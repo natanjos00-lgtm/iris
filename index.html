@@ -704,8 +704,8 @@ body{background:
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=8"></script>
-<script src="adapter.js?v=8"></script>
+<script src="config.js?v=9"></script>
+<script src="adapter.js?v=9"></script>
 <script>
 (() => {
 "use strict";
@@ -2019,7 +2019,7 @@ function snapshotForAI(){
   };
 }
 
-function aiMsg(e, base){ const d = e && e.detail ? " (" + String(e.detail).slice(0,110) + ")" : ""; return e && e.code === "fn_error" ? "O Gemini não respondeu agora" + d + ". " + base : base; }
+function aiMsg(e, base){ const d = e && e.detail ? " (" + String(e.detail).slice(0,320) + ")" : ""; return e && e.code === "fn_error" ? "O Gemini não respondeu agora" + d + ". " + base : base; }
 
 /* ---------- ÍRIS: ferramentas ---------- */
 const AREA_KEYS = Object.keys(AREAS);

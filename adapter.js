@@ -137,7 +137,8 @@
     const { data, error } = await sb.functions.invoke(name, { body });
     if (error) {
       let detail = "";
-      try { const j = await error.context.json(); detail = j.detail || j.error || ""; } catch {}
+      try { const st = error.context && error.context.status; const t = await error.context.text(); try { const j = JSON.parse(t); detail = j.detail || j.error || t; } catch { detail = t; } if (st) detail = "HTTP " + st + (detail ? ": " + detail : ""); } catch {}
+      if (!detail) detail = String(error.message || "sem resposta do servidor");
       throw { code: "fn_error", detail };
     }
     return data;
