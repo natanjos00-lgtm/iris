@@ -1644,7 +1644,7 @@ addEventListener("hashchange", route);
 /* ---------- agenda (Google Agenda) ---------- */
 let mcp = null, sample = null, userName = "";
 /* ---------- PREFERÊNCIAS DA ÍRIS (nome e voz) ---------- */
-let prefs = Object.assign({ name:"", voiceURI:"", rate:1, pitch:1, engine:"device", spekoVoice:"luana" }, store.get("iris.prefs", {}));
+let prefs = Object.assign({ name:"", voiceURI:"", rate:1, pitch:1, engine:"device", gemVoice:"Kore" }, store.get("iris.prefs", {}));
 function applyName(){ userName = (prefs.name || "Natália").trim(); }
 applyName();
 function scoreVoice(v){ let s = 0; if (/pt-BR/i.test(v.lang)) s += 20; else if (/^pt/i.test(v.lang)) s += 8;
@@ -1712,19 +1712,15 @@ function ensureAudio(){
     if (actx.state === "suspended") actx.resume(); } catch {}
 }
 function audioLevel(){ if (!analyser || !curSrc) return 0; analyser.getByteTimeDomainData(levelBuf); let s = 0; for (const v of levelBuf) { const d = (v - 128)/128; s += d*d; } return Math.sqrt(s / levelBuf.length); }
-function usePremium(P){ return false; } /* custo zero: só a voz do aparelho */
+const GEM_VOICES = [["Kore","Kore (firme e clara)"],["Leda","Leda (jovem e suave)"],["Aoede","Aoede (leve)"],["Zephyr","Zephyr (brilhante)"],["Sulafat","Sulafat (calorosa)"],["Achernar","Achernar (suave)"],["Vindemiatrix","Vindemiatrix (gentil)"],["Callirrhoe","Callirrhoe (tranquila)"]];
+function usePremium(P){ return P.engine === "gemini" && !premiumBroken && !!window.irisSb; }
 function premiumChunks(t){ const sents = speechChunks(t); const out = []; let buf = "";
   for (const s of sents) { if (buf && (buf + " " + s).length > 240) { out.push(buf); buf = s; } else buf = buf ? buf + " " + s : s; }
   if (buf) out.push(buf); return out; }
 async function synthChunk(text, P){
-  const v = PREMIUM.find(x => x.key === P.spekoVoice) || PREMIUM[0];
-  const body = { text, intent:{ language:"pt-BR" }, voice:v.voice, constraints:{ allowedProviders:{ tts:[v.allow] } } };
-  if (v.model) body.model = v.model;
-  if (Math.abs((+P.rate || 1) - 1) > 0.01) body.speed = +P.rate;
-  const r = await mcp.callTool("Speko", "audio.synthesize", { body }, { cache:false });
-  const p = r.payload || {}; const b64 = p.audio_base64 || (p.data && p.data.audio_base64);
-  if (!b64) throw { code:"no_audio" };
-  const bin = atob(b64); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const { data, error } = await window.irisSb.functions.invoke("tts", { body:{ text, voice:P.gemVoice || "Kore" } });
+  if (error || !data || !data.audio_base64) throw { code:"no_audio" };
+  const bin = atob(data.audio_base64); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return await actx.decodeAudioData(bytes.buffer);
 }
 function playBuffer(buf){ return new Promise(res => { const src = actx.createBufferSource(); src.buffer = buf; src.connect(analyser); curSrc = src; src.onended = () => { if (curSrc === src) curSrc = null; res(); }; src.start(); }); }
@@ -1743,8 +1739,8 @@ async function speakPremium(text, { onstart, onend, over } = {}){
     onend && onend();
   } catch (e) {
     if (my !== speakToken) return;
-    if (!started) { premiumBroken = ["needs_reauth","server_not_connected","not_in_manifest","blocked_by_policy","no_audio"].includes(e && e.code);
-      toast(e && e.code === "approval_required" ? "Permita a Speko quando o claude.ai perguntar para ouvir a voz natural." : "A voz natural não respondeu agora. Usei a voz do aparelho.");
+    if (!started) { premiumBroken = true;
+      toast("A voz do Gemini não respondeu agora. Usei a voz do aparelho.");
       speakNatural(text, { onstart, onend, over }); }
     else onend && onend();
   }
@@ -1765,20 +1761,22 @@ function openPrefs(){
     h("h2",{class:"t",id:"prT"},"Ajustar a ÍRIS"),
     h("label",null,"Como ela te chama", h("input",{type:"text",id:"pName",value:userName,placeholder:"Natália"})),
     h("p",{class:"muted small",style:"margin:-6px 0 0"},"Escreva do jeito que você quer ouvir. Nomes muito curtos, como Nat, às vezes são soletrados pela voz do aparelho; nesse caso, prefira o nome completo."),
+    h("label",null,"Tipo de voz", h("select",{id:"pEngine"}, opt("device","Voz do aparelho (grátis, sem internet)", prefs.engine !== "gemini"), opt("gemini","Voz natural do Gemini (usa sua chave)", prefs.engine === "gemini"))),
+    h("label",null,"Voz do Gemini", h("select",{id:"pGem"}, GEM_VOICES.map(([k,l]) => opt(k, l, (prefs.gemVoice || "Kore") === k)))),
     h("label",null,"Voz do aparelho", sel),
     h("p",{class:"muted small",style:"margin:-6px 0 0"},"Grátis: usa as vozes do seu celular ou navegador. As marcadas como Natural, Online ou Google costumam soar melhor."),
     h("label",null, h("span",null,"Velocidade ", rateOut), h("input",{type:"range",id:"pRate",min:"0.8",max:"1.25",step:"0.05",value:prefs.rate || 1})),
     h("label",null, h("span",null,"Tom ", pitchOut), h("input",{type:"range",id:"pPitch",min:"0.8",max:"1.2",step:"0.05",value:prefs.pitch || 1})),
     h("div",{class:"row-end",style:"margin-top:4px"},
       h("button",{class:"btn ghost",type:"button",style:"margin-right:auto",onclick:()=>{ const nm = $("pName").value.trim() || "Natália";
-        ensureAudio(); speakAny(`Oi, ${nm}. Tudo bem? Então, é assim que eu vou falar com você. Se não gostar, a gente ajusta junto, tá?`, { over:{ engine:"device", voiceURI:$("pVoice").value, rate:+$("pRate").value, pitch:+$("pPitch").value } }); }},"Ouvir exemplo"),
+        ensureAudio(); speakAny(`Oi, ${nm}. Tudo bem? Então, é assim que eu vou falar com você. Se não gostar, a gente ajusta junto, tá?`, { over:{ engine:$("pEngine").value, gemVoice:$("pGem").value, voiceURI:$("pVoice").value, rate:+$("pRate").value, pitch:+$("pPitch").value } }); }},"Ouvir exemplo"),
       h("button",{class:"btn ghost",type:"button",onclick:close},"Cancelar"),
       h("button",{class:"btn olive",type:"submit"},"Salvar")));
   const sync = () => { rateOut.textContent = (+$("pRate").value).toFixed(2).replace(".",",") + "×"; pitchOut.textContent = (+$("pPitch").value).toFixed(2).replace(".",","); };
   const ov = h("div",{class:"overlay",onclick:e=>{ if (e.target === ov) close(); }}, f); slot.append(ov);
   $("pRate").oninput = sync; $("pPitch").oninput = sync; sync();
   ov.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
-  f.onsubmit = async e => { e.preventDefault(); premiumBroken = false; await savePrefs({ name:$("pName").value.trim(), engine:"device", voiceURI:$("pVoice").value, rate:+$("pRate").value, pitch:+$("pPitch").value }); close(); toast("Ajustes da ÍRIS salvos."); };
+  f.onsubmit = async e => { e.preventDefault(); premiumBroken = false; await savePrefs({ name:$("pName").value.trim(), engine:$("pEngine").value, gemVoice:$("pGem").value, voiceURI:$("pVoice").value, rate:+$("pRate").value, pitch:+$("pPitch").value }); close(); toast("Ajustes da ÍRIS salvos."); };
   setTimeout(() => $("pName").focus(), 0);
 }
 try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => { const s = $("pVoice"); if (!s) return; const vs = ptVoices(); if (!vs.length) return; const cur = s.value || prefs.voiceURI; s.textContent = ""; vs.forEach((v, i) => s.append(opt(v.voiceURI, `${v.name}${i === 0 ? " (recomendada)" : ""}`, cur ? cur === v.voiceURI : i === 0))); }; } catch {}
