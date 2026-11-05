@@ -23,12 +23,20 @@
         .lg input::placeholder{color:#b39d85}
         .lg input:focus{border-color:#e0a458;box-shadow:0 0 18px rgba(224,140,60,.2)}
         .lg button{width:100%;padding:13px;border:0;border-radius:999px;background:#e0a458;color:#1d130b;font-size:16px;font-weight:500;cursor:pointer}
+        .lg button.g{background:#f5e9d7;color:#2a1d12;display:flex;align-items:center;justify-content:center;gap:10px}
+        .lg button.e{background:transparent;color:#e6b57c;box-shadow:inset 0 0 0 1px rgba(224,164,88,.5)}
+        .lg .or{color:#b39d85;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase}
         .lg .m{min-height:1.3em;font-size:13.5px;color:#e6b57c}`;
       document.head.appendChild(st);
       const box = document.createElement("div"); box.className = "lg";
-      box.innerHTML = '<form><div class="orb" aria-hidden="true"></div><h1>ÍRIS</h1><p>Digite seu e-mail. Você recebe um link para entrar, sem senha.</p><input type="email" required placeholder="seu@email.com" autocomplete="email" inputmode="email"><button>Enviar link</button><p class="m" aria-live="polite"></p></form>';
+      box.innerHTML = '<form><div class="orb" aria-hidden="true"></div><h1>ÍRIS</h1><p>Digite seu e-mail. Você recebe um link para entrar, sem senha.</p><button type="button" class="g" id="lgGoogle"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.5-4.1 7-10.2 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Entrar com Google</button><div class="or">ou</div><input type="email" required placeholder="seu@email.com" autocomplete="email" inputmode="email"><button class="e">Enviar link por e-mail</button><p class="m" aria-live="polite"></p></form>';
       document.body.appendChild(box);
       const f = box.querySelector("form"), m = box.querySelector(".m");
+      box.querySelector("#lgGoogle").onclick = async () => {
+        m.textContent = "Abrindo o Google…";
+        const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
+        if (error) m.textContent = "Não consegui abrir o Google. Use o e-mail por enquanto.";
+      };
       f.onsubmit = async e => {
         e.preventDefault(); m.textContent = "Enviando…";
         const { error } = await sb.auth.signInWithOtp({ email: f.querySelector("input").value.trim(), options: { emailRedirectTo: location.origin + location.pathname } });
