@@ -107,11 +107,35 @@
     return { doc, onSnapshot };
   }
 
+  /* ---------- IA (Gemini, via função "chat" no Supabase; a chave fica lá, nunca aqui) ---------- */
+  async function callFn(name, body) {
+    await userId;
+    const { data, error } = await sb.functions.invoke(name, { body });
+    if (error) {
+      let detail = "";
+      try { const j = await error.context.json(); detail = j.detail || j.error || ""; } catch {}
+      throw { code: "fn_error", detail };
+    }
+    return data;
+  }
+  const blobToB64 = b => new Promise(res => { const r = new FileReader(); r.onload = () => res({ mime: b.type || "image/jpeg", data: String(r.result).split(",")[1] }); r.readAsDataURL(b); });
+  const sample = async (messages, opts = {}) => {
+    const d = await callFn("chat", { messages });
+    if (opts.onText) opts.onText({ text: d.text, delta: d.text });
+    return { text: d.text, truncated: !!d.truncated };
+  };
+  sample.limits = async () => ({ tools: false, images: { maxCount: 4, mediaTypes: ["image/png", "image/jpeg", "image/webp"] } });
+  sample.json = async (prompt, opts = {}) => {
+    const images = opts.images ? await Promise.all(opts.images.map(blobToB64)) : [];
+    const d = await callFn("chat", { messages: [{ role: "user", content: prompt }], json: true, images });
+    try { return JSON.parse(d.text); } catch { const m = d.text.match(/[\[{][\s\S]*[\]}]/); if (m) return JSON.parse(m[0]); throw { code: "bad_json" }; }
+  };
+
   const caps = {
     db: { collection },
     user: { id: () => userId },
-    sample: null, // IA e leitura de faturas: etapa seguinte (função no Supabase com a chave do Gemini)
-    mcp: null     // Agenda e Gmail: etapa seguinte (login do Google próprio)
+    sample,
+    mcp: null // Gmail e Google Agenda por login do Google: o app lê a agenda por endereço secreto (função "agenda")
   };
   window.claude = { use: async name => caps[name] || null };
 })();

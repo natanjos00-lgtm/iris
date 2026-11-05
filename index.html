@@ -383,6 +383,92 @@ select.mini{width:auto;padding:4px 8px;font-size:12.5px}
   .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ============ TEMA ÂMBAR (painel noturno) ============ */
+:root{
+  --paper:#16100b; --card:#231913; --sand:#33261b; --sand-2:#4d3a29; --taupe:#b39d85; --brown:#e6b57c;
+  --ink:#f5e9d7; --ink-2:#d3c0a7; --olive:#e0a458; --olive-soft:rgba(224,164,88,.12); --line:#3f3022;
+  color-scheme:dark;
+}
+body{background:
+  radial-gradient(55% 45% at 50% 52%,rgba(255,150,60,.16),transparent 70%),
+  radial-gradient(30% 30% at 8% 6%,rgba(255,190,110,.14),transparent 70%),
+  radial-gradient(28% 28% at 96% 8%,rgba(255,170,80,.10),transparent 70%),
+  radial-gradient(40% 30% at 100% 100%,rgba(255,150,60,.10),transparent 70%),
+  linear-gradient(180deg,#120d09,#1c140e 60%,#140e0a);
+  background-attachment:fixed;background-color:#16100b}
+.side{background:rgba(22,16,11,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.btn:hover{background:#fff1da}
+.btn.olive{color:#1d130b}
+.overlay{background:rgba(0,0,0,.58)}
+.tabbar{background:rgba(22,16,11,.94)!important}
+.card,.acard,.dlg{background:rgba(35,25,19,.78)}
+.glass{background:rgba(38,27,19,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(224,164,88,.22);border-radius:20px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+
+#v-inicio{max-width:1360px}
+.desk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start}
+.desk-c{align-self:center;display:flex;justify-content:center;width:100%}
+.desk-c .corewrap{width:100%}
+.clockrow{display:flex;align-items:center;flex-wrap:wrap;gap:14px 20px;margin-bottom:18px}
+.clock{font-family:var(--f-title);font-size:58px;line-height:1;font-weight:500;color:var(--ink)}
+.cdate{font-size:13.5px;color:var(--ink-2);margin-top:2px}
+.cdate::first-letter{text-transform:uppercase}
+.vsep{width:1px;align-self:stretch;background:var(--sand-2)}
+.wx{display:flex;gap:10px;align-items:center}
+.wx svg.i{width:30px;height:30px;color:var(--brown);stroke-width:1.2}
+.wx b{display:block;font-size:24px;font-weight:500;font-family:var(--f-title);line-height:1.1}
+.wx span{font-size:12.5px;color:var(--ink-2)}
+.greet h1.t{font-size:38px;margin-top:0}
+.arealist{display:flex;flex-direction:column;gap:8px;margin:16px 0 6px}
+.arow{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(224,164,88,.14);text-decoration:none;color:var(--ink);transition:border-color .2s,background .2s}
+.arow:hover{border-color:rgba(224,164,88,.55);background:rgba(224,164,88,.09)}
+.arow svg.i{width:24px;height:24px;color:var(--brown);stroke-width:1.2}
+.arow b{display:block;font-weight:500;font-size:16px;font-family:var(--f-title);font-size:19px}
+.arow small{color:var(--ink-2);font-size:12.5px}
+.corebox{position:relative;width:min(470px,100%);aspect-ratio:1/1}
+.corebox .core{width:100%;height:100%}
+.corename{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;gap:8px;padding:0 24%}
+.corename b{font-family:var(--f-title);font-weight:500;font-size:clamp(34px,4.4vw,58px);line-height:1;text-shadow:0 0 30px rgba(255,170,80,.45)}
+.corename span{font-size:14.5px;color:var(--ink-2)}
+.dk{margin-bottom:16px}
+.dk-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dk-h svg.i{color:var(--brown)}
+.dk-h h2{font-family:var(--f-title);font-weight:500;font-size:23px;margin:0;flex:1}
+.dk-h span{font-size:12.5px;color:var(--ink-2)}
+.dk ul{list-style:none;margin:0;padding:0}
+.dk-list li{display:flex;gap:12px;align-items:center;padding:7px 0;font-size:14.5px}
+.dk-list li.ok span{color:var(--taupe);text-decoration:line-through}
+.dk-agenda li{display:grid;grid-template-columns:64px 1px minmax(0,1fr);gap:12px;padding:8px 0;font-size:14.5px;align-items:center}
+.dk-agenda time{color:var(--ink-2);font-size:13.5px}
+.dk-agenda i{background:var(--sand-2);align-self:stretch}
+.dk-goals li{display:grid;grid-template-columns:22px minmax(0,1fr) 84px 38px;gap:10px;align-items:center;padding:7px 0;font-size:14px}
+.dk-goals svg.i{width:20px;height:20px;color:var(--brown);stroke-width:1.2}
+.dk-goals .pc{text-align:right;color:var(--ink-2);font-size:13px}
+.bar{height:8px;border-radius:6px;background:rgba(255,255,255,.09);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#c58b4e,#f2c78e);border-radius:6px}
+.dk-empty{color:var(--ink-2);font-size:13.5px;padding:4px 0}
+.askbar{grid-column:1/-1;justify-self:center;width:min(400px,100%);display:flex;align-items:center;gap:6px;background:rgba(30,22,15,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(224,164,88,.5);border-radius:999px;padding:2px 6px;box-shadow:0 0 18px rgba(224,140,60,.12)}
+.askbar input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--ink);font-size:14px;padding:8px 4px}
+.askbar input::placeholder{color:var(--taupe)}
+.askbar button{background:none;border:none;color:var(--brown);cursor:pointer;display:grid;place-items:center;padding:7px;border-radius:50%}
+.askbar svg.i{width:16px;height:16px}
+.askbar button:hover{background:rgba(224,164,88,.12)}
+.more-h{margin:38px 0 14px}
+
+@media (max-width:1150px){
+  .desk{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .desk-c{grid-column:1/-1;order:-2}
+  .askbar{order:-1}
+  .corebox{width:min(400px,80vw)}
+}
+@media (max-width:700px){
+  .desk{grid-template-columns:minmax(0,1fr);gap:18px}
+  .corebox{width:min(310px,82vw)}
+  .clock{font-size:46px}
+  .clockrow{gap:14px}
+  .greet h1.t{font-size:32px}
+  .dk-goals li{grid-template-columns:20px minmax(0,1fr) 64px 36px}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -399,6 +485,12 @@ select.mini{width:auto;padding:4px 8px;font-size:12.5px}
     <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol>
     <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2s1.2 1.7 2.8 2.1c1.6.4 2.8 1 2.8 2.2s-1.2 2-2.8 2c-1.3 0-2.4-.5-2.9-1.5M12 6.3v1.5M12 16.2v1.5"/></symbol>
     <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 12c2 0 2-4 4-4s2 8 4 8 2-10 4-10 2 6 4 6 2-2 2-2"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 9.5a4.2 4.2 0 0 1 .5 8.5z"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7 15a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 6.5a4.2 4.2 0 0 1 .5 8.5z"/><path d="M8 18l-1 2M12 18l-1 2M16 18l-1 2"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 4l1.8 5.2L19 11l-5.2 1.8L12 18l-1.8-5.2L5 11l5.2-1.8z"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></symbol>
   </defs>
 </svg>
@@ -412,6 +504,8 @@ select.mini{width:auto;padding:4px 8px;font-size:12.5px}
       <a href="#pessoal" data-r="pessoal"><svg class="i"><use href="#i-leaf"/></svg>Pessoal</a>
       <a href="#trabalho" data-r="trabalho"><svg class="i"><use href="#i-work"/></svg>Trabalho</a>
       <a href="#faculdade" data-r="faculdade"><svg class="i"><use href="#i-book"/></svg>Faculdade</a>
+      <a href="#casa" data-r="casa"><svg class="i"><use href="#i-home"/></svg>Casa &amp; Obra</a>
+      <a href="#metas" data-r="metas"><svg class="i"><use href="#i-target"/></svg>Metas</a>
       <a href="#financeiro" data-r="financeiro"><svg class="i"><use href="#i-coin"/></svg>Financeiro</a>
       <div class="sep" aria-hidden="true"></div>
       <a href="#iris" data-r="iris"><svg class="i"><use href="#i-iris"/></svg>Conversar com a ÍRIS</a>
@@ -423,22 +517,43 @@ select.mini{width:auto;padding:4px 8px;font-size:12.5px}
   <main>
     <!-- INÍCIO -->
     <section class="view" id="v-inicio" aria-labelledby="h-inicio">
-      <div class="hero">
-        <div>
-          <div class="eyebrow" id="today">—</div>
-          <h1 class="t" id="h-inicio">Bom dia.</h1>
-          <p class="lede" id="dayShape">Preparando o seu dia…</p>
-          <div class="iris-line"><b>ÍRIS</b><p id="irisLine">À disposição. Quando quiser, comece por uma coisa só.</p></div>
-          <button class="mindbtn" id="mindOpen" type="button"><svg class="i"><use href="#i-wave"/></svg>Esvaziar a mente</button>
+      <div class="desk">
+        <div class="desk-l">
+          <div class="clockrow">
+            <div><div class="clock" id="clock">--:--</div><div class="cdate" id="today">—</div></div>
+            <div class="vsep" aria-hidden="true"></div>
+            <div class="wx" id="wx"><svg class="i"><use href="#i-sun"/></svg><div><b id="wxT">--°C</b><span>Salvador - BA</span></div></div>
+          </div>
+          <div class="glass greet">
+            <h1 class="t" id="h-inicio">Bom dia.</h1>
+            <p class="lede" id="dayShape">Preparando o seu dia…</p>
+            <div class="arealist" id="arealist"></div>
+            <div class="iris-line"><b>ÍRIS</b><p id="irisLine">À disposição. Quando quiser, comece por uma coisa só.</p></div>
+            <button class="mindbtn" id="mindOpen" type="button"><svg class="i"><use href="#i-wave"/></svg>Esvaziar a mente</button>
+          </div>
         </div>
-        <div>
+        <div class="desk-c">
           <div class="corewrap">
-            <button class="core" id="core" type="button" aria-label="Tocar para a ÍRIS falar com você"><canvas id="reactor"></canvas></button>
+            <div class="corebox">
+              <button class="core" id="core" type="button" aria-label="Tocar para a ÍRIS falar com você"><canvas id="reactor"></canvas></button>
+              <div class="corename" aria-hidden="true"><b id="coreName">Natália</b><span>Como posso te ajudar hoje?</span></div>
+            </div>
             <div class="core-cap" id="coreCap" aria-live="polite">Toque para ouvir a ÍRIS</div>
           </div>
         </div>
+        <div class="desk-r">
+          <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-check"/></svg><h2>Prioridades de hoje</h2><span id="dkFocusN"></span></div><ul class="dk-list" id="dkFocus"></ul></div>
+          <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-cal"/></svg><h2>Compromissos</h2><span>próximos</span></div><ul class="dk-agenda" id="dkAgenda"></ul></div>
+          <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-target"/></svg><h2>Metas em foco</h2><span>Progresso</span></div><ul class="dk-goals" id="dkGoals"></ul></div>
+        </div>
+        <form class="askbar" id="askbar" autocomplete="off">
+          <button type="button" id="askMic" aria-label="Falar com a ÍRIS"><svg class="i"><use href="#i-mic"/></svg></button>
+          <input id="askIn" type="text" placeholder="Fale comigo ou digite aqui…" aria-label="Mensagem para a ÍRIS">
+          <button type="submit" aria-label="Enviar"><svg class="i"><use href="#i-spark"/></svg></button>
+        </form>
       </div>
 
+      <div class="eyebrow more-h">Mais do seu dia</div>
       <div class="home">
         <div class="stack">
           <div class="card">
@@ -502,6 +617,8 @@ select.mini{width:auto;padding:4px 8px;font-size:12.5px}
     <section class="view" id="v-pessoal" hidden></section>
     <section class="view" id="v-trabalho" hidden></section>
     <section class="view" id="v-faculdade" hidden></section>
+    <section class="view" id="v-casa" hidden></section>
+    <section class="view" id="v-metas" hidden></section>
     <section class="view" id="v-financeiro" hidden></section>
 
     <!-- ÍRIS -->
@@ -623,11 +740,18 @@ const AREAS = {
   faculdade: { label:"Faculdade", icon:"i-book", color:"#9A8A79", intro:"Estudos, atividades, provas e trabalhos da graduação em Psicologia.",
     secs:[ {kind:"estudo", label:"Estudos", intro:"Leituras e revisões, sem maratona.", ph:"Novo estudo (ex.: ler cap. 3 de Psicopatologia)"},
            {kind:"atividade", label:"Atividades e trabalhos", intro:"Entregas e trabalhos acadêmicos.", dated:true, steps:true, ph:"Nova atividade ou trabalho"},
-           {kind:"prova", label:"Provas", intro:"Datas e o que revisar para cada uma.", dated:true, steps:true, ph:"Nova prova"} ] }
+           {kind:"prova", label:"Provas", intro:"Datas e o que revisar para cada uma.", dated:true, steps:true, ph:"Nova prova"} ] },
+  casa: { label:"Casa & Obra", icon:"i-home", color:"#C58B4E", sub:"Projeto, enxoval e organização", intro:"A casa que você está montando: obra, compras, enxoval e a organização do dia a dia.",
+    secs:[ {kind:"obra", label:"Obra e projeto", intro:"Etapas da obra, orçamentos e decisões.", dated:true, steps:true, ph:"Nova etapa ou decisão da obra"},
+           {kind:"compra", label:"Compras da casa", intro:"O que falta comprar, sem pressa.", dated:true, ph:"Novo item para comprar"},
+           {kind:"organizacao", label:"Organização", intro:"Pequenas rotinas para a casa funcionar.", ph:"Nova tarefa de organização"} ] },
+  metas: { label:"Metas", icon:"i-target", color:"#E0A458", sub:"Sonhos, objetivos e evolução", intro:"O que você quer construir daqui a meses ou anos. Cada meta é feita de passos pequenos.",
+    secs:[ {kind:"meta", label:"Metas em andamento", intro:"Divida em etapas para ver o progresso crescer.", dated:true, steps:true, ph:"Nova meta (ex.: reserva de emergência)"} ] }
 };
+AREAS.pessoal.sub = "Equilíbrio, saúde e bem-estar"; AREAS.trabalho.sub = "Projetos, demandas e entregas"; AREAS.faculdade.sub = "Estudos, atividades e prazos";
 const KIND_AREA = {}; for (const [a,cfg] of Object.entries(AREAS)) for (const s of cfg.secs) KIND_AREA[s.kind] = a;
-const KIND_LABEL = {ritual:"ritual",compromisso:"compromisso",objetivo:"objetivo",tarefa:"tarefa",projeto:"projeto",reuniao:"reunião",estudo:"estudo",atividade:"atividade",prova:"prova"};
-const DATED_KINDS = ["compromisso","reuniao","prova","atividade","tarefa"];
+const KIND_LABEL = {obra:"obra",compra:"compra",organizacao:"organização",meta:"meta",ritual:"ritual",compromisso:"compromisso",objetivo:"objetivo",tarefa:"tarefa",projeto:"projeto",reuniao:"reunião",estudo:"estudo",atividade:"atividade",prova:"prova"};
+const DATED_KINDS = ["compromisso","reuniao","prova","atividade","tarefa","obra","compra","meta"];
 
 /* ---------- armazenamento (db privado por pessoa; navegador como alternativa) ---------- */
 let items = [];
@@ -719,6 +843,7 @@ const pickKind = arr => arr[Math.floor(Math.random()*arr.length)];
 let calEvents = [], calState = "loading", calMsg = "";
 function renderHome(){
   const t = today();
+  renderDesk();
   $("today").textContent = longDate.format(new Date());
   $("h-inicio").textContent = `${greet()}${userName ? ", " + userName : ""}.`;
 
@@ -798,6 +923,7 @@ function renderUpcoming(){
   if (!rows.length){
     box.append(h("div",{class:"empty"}, calState === "loading" ? "Abrindo sua agenda…" : calState === "error" ? calMsg : "Nada marcado para os próximos dias. Respiro na agenda."));
     if (calState === "error" && mcp) box.append(h("button",{class:"btn ghost",type:"button",style:"margin-top:8px",onclick:()=>loadCal(true)},"Permitir e carregar a agenda"));
+    if (calState === "error" && !mcp && calNeedsLink) box.append(h("button",{class:"btn ghost",type:"button",style:"margin-top:8px",onclick:openAgendaLink},"Ligar o Google Agenda"));
     return;
   }
   rows.slice(0,6).forEach(r => box.append(h("div",{class:"when"},
@@ -1622,7 +1748,7 @@ function finHomeCard(){
 }
 
 /* ---------- rotas ---------- */
-const ROUTES = ["inicio","pessoal","trabalho","faculdade","financeiro","iris"];
+const ROUTES = ["inicio","pessoal","trabalho","faculdade","casa","metas","financeiro","iris"];
 function route(){
   let r = (location.hash || "#inicio").slice(1); if (!ROUTES.includes(r)) r = "inicio";
   for (const k of ROUTES) $("v-"+k).hidden = k !== r;
@@ -1926,7 +2052,8 @@ async function send(text){
     const copy = { cancelled: e.text ? e.text + "\n(interrompido)" : "Tudo bem, parei.",
       not_granted:"A conversa precisa da sua permissão para usar o Claude. Recarregue a página e permita quando o claude.ai perguntar.",
       sampling_disabled:"O Claude não está disponível nesta conta.", rate_limited:"Muitas mensagens em pouco tempo. Espere um pouco e tente de novo.",
-      session_expired:"Sua sessão expirou. Entre de novo no claude.ai.", refused:"Não consigo ajudar com isso, mas posso tentar de outro jeito se você reformular." }[e.code];
+      session_expired:"Sua sessão expirou. Entre de novo no claude.ai.", refused:"Não consigo ajudar com isso, mas posso tentar de outro jeito se você reformular.",
+      fn_error:"Não consegui falar com o Gemini agora." + (e.detail ? " (" + e.detail + ")" : ""), bad_json:"A resposta veio num formato que não entendi. Tente de novo." }[e.code];
     out.textContent = copy || ((e.text ? e.text + "\n" : "") + "A conexão caiu no meio do caminho. Pode tentar de novo.");
   } finally { setBusy(false); }
 }
@@ -2068,27 +2195,27 @@ function drawCore(ts){
   const sp = reduceM ? 0 : ts/1000, e = Math.min(1.4, energy + spike*0.45);
   const pulse = 1 + Math.sin(sp*(1.6 + e*5)) * 0.035 * e;
   const g = cx2.createRadialGradient(c,c,0,c,c,R*0.56*pulse);
-  g.addColorStop(0, "rgba(251,249,245,1)"); g.addColorStop(0.3, "rgba(228,229,213,.95)"); g.addColorStop(0.65, `rgba(106,113,80,${0.08 + e*0.12})`); g.addColorStop(1, "rgba(246,242,235,0)");
+  g.addColorStop(0, "rgba(34,22,13,.92)"); g.addColorStop(0.5, "rgba(44,28,15,.85)"); g.addColorStop(0.8, `rgba(224,150,70,${0.10 + e*0.16})`); g.addColorStop(1, "rgba(22,16,11,0)");
   cx2.fillStyle = g; cx2.beginPath(); cx2.arc(c,c,R*0.56*pulse,0,Math.PI*2); cx2.fill();
   cx2.lineCap = "round";
   cx2.save(); cx2.translate(c,c); cx2.rotate(sp*0.04);
   for (let i = 0; i < 120; i++){ const a = i/120*Math.PI*2, long = i % 10 === 0;
-    cx2.strokeStyle = long ? "rgba(111,94,79,.75)" : "rgba(154,138,121,.35)"; cx2.lineWidth = long ? 1.4 : 1;
+    cx2.strokeStyle = long ? "rgba(244,184,104,.85)" : "rgba(200,150,90,.35)"; cx2.lineWidth = long ? 1.4 : 1;
     cx2.beginPath(); cx2.moveTo(Math.cos(a)*R*0.97, Math.sin(a)*R*0.97); cx2.lineTo(Math.cos(a)*R*(long ? 0.9 : 0.94), Math.sin(a)*R*(long ? 0.9 : 0.94)); cx2.stroke(); }
   cx2.restore();
   const arcs = [
-    { r:0.84, w:2.5, seg:[[0,0.9],[1.2,2.6],[3.3,4.1],[4.6,5.8]], s:0.22, col:"106,113,80", a:0.8 },
-    { r:0.74, w:7, seg:[[0.3,1.1],[2.2,2.5],[3.4,4.8]], s:-0.35, col:"221,209,191", a:1 },
-    { r:0.66, w:1, seg:[[0,6.283]], s:0, col:"154,138,121", a:0.45 },
-    { r:0.6, w:4, seg:[[0,0.5],[0.9,1.4],[1.8,2.3],[2.7,3.2],[3.6,4.1],[4.5,5.0],[5.4,5.9]], s:0.6, col:"111,94,79", a:0.7 },
-    { r:0.92, w:1, seg:[[0.2,1.6],[3.3,4.7]], s:-0.1, col:"106,113,80", a:0.55 }
+    { r:0.84, w:2.5, seg:[[0,0.9],[1.2,2.6],[3.3,4.1],[4.6,5.8]], s:0.22, col:"255,176,86", a:0.9 },
+    { r:0.74, w:7, seg:[[0.3,1.1],[2.2,2.5],[3.4,4.8]], s:-0.35, col:"255,214,160", a:0.9 },
+    { r:0.66, w:1, seg:[[0,6.283]], s:0, col:"214,160,98", a:0.5 },
+    { r:0.6, w:4, seg:[[0,0.5],[0.9,1.4],[1.8,2.3],[2.7,3.2],[3.6,4.1],[4.5,5.0],[5.4,5.9]], s:0.6, col:"240,170,86", a:0.8 },
+    { r:0.92, w:1, seg:[[0.2,1.6],[3.3,4.7]], s:-0.1, col:"255,176,86", a:0.6 }
   ];
   for (const ar of arcs){ cx2.strokeStyle = `rgba(${ar.col},${Math.min(1, ar.a*(0.7 + e*0.35))})`; cx2.lineWidth = ar.w; cx2.lineCap = ar.w > 3 ? "butt" : "round";
     const rot = sp*ar.s*(1 + e*1.8); for (const [a0, a1] of ar.seg){ cx2.beginPath(); cx2.arc(c,c,R*ar.r,a0+rot,a1+rot); cx2.stroke(); } }
   // ondas
   const rings = coreMode === "speak" ? 3 : 1;
   for (let k = 0; k < rings; k++){
-    cx2.strokeStyle = `rgba(47,44,41,${(0.22 + e*0.5) * (1 - k*0.28)})`; cx2.lineWidth = k ? 0.8 : 1.3; cx2.beginPath();
+    cx2.strokeStyle = `rgba(255,200,130,${(0.18 + e*0.5) * (1 - k*0.28)})`; cx2.lineWidth = k ? 0.8 : 1.3; cx2.beginPath();
     for (let i = 0; i <= 200; i++){ const a = i/200*Math.PI*2;
       const amp = e*R*0.065*(Math.sin(a*6 + sp*4 + k) + Math.sin(a*13 - sp*7 + k*2)*0.6 + (coreMode === "speak" ? Math.sin(a*29 + sp*15 - k)*0.8*(0.5 + spike) : 0));
       const rr = R*(0.5 + k*0.035) + amp; const x = c + Math.cos(a)*rr, y = c + Math.sin(a)*rr; i ? cx2.lineTo(x,y) : cx2.moveTo(x,y); }
@@ -2097,10 +2224,10 @@ function drawCore(ts){
   // marcador do dia
   const hr = new Intl.DateTimeFormat("en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date()).split(":").map(Number);
   const am = ((hr[0]%24)*60 + hr[1]) / 1440 * Math.PI*2 - Math.PI/2;
-  cx2.fillStyle = "#6A7150"; cx2.beginPath(); cx2.arc(c + Math.cos(am)*R*0.84, c + Math.sin(am)*R*0.84, 3.6, 0, Math.PI*2); cx2.fill();
+  cx2.fillStyle = "#ffbd66"; cx2.beginPath(); cx2.arc(c + Math.cos(am)*R*0.84, c + Math.sin(am)*R*0.84, 3.6, 0, Math.PI*2); cx2.fill();
   // centro
-  cx2.strokeStyle = "rgba(47,44,41,.75)"; cx2.lineWidth = 1.6; cx2.beginPath(); cx2.arc(c,c,R*0.16*pulse,0,Math.PI*2); cx2.stroke();
-  cx2.save(); cx2.translate(c,c); cx2.rotate(-sp*0.5); cx2.strokeStyle = "rgba(106,113,80,.9)"; cx2.lineWidth = 1.8;
+  cx2.strokeStyle = "rgba(255,210,150,.6)"; cx2.lineWidth = 1.4; cx2.beginPath(); cx2.arc(c,c,R*0.16*pulse,0,Math.PI*2); cx2.stroke();
+  cx2.save(); cx2.translate(c,c); cx2.rotate(-sp*0.5); cx2.strokeStyle = "rgba(255,190,110,.9)"; cx2.lineWidth = 1.8;
   for (let i = 0; i < 3; i++){ cx2.rotate(Math.PI*2/3); cx2.beginPath(); cx2.arc(0,0,R*0.26,0,0.8); cx2.stroke(); }
   cx2.restore();
 }
@@ -2135,6 +2262,77 @@ function sayWithWaves(text){
 }
 $("core").addEventListener("click", coreTalk);
 
+
+/* ---------- painel inicial (relógio, clima, listas) ---------- */
+function relDayLabel(d){ const t = today(); return d === t ? "Hoje" : d === addDays(t,1) ? "Amanhã" : prettyDay(d); }
+function stepsPct(it){ const st = it.steps || []; return st.length ? Math.round(st.filter(x => x.done).length / st.length * 100) : (it.done ? 100 : 0); }
+function renderDesk(){
+  $("coreName").textContent = userName || "Natália";
+  const al = $("arealist"); al.textContent = "";
+  const rows = [...Object.entries(AREAS).filter(([k]) => k !== "metas").map(([k,c]) => ({ href:"#"+k, ic:c.icon, label:c.label, sub:c.sub || "" })),
+    { href:"#financeiro", ic:"i-coin", label:"Finanças", sub:"Contas, mês e planejamento" }, { href:"#metas", ic:"i-target", label:AREAS.metas.label, sub:AREAS.metas.sub }];
+  rows.forEach(r => al.append(h("a",{class:"arow",href:r.href}, icon(r.ic), h("div",null, h("b",null,r.label), h("small",null,r.sub)))));
+
+  const fl = $("dkFocus"); fl.textContent = "";
+  const foc = items.filter(it => it.focus && it.kind !== "ritual").slice(0,5);
+  foc.forEach(it => fl.append(h("li",{class:it.done?"ok":""}, checkBtn(it.done, (it.done?"Desmarcar: ":"Concluir: ")+it.title, () => toggleDone(it)), h("span",null,it.title))));
+  if (!foc.length) fl.append(h("li",{class:"dk-empty"}, "Nada escolhido ainda. ", h("button",{class:"link",type:"button",onclick:suggestFocus},"Deixe a ÍRIS sugerir")));
+  $("dkFocusN").textContent = foc.length ? `${foc.filter(x => x.done).length} de ${foc.length}` : "";
+
+  const ag = $("dkAgenda"); ag.textContent = ""; const t = today();
+  const evs = [ ...calEvents.filter(e => e.day >= t).map(e => ({ day:e.day, time:e.time || "", title:e.title })),
+    ...items.filter(it => !it.done && it.date && it.date >= t && ["compromisso","reuniao","prova","atividade","obra"].includes(it.kind)).map(it => ({ day:it.date, time:"", title:it.title })) ]
+    .sort((a,b) => (a.day + (a.time || "99")) < (b.day + (b.time || "99")) ? -1 : 1).slice(0,5);
+  evs.forEach(e => ag.append(h("li",null, h("time",null, e.time || relDayLabel(e.day)), h("i"), h("span",null, e.title))));
+  if (!evs.length) ag.append(h("li",{class:"dk-empty"}, calState === "error" && calNeedsLink ? h("button",{class:"link",type:"button",onclick:openAgendaLink},"Ligar o Google Agenda") : "Nada marcado por enquanto."));
+
+  const gl = $("dkGoals"); gl.textContent = "";
+  const goals = items.filter(it => ["meta","objetivo","projeto"].includes(it.kind) && !it.done)
+    .sort((a,b) => (b.focus - a.focus) || (stepsPct(b) - stepsPct(a))).slice(0,5);
+  goals.forEach(it => { const p = stepsPct(it); gl.append(h("li",null, icon(AREAS[it.area] ? AREAS[it.area].icon : "i-target"), h("span",null,it.title), h("div",{class:"bar",role:"img","aria-label":p+"%"}, h("i",{style:`width:${p}%`})), h("span",{class:"pc"}, p+"%"))); });
+  if (!goals.length) gl.append(h("li",{class:"dk-empty"}, "Crie uma meta com etapas para acompanhar o progresso. ", h("a",{class:"link",href:"#metas"},"Criar meta")));
+}
+function tickClock(){ try { $("clock").textContent = hmFmt.format(new Date()); } catch {} }
+setInterval(tickClock, 15000); tickClock();
+async function loadWeather(){
+  try {
+    const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=-12.97&longitude=-38.5&current=temperature_2m,weather_code&timezone=America%2FSao_Paulo");
+    const j = await r.json(); const c = j.current; if (!c) return;
+    $("wxT").textContent = Math.round(c.temperature_2m) + "°C";
+    const code = c.weather_code; const ic = code <= 1 ? "i-sun" : code <= 48 ? "i-cloud" : "i-rain";
+    $("wx").querySelector("use").setAttribute("href", "#" + ic);
+  } catch {}
+}
+loadWeather(); setInterval(loadWeather, 30*60*1000);
+$("askbar").onsubmit = e => { e.preventDefault(); const v = $("askIn").value.trim(); if (!v) { $("askIn").focus(); return; } $("askIn").value = ""; location.hash = "#iris"; setTimeout(() => send(v), 60); };
+(function(){ const SRx = window.SpeechRecognition || window.webkitSpeechRecognition; const mb = $("askMic"); if (!SRx) { mb.hidden = true; return; }
+  mb.onclick = () => { try { const r = new SRx(); r.lang = "pt-BR"; r.onresult = ev => { $("askIn").value = Array.from(ev.results).map(x => x[0].transcript).join(" "); $("askbar").requestSubmit(); }; r.start(); } catch { mb.hidden = true; } }; })();
+
+/* ---------- agenda por endereço secreto (Google Agenda, somente leitura) ---------- */
+let calNeedsLink = false;
+async function loadIcs(){
+  try {
+    const { data, error } = await window.irisSb.functions.invoke("agenda", { body:{} }); if (error) throw error;
+    if (data && data.error === "no_ics") { calState = "error"; calNeedsLink = true; calMsg = "Ligue o seu Google Agenda para ver os compromissos aqui."; }
+    else if (data && data.error) { calState = "error"; calNeedsLink = true; calMsg = "Não consegui ler a agenda. Confira o endereço secreto e cole de novo."; }
+    else { calEvents = (data.events || []).map(e => ({ ...e, href:null })); calState = "ok"; calNeedsLink = false; }
+  } catch { if (calState !== "ok") { calState = "error"; calMsg = "A agenda não respondeu agora. Ela tenta de novo sozinha."; } }
+  if (current === "inicio") renderHome();
+}
+function openAgendaLink(){
+  const slot = $("dlgSlot"); slot.textContent = ""; const close = () => { slot.textContent = ""; };
+  const inp = h("input",{type:"url",id:"icsIn",placeholder:"https://calendar.google.com/calendar/ical/…/basic.ics",required:true});
+  const f = h("form",{class:"dlg",role:"dialog","aria-modal":"true",autocomplete:"off"},
+    h("h2",{class:"t"},"Ligar o Google Agenda"),
+    h("p",{class:"muted small",style:"margin:0"},"No Google Agenda (no computador): Configurações > clique na sua agenda > \"Integrar agenda\" > copie o \"Endereço secreto no formato iCal\". Cole aqui. A ÍRIS só lê, não altera nada. Não compartilhe esse endereço."),
+    h("label",null,"Endereço secreto", inp),
+    h("div",{class:"row-end"}, h("button",{class:"btn ghost",type:"button",onclick:close},"Cancelar"), h("button",{class:"btn olive",type:"submit"},"Salvar")));
+  f.onsubmit = async e => { e.preventDefault(); const v = inp.value.trim(); if (!finMeta) { toast("Entre na sua conta para salvar."); return; }
+    try { await finMeta.doc("agenda").set({ ics:v }); } catch { toast("Não consegui salvar o endereço."); return; }
+    close(); calState = "loading"; toast("Agenda ligada. Buscando seus compromissos…"); loadIcs(); };
+  const ov = h("div",{class:"overlay",onclick:e => { if (e.target === ov) close(); }}, f); slot.append(ov); setTimeout(() => inp.focus(), 0);
+}
+
 /* ---------- inicialização ---------- */
 route();
 renderTimers();
@@ -2159,7 +2357,7 @@ setInterval(() => { if (current === "inicio") renderHome(); }, 60000);
     finMeta.onSnapshot(snap => { for (const d of snap.docs) { if (d.id === "cfg") fincfg = Object.assign({ income:0, savingsPct:10, reserve:0, reserveGoalMonths:6, budgets:{}, cards:[], fixed:[] }, d.data()); else if (d.id === "prefs") { prefs = Object.assign({}, prefs, d.data()); store.set("iris.prefs", prefs); applyName(); } else if (d.id.startsWith("an-")) finAn = Object.assign({}, finAn, { [d.id.slice(3)]: d.data() }); } renderFinIfOpen(); }, () => {});
   } else { clearTimeout(fallback); local.load(); finLocal.load(); loaded = true; }
 
-  if (mcp) { watchCal(); watchMail(); } else { calState = "error"; calMsg = "A agenda aparece quando a página é aberta no claude.ai."; mailState = "error"; mailMsg = "Os e-mails aparecem quando a página é aberta no claude.ai."; renderInbox(); }
+  if (mcp) { watchCal(); watchMail(); } else if (window.irisSb) { loadIcs(); setInterval(() => { if (!document.hidden) loadIcs(); }, 10*60*1000); mailState = "error"; mailMsg = "O Gmail ainda não está ligado nesta versão."; renderInbox(); } else { calState = "error"; calMsg = "A agenda aparece quando a página é aberta no claude.ai."; mailState = "error"; mailMsg = "Os e-mails aparecem quando a página é aberta no claude.ai."; renderInbox(); }
   hello(); renderView();
 })();
 })();
