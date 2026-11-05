@@ -469,6 +469,34 @@ body{background:
   .greet h1.t{font-size:32px}
   .dk-goals li{grid-template-columns:20px minmax(0,1fr) 64px 36px}
 }
+
+@media (max-width:1150px){
+  .desk-l{display:contents}
+  .clockrow{grid-column:1/-1;order:-3;margin:0;flex-wrap:nowrap;justify-content:space-between}
+  .desk-c{order:-2}
+  .askbar{order:-1}
+  .greet{grid-column:1}
+  .desk-r{grid-column:2}
+  .corename{display:none}
+  .corebox{width:min(300px,56vw)}
+}
+@media (max-width:700px){
+  .greet,.desk-r{grid-column:1}
+  main{padding-top:14px}
+  .desk{gap:12px}
+  .clockrow{gap:10px}
+  .clock{font-size:38px}
+  .cdate{font-size:12.5px}
+  .wx svg.i{width:24px;height:24px}
+  .wx b{font-size:20px}
+  .wx span{font-size:11.5px}
+  .vsep{display:none}
+  .corebox{width:min(236px,60vw)}
+  .desk-c .core-cap{display:none}
+  .askbar{width:min(300px,86%)}
+  .greet{padding:16px 18px}
+  .greet h1.t{font-size:28px;margin-bottom:6px}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1837,6 +1865,13 @@ function ensureAudio(){
   try { if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); analyser = actx.createAnalyser(); analyser.fftSize = 512; analyser.connect(actx.destination); levelBuf = new Uint8Array(analyser.fftSize); }
     if (actx.state === "suspended") actx.resume(); } catch {}
 }
+function unlockAudio(){
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {}
+  ensureAudio();
+  try { if (actx && !unlockAudio.a) { const s0 = actx.createBufferSource(); s0.buffer = actx.createBuffer(1,1,22050); s0.connect(actx.destination); s0.start(0); unlockAudio.a = true; } } catch {}
+  try { if (!unlockAudio.t && "speechSynthesis" in window) { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); unlockAudio.t = true; } } catch {}
+}
+["pointerdown","touchstart","touchend","click"].forEach(ev => addEventListener(ev, unlockAudio, { passive:true }));
 function audioLevel(){ if (!analyser || !curSrc) return 0; analyser.getByteTimeDomainData(levelBuf); let s = 0; for (const v of levelBuf) { const d = (v - 128)/128; s += d*d; } return Math.sqrt(s / levelBuf.length); }
 const GEM_VOICES = [["Kore","Kore (firme e clara)"],["Leda","Leda (jovem e suave)"],["Aoede","Aoede (leve)"],["Zephyr","Zephyr (brilhante)"],["Sulafat","Sulafat (calorosa)"],["Achernar","Achernar (suave)"],["Vindemiatrix","Vindemiatrix (gentil)"],["Callirrhoe","Callirrhoe (tranquila)"]];
 function usePremium(P){ return P.engine === "gemini" && !premiumBroken && !!window.irisSb; }

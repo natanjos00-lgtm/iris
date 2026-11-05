@@ -8,17 +8,33 @@
   /* ---------- login por link no e-mail (gratuito) ---------- */
   function loginScreen() {
     return new Promise(resolve => {
-      const box = document.createElement("div");
-      box.style.cssText = "position:fixed;inset:0;z-index:99999;background:#f6f2ea;display:flex;align-items:center;justify-content:center;padding:24px;font-family:system-ui,sans-serif;color:#3b3a37";
-      box.innerHTML = '<form style="max-width:340px;width:100%;display:grid;gap:12px"><h1 style="font-weight:400;margin:0">ÍRIS</h1><p style="margin:0;opacity:.75">Digite seu e-mail. Você recebe um link para entrar, sem senha.</p><input type="email" required placeholder="seu@email.com" style="padding:12px;border:1px solid #cfc6b6;border-radius:10px;font-size:16px;background:#fff"><button style="padding:12px;border:0;border-radius:10px;background:#6b7a4f;color:#fff;font-size:16px">Enviar link</button><p class="m" style="margin:0;min-height:1.2em;font-size:14px"></p></form>';
+      const st = document.createElement("style");
+      st.textContent = `
+        .lg{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;color:#f5e9d7;font-family:"Figtree",system-ui,sans-serif;
+          background:radial-gradient(55% 45% at 50% 40%,rgba(255,150,60,.18),transparent 70%),radial-gradient(30% 30% at 8% 6%,rgba(255,190,110,.14),transparent 70%),linear-gradient(180deg,#120d09,#1c140e 60%,#140e0a)}
+        .lg form{width:100%;max-width:340px;display:grid;gap:14px;justify-items:center;text-align:center}
+        .lg .orb{width:120px;height:120px;border-radius:50%;position:relative;margin-bottom:6px;background:radial-gradient(circle,rgba(44,28,15,.95) 40%,rgba(224,150,70,.22) 75%,transparent 76%)}
+        .lg .orb::before,.lg .orb::after{content:"";position:absolute;inset:6px;border-radius:50%;border:2px solid transparent;border-top-color:#f0b05f;border-right-color:rgba(240,176,95,.35);animation:lgspin 7s linear infinite}
+        .lg .orb::after{inset:20px;border-top-color:rgba(255,214,160,.8);border-right-color:transparent;border-left-color:rgba(240,176,95,.5);animation-duration:11s;animation-direction:reverse}
+        @keyframes lgspin{to{transform:rotate(360deg)}}
+        .lg h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:44px;letter-spacing:.14em;margin:0;line-height:1}
+        .lg p{margin:0;color:#d3c0a7;font-size:14.5px;line-height:1.5}
+        .lg input{width:100%;box-sizing:border-box;padding:13px 16px;border:1px solid rgba(224,164,88,.45);border-radius:999px;font-size:16px;background:rgba(30,22,15,.8);color:#f5e9d7;outline:none;text-align:center}
+        .lg input::placeholder{color:#b39d85}
+        .lg input:focus{border-color:#e0a458;box-shadow:0 0 18px rgba(224,140,60,.2)}
+        .lg button{width:100%;padding:13px;border:0;border-radius:999px;background:#e0a458;color:#1d130b;font-size:16px;font-weight:500;cursor:pointer}
+        .lg .m{min-height:1.3em;font-size:13.5px;color:#e6b57c}`;
+      document.head.appendChild(st);
+      const box = document.createElement("div"); box.className = "lg";
+      box.innerHTML = '<form><div class="orb" aria-hidden="true"></div><h1>ÍRIS</h1><p>Digite seu e-mail. Você recebe um link para entrar, sem senha.</p><input type="email" required placeholder="seu@email.com" autocomplete="email" inputmode="email"><button>Enviar link</button><p class="m" aria-live="polite"></p></form>';
       document.body.appendChild(box);
       const f = box.querySelector("form"), m = box.querySelector(".m");
       f.onsubmit = async e => {
         e.preventDefault(); m.textContent = "Enviando…";
         const { error } = await sb.auth.signInWithOtp({ email: f.querySelector("input").value.trim(), options: { emailRedirectTo: location.origin + location.pathname } });
-        m.textContent = error ? "Não consegui enviar. Tente de novo em instantes." : "Link enviado. Abra o e-mail neste aparelho.";
+        m.textContent = error ? "Não consegui enviar. Confira o e-mail e tente de novo." : "Link enviado. Abra o e-mail neste aparelho.";
       };
-      sb.auth.onAuthStateChange((_ev, session) => { if (session) { box.remove(); resolve(session.user.id); } });
+      sb.auth.onAuthStateChange((_ev, session) => { if (session) { box.remove(); st.remove(); resolve(session.user.id); } });
     });
   }
   const userId = (async () => {
