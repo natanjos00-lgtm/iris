@@ -143,12 +143,41 @@
     return data;
   }
   const blobToB64 = b => new Promise(res => { const r = new FileReader(); r.onload = () => res({ mime: b.type || "image/jpeg", data: String(r.result).split(",")[1] }); r.readAsDataURL(b); });
+  /* converte as ferramentas da ÍRIS para o formato do Gemini */
+  const TYPES = { object: "OBJECT", string: "STRING", number: "NUMBER", integer: "INTEGER", boolean: "BOOLEAN", array: "ARRAY" };
+  const cleanSchema = s => { if (!s || typeof s !== "object") return s; const o = {};
+    if (s.type) o.type = TYPES[s.type] || String(s.type).toUpperCase(); if (s.description) o.description = s.description; if (s.enum) o.enum = s.enum; if (s.required) o.required = s.required;
+    if (s.properties) { o.properties = {}; for (const [k, v] of Object.entries(s.properties)) o.properties[k] = cleanSchema(v); }
+    if (s.items) o.items = cleanSchema(s.items); return o; };
+  const declsOf = tools => tools.map(t => { const d = { name: t.name, description: t.description }; if (t.inputSchema && t.inputSchema.properties && Object.keys(t.inputSchema.properties).length) d.parameters = cleanSchema(t.inputSchema); return d; });
+  const toContents = messages => { if (typeof messages === "string") messages = [{ role: "user", content: messages }]; const out = []; for (const m of messages) { if (!m || typeof m.content !== "string" || !m.content.trim()) continue;
+    const role = m.role === "assistant" ? "model" : "user"; const last = out[out.length - 1];
+    if (last && last.role === role && !last.parts.some(p => !p.text)) last.parts.push({ text: m.content }); else out.push({ role, parts: [{ text: m.content }] }); } return out; };
+
   const sample = async (messages, opts = {}) => {
-    const d = await callFn("chat", { messages });
-    if (opts.onText) opts.onText({ text: d.text, delta: d.text });
-    return { text: d.text, truncated: !!d.truncated };
+    const contents = toContents(messages);
+    const tools = Array.isArray(opts.tools) && opts.tools.length ? opts.tools : null;
+    for (let step = 0; step < 7; step++) {
+      if (opts.signal && opts.signal.aborted) throw { code: "cancelled" };
+      const d = await callFn("chat", { contents, tools: tools ? [{ functionDeclarations: declsOf(tools) }] : undefined });
+      if (tools && d.functionCalls && d.functionCalls.length) {
+        contents.push(d.modelContent);
+        const parts = [];
+        for (const fc of d.functionCalls) {
+          const t = tools.find(x => x.name === fc.name); let resp;
+          try { const r = t ? await t.execute(fc.args || {}, { signal: opts.signal }) : { erro: "ferramenta desconhecida" }; resp = { result: r === undefined ? "ok" : r }; }
+          catch (e) { resp = { erro: String((e && e.message) || e || "falhou") }; }
+          parts.push({ functionResponse: { name: fc.name, response: resp } });
+        }
+        contents.push({ role: "user", parts });
+        continue;
+      }
+      if (opts.onText) opts.onText({ text: d.text, delta: d.text });
+      return { text: d.text, truncated: !!d.truncated };
+    }
+    return { text: "Fiz o que consegui por aqui. Me diga se quer que eu continue.", truncated: false };
   };
-  sample.limits = async () => ({ tools: false, images: { maxCount: 4, mediaTypes: ["image/png", "image/jpeg", "image/webp"] } });
+  sample.limits = async () => ({ tools: true, images: { maxCount: 4, mediaTypes: ["image/png", "image/jpeg", "image/webp"] } });
   sample.json = async (prompt, opts = {}) => {
     const images = opts.images ? await Promise.all(opts.images.map(blobToB64)) : [];
     const d = await callFn("chat", { messages: [{ role: "user", content: prompt }], json: true, images });

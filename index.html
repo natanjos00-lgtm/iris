@@ -571,7 +571,7 @@ body{background:
         </div>
         <div class="desk-r">
           <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-check"/></svg><h2>Prioridades de hoje</h2><span id="dkFocusN"></span></div><ul class="dk-list" id="dkFocus"></ul></div>
-          <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-cal"/></svg><h2>Compromissos</h2><span>próximos</span></div><ul class="dk-agenda" id="dkAgenda"></ul></div>
+          <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-cal"/></svg><h2>Compromissos</h2><button class="link" id="dkNewEv" type="button">+ evento</button></div><ul class="dk-agenda" id="dkAgenda"></ul></div>
           <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-target"/></svg><h2>Metas em foco</h2><span>Progresso</span></div><ul class="dk-goals" id="dkGoals"></ul></div>
         </div>
         <form class="askbar" id="askbar" autocomplete="off">
@@ -704,8 +704,8 @@ body{background:
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=6"></script>
-<script src="adapter.js?v=6"></script>
+<script src="config.js?v=8"></script>
+<script src="adapter.js?v=8"></script>
 <script>
 (() => {
 "use strict";
@@ -845,7 +845,7 @@ function itemRow(it, opts = {}){
   }
   const acts = h("div",{class:"acts"});
   if (it.kind !== "ritual" && !it.done) acts.append(h("button",{class:"ib"+(it.focus?" on":""),type:"button",title:it.focus?"Tirar do foco de hoje":"Pôr no foco de hoje","aria-label":it.focus?"Tirar do foco de hoje":"Pôr no foco de hoje",onclick:()=>toggleFocus(it)}, icon("i-sun")));
-  if (["compromisso","reuniao","prova","atividade"].includes(it.kind) && !it.done && !it.onCal && mcp) acts.append(h("button",{class:"ib",type:"button",title:"Levar para o Google Agenda","aria-label":"Levar para o Google Agenda",onclick:()=>openCalDialog({ title:it.title, date:it.date, itemId:it.id })}, icon("i-cal")));
+  if (["compromisso","reuniao","prova","atividade"].includes(it.kind) && !it.done && !it.onCal && (mcp || window.irisSb)) acts.append(h("button",{class:"ib",type:"button",title:"Levar para o Google Agenda","aria-label":"Levar para o Google Agenda",onclick:()=>openCalDialog({ title:it.title, date:it.date, itemId:it.id })}, icon("i-cal")));
   if (opts.canSplit && !it.done) acts.append(h("button",{class:"ib",type:"button",title:"Dividir em etapas com a ÍRIS","aria-label":"Dividir em etapas com a ÍRIS",onclick:(e)=>splitSteps(it, e.currentTarget)}, icon("i-split")));
   acts.append(h("button",{class:"ib",type:"button",title:"Remover","aria-label":"Remover",onclick:()=>removeItem(it.id)}, icon("i-trash")));
   const li = h("li",{class:"item"+(it.done?" done":"")},
@@ -1120,6 +1120,16 @@ async function createEvent({ title, date, start, end, allDay, location }){
   if (allDay) { input.allDay = true; input.startTime = date + "T00:00:00"; input.endTime = addDays(date,1) + "T00:00:00"; }
   else { input.startTime = `${date}T${start}:00`; input.endTime = `${date}T${end}:00`; }
   if (location) input.location = String(location).slice(0,200);
+  if (!mcp) { // versão fora do Claude: API do Google Agenda, com a permissão de criar eventos
+    const tok = await calToken(true);
+    const body = { summary:input.summary, location:input.location };
+    if (allDay) { body.start = { date }; body.end = { date:addDays(date,1) }; } else { body.start = { dateTime:`${date}T${start}:00`, timeZone:TZ }; body.end = { dateTime:`${date}T${end}:00`, timeZone:TZ }; }
+    const r = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", { method:"POST", headers:{ Authorization:"Bearer " + tok, "Content-Type":"application/json" }, body:JSON.stringify(body) });
+    if (!r.ok) throw { code:"http_" + r.status };
+    calEvents.push({ title:input.summary, day:date, time: allDay ? "" : start, allDay:!!allDay, end:"", location:location || "", href:null }); // aparece já; o feed iCal do Google demora para atualizar
+    if (current === "inicio") renderHome();
+    return;
+  }
   await mcp.callTool(CAL, "create_event", input);
   mcp.invalidate(CAL).catch(()=>{}); setTimeout(() => loadCal(true), 800);
 }
@@ -1149,7 +1159,7 @@ function openCalDialog(pre){
     try { await createEvent({ title, date, start, end, allDay, location:$("evL").value.trim() });
       if (pre.itemId) await updateItem(pre.itemId, { onCal:true, date });
       close(); toast("Evento criado no Google Agenda."); }
-    catch (x) { err.hidden = false; err.textContent = x.code === "approval_required" ? "O claude.ai precisa da sua permissão para criar eventos. Tente de novo e permita." : x.code === "server_unavailable" || x.code === "upstream_error" ? "A agenda não confirmou. Confira no Google Agenda antes de tentar de novo, para não duplicar." : calErr(x.code);
+    catch (x) { err.hidden = false; err.textContent = x.code === "no_client" || x.code === "no_gis" ? "O Google não carregou. Recarregue a página e tente de novo." : x.code === "popup_closed" || x.code === "access_denied" ? "A permissão do Google Agenda não foi dada." : x.code === "http_403" ? "O Google Agenda não deixou criar. Ative a API do Google Agenda no Google Cloud." : x.code === "http_401" ? "A permissão expirou. Tente de novo." : x.code === "approval_required" ? "O claude.ai precisa da sua permissão para criar eventos. Tente de novo e permita." : x.code === "server_unavailable" || x.code === "upstream_error" ? "A agenda não confirmou. Confira no Google Agenda antes de tentar de novo, para não duplicar." : calErr(x.code);
       $("evGo").disabled = false; $("evGo").textContent = "Criar evento"; }
   };
   setTimeout(() => $("evT").focus(), 0);
@@ -1516,7 +1526,7 @@ Não invente números. Se faltar dado (ex.: renda ou limites), diga o que ajudar
 Dados: ${JSON.stringify(data).slice(0, 12000)}
 Gastos do mês por lançamento (amostra): ${JSON.stringify(c.out.slice(0,120).map(t => [t.date, t.desc, Math.round(t.amount), t.cat, t.method]))}`;
   try { const r = await sample(prompt, { cache:false, onText:({ text }) => { out.textContent = text; } }); out.textContent = r.text; await anSave(M, r.text); renderFinIfOpen(); }
-  catch (e) { out.textContent = e.code === "not_granted" ? "Permita o uso do Claude quando o claude.ai perguntar para gerar a leitura." : (e.text || prev) + "\n\nNão consegui terminar a leitura agora. Tente de novo em instantes."; }
+  catch (e) { out.textContent = (e.text || prev) + "\n\n" + aiMsg(e, "Não consegui terminar a leitura agora. Tente de novo em instantes."); }
   finally { btn.disabled = false; }
 }
 
@@ -1638,11 +1648,11 @@ ${text ? "Texto da fatura:\n\"\"\"" + text.slice(0, 60000) + "\"\"\"" : "A fatur
     lines: lines.map(l => ({ date: /^\d{4}-\d{2}-\d{2}$/.test(String(l.data||"")) ? l.data : (venc || today()), desc:String(l.descricao).slice(0,120), amount:+l.valor, k:+l.parcela || null, n:+l.parcelas || null, cat: CATS.includes(l.categoria) ? l.categoria : "Outros", on:true })) };
 }
 function fatErr(e){
-  return e && e.code === "images_unavailable" ? "esta visualização não consegue enviar imagens ao Claude; envie o PDF ou cole o texto" :
+  return e && e.code === "images_unavailable" ? "não consegui enviar a imagem; envie o PDF ou cole o texto" :
     e && e.code === "empty" ? "não encontrei lançamentos; tente um arquivo mais nítido ou cole o texto" :
     e && e.code === "not_granted" ? "o uso do Claude não foi permitido" :
     e && e.message === "script" ? "não consegui abrir o leitor de PDF; envie um print ou cole o texto" :
-    e && e.code === "invalid_json" ? "a leitura saiu incompleta; tente de novo só com as páginas de lançamentos" : "não consegui ler agora; tente de novo";
+    e && (e.code === "invalid_json" || e.code === "bad_json") ? "a leitura saiu incompleta; tente de novo só com as páginas de lançamentos" : e && e.code === "fn_error" ? "o Gemini não respondeu" + (e.detail ? " (" + String(e.detail).slice(0,100) + ")" : "") : "não consegui ler agora; tente de novo";
 }
 async function readFaturas(files, pasted){
   const st = $("fatStatus"); st.textContent = "";
@@ -1656,7 +1666,7 @@ async function readFaturas(files, pasted){
     const j = jobs[i]; const name = j.file ? j.file.name : "texto colado";
     line.textContent = `Lendo ${i+1} de ${jobs.length}: ${name}. Faturas longas levam até um minuto cada.`;
     try { const d = await extractOne(j.file, j.pasted); faturaDrafts.push(d); ok++; renderFaturaDrafts(); }
-    catch (e) { if (e && e.code === "not_granted") { errs.append(h("li",null,"Permita o uso do Claude quando o claude.ai perguntar.")); break; } errs.append(h("li",null, `${name}: ${fatErr(e)}.`)); }
+    catch (e) { errs.append(h("li",null, `${name}: ${fatErr(e)}.`)); }
   }
   line.textContent = ok ? `${plural(ok,"fatura lida","faturas lidas")}${jobs.length - ok ? `, ${jobs.length - ok} com problema` : ""}. Revise abaixo e guarde.` : "Nenhuma fatura pôde ser lida.";
   btn.disabled = false; btn.textContent = "Ler com a ÍRIS";
@@ -1932,6 +1942,7 @@ function openPrefs(){
     h("h2",{class:"t",id:"prT"},"Ajustar a ÍRIS"),
     h("label",null,"Como ela te chama", h("input",{type:"text",id:"pName",value:userName,placeholder:"Natália"})),
     h("p",{class:"muted small",style:"margin:-6px 0 0"},"Escreva do jeito que você quer ouvir. Nomes muito curtos, como Nat, às vezes são soletrados pela voz do aparelho; nesse caso, prefira o nome completo."),
+    h("div",{class:"muted small",style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap"}, h("button",{class:"btn ghost",type:"button",id:"pTest",style:"padding:6px 12px;font-size:12.5px"},"Testar o Gemini"), h("span",{id:"pTestOut"})),
     h("label",null,"Tipo de voz", h("select",{id:"pEngine"}, opt("device","Voz do aparelho (grátis, sem internet)", prefs.engine !== "gemini"), opt("gemini","Voz natural do Gemini (usa sua chave)", prefs.engine === "gemini"))),
     h("label",null,"Voz do Gemini", h("select",{id:"pGem"}, GEM_VOICES.map(([k,l]) => opt(k, l, (prefs.gemVoice || "Kore") === k)))),
     h("label",null,"Voz do aparelho", sel),
@@ -1945,6 +1956,7 @@ function openPrefs(){
       h("button",{class:"btn olive",type:"submit"},"Salvar")));
   const sync = () => { rateOut.textContent = (+$("pRate").value).toFixed(2).replace(".",",") + "×"; pitchOut.textContent = (+$("pPitch").value).toFixed(2).replace(".",","); };
   const ov = h("div",{class:"overlay",onclick:e=>{ if (e.target === ov) close(); }}, f); slot.append(ov);
+  $("pTest").onclick = async () => { const o = $("pTestOut"); o.textContent = "Testando…"; try { const r = await sample([{ role:"user", content:"Responda só com a palavra: ok" }], {}); o.textContent = "Gemini respondeu: " + String(r.text).slice(0,40); } catch (e) { o.textContent = "Falhou: " + ((e && e.detail) || (e && e.code) || "erro desconhecido"); } };
   $("pRate").oninput = sync; $("pPitch").oninput = sync; sync();
   ov.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
   f.onsubmit = async e => { e.preventDefault(); premiumBroken = false; await savePrefs({ name:$("pName").value.trim(), engine:$("pEngine").value, gemVoice:$("pGem").value, voiceURI:$("pVoice").value, rate:+$("pRate").value, pitch:+$("pPitch").value }); close(); toast("Ajustes da ÍRIS salvos."); };
@@ -2007,21 +2019,23 @@ function snapshotForAI(){
   };
 }
 
+function aiMsg(e, base){ const d = e && e.detail ? " (" + String(e.detail).slice(0,110) + ")" : ""; return e && e.code === "fn_error" ? "O Gemini não respondeu agora" + d + ". " + base : base; }
+
 /* ---------- ÍRIS: ferramentas ---------- */
 const AREA_KEYS = Object.keys(AREAS);
 const TOOLS = [
   { name:"consultar_agenda", description:"Lista eventos do Google Agenda entre duas datas (AAAA-MM-DD, fim exclusivo). Retorna título, dia, hora e local.",
     inputSchema:{ type:"object", properties:{ inicio:{type:"string"}, fim:{type:"string"} }, required:["inicio","fim"] },
-    async execute(i, ctx){ if (!mcp) throw new Error("Agenda indisponível nesta visualização");
+    async execute(i, ctx){ if (!mcp) { const a = String(i.inicio).slice(0,10), b = String(i.fim).slice(0,10); return calEvents.filter(e => e.day >= a && e.day < b).map(({href, ...e}) => e); }
       const r = await mcp.callTool(CAL, "list_events", { startTime:String(i.inicio).slice(0,10)+"T00:00:00", endTime:String(i.fim).slice(0,10)+"T00:00:00", orderBy:"startTime", pageSize:50, timeZone:TZ }, { signal:ctx.signal });
       return normEvents(r.payload).map(({href, ...e}) => e); } },
   { name:"buscar_emails", description:"Busca conversas no Gmail com a sintaxe de busca do Gmail (ex.: 'in:inbox category:primary newer_than:3d'). Retorna remetente, assunto, trecho, data e se está não lido.",
     inputSchema:{ type:"object", properties:{ consulta:{type:"string"} }, required:["consulta"] },
-    async execute(i, ctx){ if (!mcp) throw new Error("Gmail indisponível nesta visualização");
+    async execute(i, ctx){ if (!mcp) return await gmailSearch(String(i.consulta).slice(0,300));
       const r = await mcp.callTool(MAIL, "search_threads", { query:String(i.consulta).slice(0,300), pageSize:10, view:"THREAD_VIEW_SUMMARY" }, { signal:ctx.signal });
       return ((r.payload && r.payload.threads) || []).map(t => { const m = (t.messages||[]).slice(-1)[0] || {}; const nm = (m.addressDisplayNames||[]).find(x => x.emailAddress === m.sender);
         return { de:(nm && nm.displayName) || m.sender, assunto:m.subject, trecho:String(m.snippet||"").replace(/[͏​-‍﻿]/g,"").replace(/\s+/g," ").slice(0,200), data:m.date, naoLido:(m.labelIds||[]).includes("UNREAD") }; }); } },
-  { name:"adicionar_item", description:"Adiciona um item às listas dela. area: pessoal|trabalho|faculdade. tipo: ritual, compromisso, objetivo (pessoal); tarefa, projeto, reuniao (trabalho); estudo, atividade, prova (faculdade). data opcional AAAA-MM-DD. Retorna o id.",
+  { name:"adicionar_item", description:"Adiciona um item às listas dela. tipo: ritual, compromisso, objetivo (pessoal); tarefa, projeto, reuniao (trabalho); estudo, atividade, prova (faculdade); obra, compra, organizacao (casa); meta (metas). data opcional AAAA-MM-DD. Retorna o id.",
     inputSchema:{ type:"object", properties:{ area:{type:"string"}, tipo:{type:"string"}, titulo:{type:"string"}, data:{type:"string"} }, required:["tipo","titulo"] },
     async execute(i){ const kind = String(i.tipo); if (!KIND_AREA[kind]) throw new Error("tipo inválido");
       const date = /^\d{4}-\d{2}-\d{2}$/.test(String(i.data||"")) ? String(i.data) : null;
@@ -2034,7 +2048,7 @@ const TOOLS = [
       for (const id of ids) if (items.find(x => x.id === id)) await updateItem(id, { focus:true }); return { ok:true }; } },
   { name:"criar_evento", description:"Cria um evento no Google Agenda depois que ela confirma na tela. data AAAA-MM-DD; inicio e fim HH:MM (omita para dia inteiro). Retorna se foi criado.",
     inputSchema:{ type:"object", properties:{ titulo:{type:"string"}, data:{type:"string"}, inicio:{type:"string"}, fim:{type:"string"}, local:{type:"string"} }, required:["titulo","data"] },
-    async execute(i){ if (!mcp) throw new Error("Agenda indisponível nesta visualização");
+    async execute(i){
       const date = String(i.data).slice(0,10); if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("data inválida");
       const tm = x => /^\d{2}:\d{2}$/.test(String(x||"")) ? String(x) : null;
       const start = tm(i.inicio), end = tm(i.fim) || (start ? `${String(Math.min(23, +start.slice(0,2)+1)).padStart(2,"0")}:${start.slice(3)}` : null);
@@ -2133,7 +2147,7 @@ Responda só com um array JSON de ids, ex.: ["abc","def"].`, { modelTier:"quick"
     const valid = (Array.isArray(ids) ? ids : []).map(String).filter(id => p.some(x => x.id === id)).slice(0,3);
     for (const id of valid) { if (items.filter(x => x.focus && !x.done).length >= 3) break; await updateItem(id, { focus:true }); }
     if (!valid.length) toast("A ÍRIS não encontrou uma boa sugestão agora.");
-  } catch (e) { toast(e.code === "not_granted" ? "Permita o uso do Claude para receber sugestões." : "Não consegui sugerir agora."); }
+  } catch (e) { toast(aiMsg(e, "Escolhi pelas datas mais próximas.")); const pick = p.slice().sort((a,b) => (a.date||"9999") < (b.date||"9999") ? -1 : 1).slice(0, Math.max(0, 3 - items.filter(x => x.focus && !x.done).length)); for (const it of pick) await updateItem(it.id, { focus:true }); }
 }
 async function splitSteps(it, btn){
   if (!sample) { toast("Dividir em etapas precisa do Claude, disponível no claude.ai."); return; }
@@ -2143,7 +2157,7 @@ async function splitSteps(it, btn){
     const steps = (Array.isArray(arr) ? arr : []).map(s => String(s).slice(0,140)).filter(Boolean).slice(0,6);
     if (!steps.length) { toast("Não saiu nada útil. Tente de novo."); return; }
     await updateItem(it.id, { steps: [...(it.steps||[]), ...steps.map(t => ({ t, done:false }))] }); toast("Etapas adicionadas.");
-  } catch (e) { toast(e.code === "not_granted" ? "Permita o uso do Claude para dividir em etapas." : "Não consegui agora."); }
+  } catch (e) { toast(aiMsg(e, "Tente de novo em instantes.")); }
   finally { btn.disabled = false; }
 }
 /* ---------- ESVAZIAR A MENTE (modo dedicado) ---------- */
@@ -2218,7 +2232,7 @@ Texto:
         h("button",{class:"btn ghost",type:"button",onclick:()=>save(false)},"Guardar selecionados"),
         first !== null ? h("button",{class:"btn olive",type:"button",onclick:()=>save(true)},"Guardar e pôr o primeiro no foco") : null));
       out.append(box);
-    } catch (e) { out.textContent = ""; out.append(h("div",{class:"empty",style:"margin-top:14px"}, e.code === "not_granted" ? "Permita o uso do Claude quando o claude.ai perguntar." : "Não consegui organizar agora. Seu texto continua salvo aqui; tente de novo em instantes.")); }
+    } catch (e) { out.textContent = ""; out.append(h("div",{class:"empty",style:"margin-top:14px"}, aiMsg(e, "Não consegui organizar agora. Seu texto continua salvo aqui; tente de novo em instantes."))); }
     finally { go.disabled = false; go.textContent = "Pronto, organizar"; }
   };
 }
@@ -2337,6 +2351,7 @@ function renderDesk(){
   goals.forEach(it => { const p = stepsPct(it); gl.append(h("li",null, icon(AREAS[it.area] ? AREAS[it.area].icon : "i-target"), h("span",null,it.title), h("div",{class:"bar",role:"img","aria-label":p+"%"}, h("i",{style:`width:${p}%`})), h("span",{class:"pc"}, p+"%"))); });
   if (!goals.length) gl.append(h("li",{class:"dk-empty"}, "Crie uma meta com etapas para acompanhar o progresso. ", h("a",{class:"link",href:"#metas"},"Criar meta")));
 }
+$("dkNewEv").onclick = () => openCalDialog({});
 function tickClock(){ try { $("clock").textContent = hmFmt.format(new Date()); } catch {} }
 setInterval(tickClock, 15000); tickClock();
 async function loadWeather(){
@@ -2379,19 +2394,21 @@ function openAgendaLink(){
 }
 
 /* ---------- Gmail (somente leitura, pelo login do Google) ---------- */
-let gTok = null, gExp = 0;
-function gmailToken(interactive){
+const gToks = {};
+function googleToken(kind, scope, interactive){
   return new Promise((res, rej) => {
-    if (gTok && Date.now() < gExp - 60000) return res(gTok);
+    const t = gToks[kind]; if (t && Date.now() < t.exp - 60000) return res(t.tok);
     const cid = window.IRIS_CONFIG && window.IRIS_CONFIG.GOOGLE_CLIENT_ID;
     if (!cid) return rej({ code:"no_client" });
     if (!(window.google && google.accounts && google.accounts.oauth2)) return rej({ code:"no_gis" });
-    const c = google.accounts.oauth2.initTokenClient({ client_id:cid, scope:"https://www.googleapis.com/auth/gmail.readonly",
-      callback: r => { if (r.error) return rej({ code:r.error }); gTok = r.access_token; gExp = Date.now() + (r.expires_in || 3600) * 1000; store.set("iris.gmailOn", true); res(gTok); },
+    const c = google.accounts.oauth2.initTokenClient({ client_id:cid, scope,
+      callback: r => { if (r.error) return rej({ code:r.error }); gToks[kind] = { tok:r.access_token, exp:Date.now() + (r.expires_in || 3600) * 1000 }; store.set("iris.g_" + kind, true); res(r.access_token); },
       error_callback: e => rej({ code:(e && e.type) || "popup" }) });
-    c.requestAccessToken({ prompt: interactive ? "consent" : "none" });
+    c.requestAccessToken({ prompt: interactive ? "" : "none" });
   });
 }
+const gmailToken = interactive => googleToken("gmail", "https://www.googleapis.com/auth/gmail.readonly", interactive);
+const calToken = interactive => googleToken("cal", "https://www.googleapis.com/auth/calendar.events", interactive);
 async function gapi(path, tok){ const r = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/" + path, { headers:{ Authorization:"Bearer " + tok } }); if (!r.ok) throw { code:"http_" + r.status }; return r.json(); }
 async function loadGmail(interactive){
   try {
@@ -2410,6 +2427,12 @@ async function loadGmail(interactive){
   renderInbox();
 }
 let mailNeedsLink = false;
+async function gmailSearch(q){
+  let tok; try { tok = await gmailToken(false); } catch { throw new Error("O Gmail ainda não está ligado. Peça para ela tocar em Ligar o Gmail no cartão da caixa de entrada."); }
+  const list = await gapi("messages?maxResults=10&q=" + encodeURIComponent(q), tok);
+  const msgs = await Promise.all((list.messages || []).slice(0,10).map(m => gapi("messages/" + m.id + "?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date", tok)));
+  return msgs.map(m => { const hd = n => ((m.payload && m.payload.headers) || []).find(x => x.name.toLowerCase() === n); return { de:((hd("from")||{}).value || "").replace(/<.*>/,"").replace(/"/g,"").trim(), assunto:(hd("subject")||{}).value || "", trecho:String(m.snippet||"").slice(0,200), data:(hd("date")||{}).value || "", naoLido:(m.labelIds||[]).includes("UNREAD") }; });
+}
 
 /* ---------- inicialização ---------- */
 route();
@@ -2435,7 +2458,7 @@ setInterval(() => { if (current === "inicio") renderHome(); }, 60000);
     finMeta.onSnapshot(snap => { for (const d of snap.docs) { if (d.id === "cfg") fincfg = Object.assign({ income:0, savingsPct:10, reserve:0, reserveGoalMonths:6, budgets:{}, cards:[], fixed:[] }, d.data()); else if (d.id === "prefs") { prefs = Object.assign({}, prefs, d.data()); store.set("iris.prefs", prefs); applyName(); } else if (d.id.startsWith("an-")) finAn = Object.assign({}, finAn, { [d.id.slice(3)]: d.data() }); } renderFinIfOpen(); }, () => {});
   } else { clearTimeout(fallback); local.load(); finLocal.load(); loaded = true; }
 
-  if (mcp) { watchCal(); watchMail(); } else if (window.irisSb) { loadIcs(); setInterval(() => { if (!document.hidden) loadIcs(); }, 10*60*1000); mailState = "error"; mailNeedsLink = true; mailMsg = "Ligue o Gmail para ver aqui os e-mails importantes."; renderInbox(); if (store.get("iris.gmailOn", false)) setTimeout(() => loadGmail(false), 1500); setInterval(() => { if (!document.hidden && store.get("iris.gmailOn", false)) loadGmail(false); }, 10*60*1000); } else { calState = "error"; calMsg = "A agenda aparece quando a página é aberta no claude.ai."; mailState = "error"; mailMsg = "Os e-mails aparecem quando a página é aberta no claude.ai."; renderInbox(); }
+  if (mcp) { watchCal(); watchMail(); } else if (window.irisSb) { loadIcs(); setInterval(() => { if (!document.hidden) loadIcs(); }, 10*60*1000); mailState = "error"; mailNeedsLink = true; mailMsg = "Ligue o Gmail para ver aqui os e-mails importantes."; renderInbox(); if (store.get("iris.g_gmail", false)) setTimeout(() => loadGmail(false), 1500); setInterval(() => { if (!document.hidden && store.get("iris.g_gmail", false)) loadGmail(false); }, 10*60*1000); } else { calState = "error"; calMsg = "A agenda aparece quando a página é aberta no claude.ai."; mailState = "error"; mailMsg = "Os e-mails aparecem quando a página é aberta no claude.ai."; renderInbox(); }
   hello(); renderView();
 })();
 })();
