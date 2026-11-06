@@ -818,6 +818,27 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
 
 .dk ul li.dk-empty{display:block;grid-template-columns:none;padding:6px 0;line-height:1.55}
 .dk ul li.dk-empty .link{display:inline;font-size:inherit}
+
+.arow .ar-t{min-width:0;flex:1}
+.arow small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arow .bdg{flex:none;min-width:30px;height:30px;padding:0 9px;border-radius:15px;background:rgba(232,176,104,.2);border:1px solid rgba(232,176,104,.5);color:var(--gold-2);font-size:15px;display:grid;place-items:center}
+.arow::after{margin-left:0}
+@media (max-width:760px){.arow .bdg{position:absolute;top:6px;right:6px;min-width:24px;height:24px;font-size:13px}.arow{position:relative}}
+
+.attn{padding:var(--pad-c)}
+.attn-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.attn-i a{display:flex;gap:14px;align-items:flex-start;padding:13px 16px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid var(--gl2);text-decoration:none;color:var(--ink);transition:border-color .2s,background .2s}
+.attn-i a:hover{border-color:rgba(232,176,104,.6);background:rgba(232,176,104,.09)}
+.attn-i svg.i{width:26px;height:26px;color:var(--gold);margin-top:2px}
+.attn-i.lv0 a{border-color:rgba(239,106,59,.55);background:rgba(239,106,59,.09)}
+.attn-i.lv0 svg.i{color:#ff9a6b}
+.attn-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.attn-t small{font-size:var(--fs-sec);color:var(--taupe);letter-spacing:.04em}
+.attn-t span{font-size:var(--fs-body);line-height:1.35;overflow-wrap:anywhere}
+.attn-ok{padding:10px 2px}
+.attn .dk-h{margin-bottom:14px}
+@media (max-width:760px){.attn{order:3}}
+@media (max-width:1099px) and (min-width:761px){.attn{grid-column:1/-1;order:3}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -898,7 +919,7 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
             <h1 class="t" id="h-inicio">Bom dia.</h1>
             <p class="lede" id="dayShape">Preparando o seu dia…</p>
           </div>
-          <div class="arealist" id="arealist"></div>
+          <section class="glass attn" id="attn" aria-labelledby="alH"><div class="dk-h"><svg class="i"><use href="#i-bell"/></svg><h2 id="alH">Precisa de atenção</h2><span id="alN"></span></div><ul class="attn-list" id="alList"></ul></section>
           <div class="iris-line"><b>ÍRIS</b><p id="irisLine">À disposição. Quando quiser, comece por uma coisa só.</p></div>
           <button class="mindbtn" id="mindOpen" type="button"><svg class="i"><use href="#i-wave"/></svg>Esvaziar a mente</button>
         </div>
@@ -949,7 +970,7 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
             <div id="upcoming"><div class="empty">Abrindo sua agenda…</div></div>
           </div>
 
-          <div>
+          <div class="areas3-wrap">
             <div class="card-h" style="padding:0 2px"><h2 class="t">Próximo passo em cada área</h2></div>
             <div class="areas3" id="areas3"></div>
           </div>
@@ -1058,8 +1079,8 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=18"></script>
-<script src="adapter.js?v=18"></script>
+<script src="config.js?v=20"></script>
+<script src="adapter.js?v=20"></script>
 <script>
 (() => {
 "use strict";
@@ -1438,6 +1459,7 @@ function mailErr(code){
     server_unavailable:"O Gmail não respondeu agora. Ele tenta de novo sozinho." }[code] || "Não consegui abrir o Gmail agora.";
 }
 function renderInbox(){
+  try { renderAlerts(); } catch {}
   const box = $("inbox"); if (!box) return; box.textContent = "";
   if (!mailThreads.length){
     box.append(h("div",{class:"empty"}, mailState === "loading" ? "Abrindo seu Gmail…" : mailState === "error" ? mailMsg : "Nada novo na caixa principal. Silêncio bom."));
@@ -2687,12 +2709,38 @@ $("core").addEventListener("click", coreTalk);
 /* ---------- painel inicial (relógio, clima, listas) ---------- */
 function relDayLabel(d){ const t = today(); return d === t ? "Hoje" : d === addDays(t,1) ? "Amanhã" : prettyDay(d); }
 function stepsPct(it){ const st = it.steps || []; return st.length ? Math.round(st.filter(x => x.done).length / st.length * 100) : (it.done ? 100 : 0); }
+
+/* ---------- precisa de atenção (avisos das áreas) ---------- */
+function renderAlerts(){
+  const ul = $("alList"); if (!ul) return; ul.textContent = "";
+  const t = today(), A = [];
+  const aLabel = k => (AREAS[k] && AREAS[k].label) || "";
+  const dm = d => d.slice(8) + "/" + d.slice(5,7);
+  try {
+    items.filter(it => !it.done && it.kind !== "ritual" && it.date).forEach(it => {
+      if (it.date < t) A.push({ lv:0, ic:"i-check", area:aLabel(it.area), t:`Atrasado: ${it.title} (era ${dm(it.date)})`, href:"#" + it.area });
+      else if (it.date === t) A.push({ lv:1, ic:"i-cal", area:aLabel(it.area), t:`Hoje: ${it.title}`, href:"#" + it.area });
+      else if (it.date === addDays(t,1)) A.push({ lv:2, ic:"i-cal", area:aLabel(it.area), t:`Amanhã: ${it.title}`, href:"#" + it.area });
+    });
+  } catch {}
+  try {
+    const now = new Date(); const hm = new Intl.DateTimeFormat("en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit",hour12:false}).format(now).split(":").map(Number); const nowM = (hm[0] % 24) * 60 + hm[1];
+    calEvents.filter(e => e.day === t && !e.allDay && e.time).forEach(e => { const [h2, m2] = e.time.split(":").map(Number); const diff = h2 * 60 + m2 - nowM;
+      if (diff >= 0 && diff <= 120) A.push({ lv:0, ic:"i-cal", area:"Agenda", t:`${e.time}: ${e.title}` + (diff ? ` (em ${diff >= 60 ? Math.floor(diff/60) + "h" + (diff % 60 ? String(diff % 60).padStart(2,"0") : "") : diff + " min"})` : " (agora)"), href:"#inicio", go:"dkComp" }); });
+  } catch {}
+  try { const un = mailThreads.filter(m => m.unread).length; if (un) A.push({ lv:1, ic:"i-iris", area:"E-mails", t:`${un} e-mail${un === 1 ? "" : "s"} não lido${un === 1 ? "" : "s"} na caixa principal`, href:"#inicio", go:"inbox" }); } catch {}
+  try { finAlerts().filter(a => a.k !== "info").forEach(a => A.push({ lv:a.k === "warn" ? 0 : 1, ic:"i-coin", area:"Finanças", t:a.t, href:"#financeiro" })); } catch {}
+  A.sort((a, b) => a.lv - b.lv);
+  const top = A.slice(0, 7);
+  $("alN").textContent = A.length ? (A.length > 7 ? "7 de " + A.length : String(A.length)) : "";
+  if (!top.length) { ul.append(h("li",{class:"dk-empty attn-ok"}, "Tudo em dia. Nada precisa de você agora.")); return; }
+  top.forEach(a => ul.append(h("li",{class:"attn-i lv" + a.lv},
+    h("a",{href:a.href, onclick: a.go ? (() => setTimeout(() => { const e = $(a.go); if (e) e.scrollIntoView({ block:"center", behavior:"smooth" }); }, 150)) : null}, icon(a.ic),
+      h("div",{class:"attn-t"}, h("small",null,a.area), h("span",null,a.t))))));
+}
 function renderDesk(){
   $("coreName").textContent = "ÍRIS"; try { v2Extras(); } catch {}
-  const al = $("arealist"); al.textContent = "";
-  const rows = [...Object.entries(AREAS).filter(([k]) => k !== "metas").map(([k,c]) => ({ href:"#"+k, ic:c.icon, label:c.label, sub:c.sub || "" })),
-    { href:"#financeiro", ic:"i-coin", label:"Finanças", sub:"Contas, mês e planejamento" }, { href:"#metas", ic:"i-target", label:AREAS.metas.label, sub:AREAS.metas.sub }];
-  rows.forEach(r => al.append(h("a",{class:"arow",href:r.href}, icon(r.ic), h("div",null, h("b",null,r.label), h("small",null,r.sub)))));
+  renderAlerts();
 
   const fl = $("dkFocus"); fl.textContent = "";
   const foc = items.filter(it => it.focus && it.kind !== "ritual").slice(0,5);
