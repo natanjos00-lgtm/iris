@@ -617,6 +617,196 @@ main{padding:0 0 46px}
   .greet2 h1.t{font-size:52px}
 }
 
+
+/* ============ ESCALA V3 — tipografia maior, mais respiro ============ */
+:root{
+  --fs-h1:clamp(40px,3.3vw,60px);
+  --fs-h2:clamp(23px,1.75vw,30px);
+  --fs-body:clamp(16.5px,1.12vw,19px);
+  --fs-sec:clamp(14.5px,.98vw,16.5px);
+  --fs-nav:clamp(17px,1.2vw,19.5px);
+  --fs-btn:clamp(16px,1.1vw,18px);
+  --pad-c:clamp(20px,1.7vw,30px);
+  --gap:clamp(16px,1.5vw,26px);
+  --side-w:clamp(232px,16vw,300px);
+}
+body{font-size:var(--fs-body);line-height:1.5}
+.small{font-size:var(--fs-sec)}
+.eyebrow{font-size:13.5px;letter-spacing:.14em}
+.lede{font-size:var(--fs-body)}
+h1.t{font-size:var(--fs-h1)}
+h2.t{font-size:var(--fs-h2)}
+.muted,.empty,.meta,.card-h .hint,.hint{font-size:var(--fs-sec)}
+.empty{font-size:var(--fs-body)}
+.link{font-size:var(--fs-sec)}
+.card,.acard,.dlg{padding:var(--pad-c)}
+.card-h{margin-bottom:16px}
+.btn,.btn.ghost{font-size:var(--fs-btn);min-height:46px;padding:10px 20px;border-radius:14px}
+input[type=text],input[type=number],input[type=date],select,textarea{font-size:var(--fs-body)}
+.item{padding:14px 2px;gap:14px}
+.ttl{font-size:var(--fs-body)}
+.check{width:24px;height:24px}
+.ib svg{width:20px;height:20px}.ib{padding:7px}
+.glass{padding:var(--pad-c);border-radius:26px}
+
+/* menu lateral */
+.side{padding:28px 16px 22px;gap:26px}
+.brand svg.i{width:44px;height:44px}
+.brand b{font-size:clamp(30px,2.2vw,38px)}
+.brand span{font-size:clamp(13px,.9vw,15px)}
+.nav{gap:6px}
+.nav a{font-size:var(--fs-nav);padding:14px 18px;gap:16px;border-radius:16px}
+.nav a svg.i{width:26px;height:26px}
+.nav .sep{margin:12px 14px}
+.side .cfg{font-size:var(--fs-nav);padding:14px 18px;gap:16px}
+.side .cfg svg.i{width:26px;height:26px}
+.side .foot{font-size:var(--fs-sec)}
+
+/* topo */
+.topbar{padding:20px clamp(24px,2.4vw,44px) 12px}
+.clock{font-size:clamp(46px,3.8vw,68px)}
+.cdate{font-size:clamp(16px,1.1vw,19px)}
+.wx svg.i{width:clamp(34px,2.4vw,44px);height:clamp(34px,2.4vw,44px)}
+.wx b{font-size:clamp(26px,1.9vw,34px)}
+.wx span{font-size:clamp(14.5px,1vw,17px)}
+.tools{gap:10px}
+.tools button{width:52px;height:52px}
+.tools svg.i{width:28px;height:28px}
+
+/* início — desktop */
+.desk{height:auto;min-height:calc(100dvh - 120px);grid-template-columns:minmax(280px,.8fr) minmax(0,1.3fr) minmax(370px,.95fr);grid-template-rows:1fr auto;gap:var(--gap);padding:0 clamp(24px,2.4vw,44px) 40px}
+.desk-l,.desk-r{overflow:visible;gap:var(--gap)}
+.desk-c{justify-content:flex-start;padding-top:8px}
+.greet2 h1.t{font-size:var(--fs-h1);line-height:1.04;margin:0 0 12px}
+.greet2 h1.t::after{content:" \2661";font-size:.5em;color:var(--gold);vertical-align:middle}
+.greet2 .lede{font-size:var(--fs-body);max-width:none;color:var(--ink-2)}
+.arealist{gap:12px}
+.arealist .arow[href="#metas"]{display:none}
+.arow{padding:14px 18px;gap:16px;border-radius:20px;min-height:78px}
+.arow svg.i{width:34px;height:34px}
+.arow b{font-size:clamp(21px,1.5vw,26px)}
+.arow small{font-size:var(--fs-sec)}
+.arow::after{content:"\203A";margin-left:auto;font-size:34px;line-height:1;color:var(--gold);opacity:.8}
+.iris-line{padding:16px 18px;font-size:var(--fs-sec);border-radius:0 14px 14px 0}
+.iris-line b{font-size:18px}
+.mindbtn{font-size:var(--fs-btn);min-height:50px;padding:12px 22px}
+.corebox{width:min(100%,clamp(300px,34vw,660px));min-width:280px}
+.corename{padding:0 15%}
+.corename b{font-size:clamp(40px,4.2vw,78px)}
+.corename span{font-size:clamp(15px,1.25vw,20px)}
+.corename .wv{width:clamp(50px,4vw,72px);height:clamp(38px,3vw,54px)}
+.core-cap{font-size:var(--fs-sec)}
+.askbar{width:min(640px,100%);padding:6px 12px;min-height:60px}
+.askbar input{font-size:var(--fs-body);padding:14px 8px}
+.askbar button svg.i{width:26px;height:26px}
+.askbar button{padding:9px}
+.dk-h{gap:14px;margin-bottom:14px}
+.dk-h svg.i{width:30px;height:30px}
+.dk-h h2{font-size:var(--fs-h2);white-space:nowrap}
+.dk-h span,.dk-h .link{font-size:var(--fs-sec)}
+.dk-list li{font-size:var(--fs-body);padding:9px 0;gap:14px}
+.dk .check{width:26px;height:26px;border-radius:7px}
+.dk-agenda li{font-size:var(--fs-body);grid-template-columns:76px 1px minmax(0,1fr);gap:16px;padding:10px 0}
+.dk-agenda time{font-size:var(--fs-body)}
+.dk-goals li{font-size:var(--fs-body);grid-template-columns:30px minmax(0,1fr) clamp(64px,6vw,130px) 48px;gap:14px;padding:9px 0}
+.dk-goals svg.i{width:28px;height:28px}
+.dk-goals .pc{font-size:var(--fs-sec)}
+.bar{height:10px}
+.dk-empty{font-size:var(--fs-body)}
+.shortcuts h2,.weekfocus h2{font-size:var(--fs-h2);margin-bottom:14px}
+.shortcuts h2::before{content:"\26A1\FE0E";color:var(--gold);margin-right:12px;font-size:.85em}
+.sc-grid{gap:clamp(12px,1.1vw,18px)}
+.sc{font-size:var(--fs-btn);min-height:clamp(96px,7.5vw,128px);padding:16px 8px;gap:10px;border-radius:20px}
+.sc svg.i{width:clamp(30px,2.2vw,40px);height:clamp(30px,2.2vw,40px)}
+.weekfocus{gap:20px}
+.weekfocus>svg.i{width:44px;height:44px}
+.weekfocus p{font-size:clamp(20px,1.5vw,26px);line-height:1.3}
+.desk-b{gap:var(--gap)}
+.eyebrow.more-h{margin:44px clamp(24px,2.4vw,44px) 18px;font-size:14px}
+#v-inicio .home{padding:0 clamp(24px,2.4vw,44px);gap:var(--gap)}
+#v-inicio .stack{gap:var(--gap)}
+.when{grid-template-columns:96px minmax(0,1fr)}
+.when .d{font-size:var(--fs-sec)}.when .d b{font-size:var(--fs-body)}
+.tbtns .btn{min-height:48px}
+.view:not(#v-inicio){padding-top:22px;max-width:1280px}
+
+/* tablet */
+@media (max-width:1099px) and (min-width:761px){
+  :root{--side-w:84px;--fs-h1:clamp(38px,5vw,48px);--fs-h2:26px;--fs-body:17.5px}
+  .nav a{font-size:0;padding:15px;justify-content:center;gap:0}
+  .nav a svg.i{width:28px;height:28px}
+  .side{padding:22px 10px;align-items:stretch}
+  .side .cfg{font-size:0;justify-content:center;padding:15px;gap:0}
+  .side .foot,.brand div{display:none}
+  .brand{justify-content:center;padding:0}
+  .nav .sep{margin:10px 8px}
+  .desk{grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:0;grid-template-rows:none;padding:0 24px 40px}
+  .arealist{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .arealist .arow[href="#metas"]{display:flex}
+  .corebox{width:min(58vw,420px)}
+  .sc-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .sc{min-height:104px;font-size:16px}
+  .topbar{padding:18px 24px 10px}
+  #v-inicio .home{padding:0 24px}
+  .eyebrow.more-h{margin:36px 24px 14px}
+}
+/* celular */
+@media (max-width:760px){
+  :root{--fs-h1:34px;--fs-h2:24px;--fs-body:16.5px;--fs-sec:14.5px;--fs-btn:16px;--pad-c:20px;--gap:14px}
+  .topbar{padding:calc(10px + env(safe-area-inset-top,0px)) 18px 6px}
+  .topbar .mbar .mb-brand{font-size:30px}
+  .topbar .mbar .mb-brand svg.i{width:32px;height:32px}
+  .menu-btn,.topbar .mbar button{width:48px;height:48px}
+  .menu-btn svg.i,.topbar .mbar button svg.i{width:28px;height:28px}
+  .clock{font-size:46px}
+  .cdate{font-size:14.5px}
+  .wx svg.i{width:32px;height:32px}.wx b{font-size:24px}.wx span{font-size:13.5px}
+  .desk{padding:6px 18px 6px;gap:16px;min-height:0;display:flex}
+  .desk-l,.desk-r,.desk-b{display:contents}
+  .greet2 h1.t{font-size:var(--fs-h1)}
+  .greet2 .lede{font-size:15.5px}
+  .corebox{width:min(78vw,320px);min-width:0}
+  .corename span{font-size:16.5px}
+  .corename .wv{width:46px;height:34px}
+  .askbar{min-height:58px}
+  .askbar input{font-size:16.5px}
+  .arealist{margin:0 -18px;padding:2px 18px 6px;gap:12px;overflow-x:auto;flex-direction:row}
+  .arealist .arow[href="#metas"]{display:flex}
+  .arow{flex:0 0 96px;min-height:96px;padding:14px 6px;gap:8px;border-radius:20px}
+  .arow::after{display:none}
+  .arow b{font-size:14.5px}
+  .arow svg.i{width:30px;height:30px}
+  .glass{border-radius:24px}
+  .dk-h h2{font-size:24px}
+  .dk-list li,.dk-agenda li,.dk-goals li{font-size:16.5px}
+  .dk-goals li{grid-template-columns:26px minmax(0,1fr) 72px 44px}
+  .dk-agenda li{grid-template-columns:70px 1px minmax(0,1fr);gap:14px}
+  .sc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sc{min-height:92px;font-size:16px}
+  .sc:nth-child(5){grid-column:1/-1}
+  .weekfocus p{font-size:21px}
+  .mindbtn{width:100%;justify-content:center}
+  #v-inicio .home{padding:0 18px}
+  .eyebrow.more-h{margin:30px 18px 14px}
+  .view:not(#v-inicio){padding:18px 18px 0}
+  .tabbar{left:12px;right:12px;padding:10px 6px}
+  .tabbar a,.tabbar .tb{font-size:12.5px;gap:4px;padding:7px 0;min-height:56px;justify-content:center}
+  .tabbar svg.i{width:26px;height:26px}
+  .tabbar .fab{flex:0 0 72px;width:72px;height:72px;margin-top:-34px}
+  .tabbar .fab svg.i{width:32px;height:32px}
+  .side .nav a,.side .cfg{font-size:18px}
+}
+
+.listen{box-sizing:border-box;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(120px + env(safe-area-inset-bottom,0px));z-index:70;width:min(560px,calc(100vw - 28px));display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:22px;background:rgba(28,19,12,.96);border:1px solid rgba(244,190,120,.7);box-shadow:0 0 40px rgba(255,150,60,.35),0 14px 40px rgba(0,0,0,.6);backdrop-filter:blur(14px)}
+.listen[hidden]{display:none!important}
+.ln-dot{flex:none;width:18px;height:18px;border-radius:50%;background:#ffb25a;box-shadow:0 0 0 0 rgba(255,178,90,.7);animation:lnp 1.2s infinite}
+@keyframes lnp{70%{box-shadow:0 0 0 16px rgba(255,178,90,0)}100%{box-shadow:0 0 0 0 rgba(255,178,90,0)}}
+.ln-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ln-txt b{font-family:var(--f-title);font-weight:500;font-size:24px;color:var(--gold-2)}
+.ln-txt span{font-size:15.5px;color:var(--ink-2);overflow-wrap:anywhere}
+.tabbar .fab.on,.askbar button.on{box-shadow:0 0 0 6px rgba(255,178,90,.28),0 0 34px rgba(255,150,60,.8);background:radial-gradient(closest-side,rgba(110,66,28,.95),rgba(40,26,14,.98))}
+.askbar button.on{border-radius:50%;color:#ffd199}
+@media (min-width:761px){.listen{bottom:34px}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -843,6 +1033,7 @@ main{padding:0 0 46px}
   </main>
 </div>
 
+<div class="listen" id="listen" role="status" aria-live="polite" hidden><i class="ln-dot" aria-hidden="true"></i><div class="ln-txt"><b id="lnT">Ouvindo…</b><span id="lnS"></span></div><button class="btn ghost" id="lnStop" type="button">Parar</button></div>
 <nav class="tabbar" id="tabbar" aria-label="Navegação">
   <a href="#inicio" data-r="inicio"><svg class="i"><use href="#i-home"/></svg>Início</a>
   <a href="#pessoal" data-r="pessoal"><svg class="i"><use href="#i-cal"/></svg>Rotina</a>
@@ -855,8 +1046,8 @@ main{padding:0 0 46px}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=11"></script>
-<script src="adapter.js?v=11"></script>
+<script src="config.js?v=13"></script>
+<script src="adapter.js?v=13"></script>
 <script>
 (() => {
 "use strict";
@@ -2524,8 +2715,34 @@ async function loadWeather(){
 }
 loadWeather(); setInterval(loadWeather, 30*60*1000);
 $("askbar").onsubmit = e => { e.preventDefault(); const v = $("askIn").value.trim(); if (!v) { $("askIn").focus(); return; } $("askIn").value = ""; location.hash = "#iris"; setTimeout(() => send(v), 60); };
-(function(){ const SRx = window.SpeechRecognition || window.webkitSpeechRecognition; const mb = $("askMic"); if (!SRx) { mb.hidden = true; return; }
-  mb.onclick = () => { try { const r = new SRx(); r.lang = "pt-BR"; r.onresult = ev => { $("askIn").value = Array.from(ev.results).map(x => x[0].transcript).join(" "); $("askbar").requestSubmit(); }; r.start(); } catch { mb.hidden = true; } }; })();
+/* ---------- ouvir a Natália (microfone com estado claro) ---------- */
+const SRx = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, recOn = false, recText = "", recTimer = null;
+function listenShow(on, t, sub){ const el = $("listen"); if (!el) return; el.hidden = !on; if (t) $("lnT").textContent = t; $("lnS").textContent = sub || ""; document.querySelectorAll("#tabMic,#askMic").forEach(b => b.classList.toggle("on", !!on && recOn)); }
+function listenEnd(msg){ recOn = false; clearTimeout(recTimer); try { rec && rec.abort(); } catch {} rec = null; if (msg) { listenShow(true, msg.t, msg.s); setTimeout(() => { if (!recOn) listenShow(false); }, 3200); } else listenShow(false); }
+function toggleListen(){
+  if (recOn) { const t = recText.trim(); const r = rec; recOn = false; clearTimeout(recTimer); try { r && r.stop(); } catch {} if (!t) listenEnd({ t:"Não ouvi nada", s:"Toque no microfone e fale logo em seguida." }); return; }
+  if (!SRx) { listenShow(true, "Este navegador não ouve a voz aqui", "Toque na barra de texto e use o microfone do teclado."); setTimeout(() => listenShow(false), 4200); if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => $("askIn").focus(), 200); return; }
+  try { stopSpeaking(); } catch {}
+  recText = ""; let sent = false;
+  try {
+    rec = new SRx(); rec.lang = "pt-BR"; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+    rec.onstart = () => { recOn = true; try { navigator.vibrate && navigator.vibrate(25); } catch {} listenShow(true, "Ouvindo…", "Pode falar. Toque no microfone para parar."); };
+    rec.onresult = ev => { recText = Array.from(ev.results).map(x => x[0].transcript).join(" "); $("lnS").textContent = recText || "Pode falar."; };
+    rec.onerror = e => { const c = e && e.error; recOn = false;
+      if (c === "not-allowed" || c === "service-not-allowed") listenEnd({ t:"Microfone bloqueado", s:"Libere o microfone para este site nas configurações do navegador e tente de novo." });
+      else if (c === "no-speech") listenEnd({ t:"Não ouvi nada", s:"Toque no microfone e comece a falar logo em seguida." });
+      else if (c !== "aborted") listenEnd({ t:"Não consegui ouvir", s:"Tente de novo ou escreva na barra." }); };
+    rec.onend = () => { const t = recText.trim(); const wasOn = recOn; recOn = false; clearTimeout(recTimer);
+      if (t && !sent) { sent = true; listenShow(false); $("askIn").value = t; if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => $("askbar").requestSubmit(), 80); }
+      else if (wasOn && !t) listenEnd({ t:"Não ouvi nada", s:"Toque no microfone e comece a falar logo em seguida." });
+      else listenShow(false); };
+    rec.start(); recOn = true; listenShow(true, "Ouvindo…", "Pode falar. Toque no microfone para parar.");
+    recTimer = setTimeout(() => { try { rec && rec.stop(); } catch {} }, 15000);
+  } catch { listenEnd({ t:"Não consegui ligar o microfone", s:"Escreva na barra ou tente de novo." }); }
+}
+$("askMic").onclick = toggleListen;
+$("lnStop").onclick = () => { if (recOn) toggleListen(); else listenShow(false); };
 
 /* ---------- agenda por endereço secreto (Google Agenda, somente leitura) ---------- */
 let calNeedsLink = false;
@@ -2631,7 +2848,7 @@ $("menuBtn").onclick = () => document.body.classList.toggle("menu");
 $("tabMenu").onclick = () => document.body.classList.toggle("menu");
 $("scrim").onclick = () => document.body.classList.remove("menu");
 $("nav").addEventListener("click", () => document.body.classList.remove("menu"));
-$("tabMic").onclick = () => { if (current !== "inicio") { location.hash = "#inicio"; setTimeout(coreTalk, 250); } else coreTalk(); };
+$("tabMic").onclick = () => toggleListen();
 document.body.dataset.route = "inicio";
 
 /* ---------- inicialização ---------- */
