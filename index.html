@@ -694,6 +694,8 @@ html{scrollbar-color:var(--sb-thumb) var(--sb-track)}
 ::-webkit-scrollbar-corner{background:transparent}
 .side{scrollbar-width:none}
 .side::-webkit-scrollbar{display:none}
+.dk-agenda li.ag-next{display:block;border-top:1px dashed var(--line);margin-top:6px;padding:10px 0 0;font-size:13.5px;color:var(--taupe)}
+.dk-agenda li.ag-next small{font-size:inherit;overflow-wrap:anywhere}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2520,7 +2522,7 @@ function drawCore(ts){
   const gold = dark ? "238,178,100" : "166,112,58", hot = dark ? "255,218,160" : "196,132,66";
   const L = a => Math.min(1, a);
   const ring = (r, al, lw, dx, dy) => { cx2.strokeStyle = `rgba(${gold},${L(al)})`; cx2.lineWidth = lw; cx2.beginPath(); cx2.arc(c + (dx||0)*R, c + (dy||0)*R, R*r*pulse, 0, Math.PI*2); cx2.stroke(); };
-  const glowArc = (r, a0, a1, lw, al, blur) => { cx2.save(); cx2.shadowColor = `rgba(${hot},${L(al)})`; cx2.shadowBlur = blur; cx2.strokeStyle = `rgba(${hot},${L(al)})`; cx2.lineWidth = lw; cx2.lineCap = "round"; cx2.beginPath(); cx2.arc(c,c,R*r*pulse,a0,a1); cx2.stroke(); cx2.restore(); };
+  const glowArc = (r, a0, a1, lw, al, blur) => { cx2.save(); cx2.strokeStyle = `rgba(${hot},${L(al*0.16)})`; cx2.lineWidth = lw*4.5; cx2.lineCap = "round"; cx2.beginPath(); cx2.arc(c,c,R*r*pulse,a0,a1); cx2.stroke(); cx2.shadowColor = `rgba(${hot},${L(al)})`; cx2.shadowBlur = blur; cx2.strokeStyle = `rgba(${hot},${L(al)})`; cx2.lineWidth = lw; cx2.lineCap = "round"; cx2.beginPath(); cx2.arc(c,c,R*r*pulse,a0,a1); cx2.stroke(); cx2.restore(); };
   // fundo suave atrás dos anéis
   const bgG = cx2.createRadialGradient(c, c, R*0.2, c, c, R*0.98);
   if (dark) { bgG.addColorStop(0, "rgba(34,22,13,.85)"); bgG.addColorStop(0.75, "rgba(58,38,21,.55)"); bgG.addColorStop(1, "rgba(58,38,21,0)"); }
@@ -2557,10 +2559,6 @@ function drawCore(ts){
     for (let q = 0; q < 3; q++){ const ph = ((sp*(coreMode === "think" ? 0.3 : 0.6) + q/3) % 1);
       cx2.strokeStyle = `rgba(${hot},${(1 - ph)*0.5})`; cx2.lineWidth = 1.4; cx2.beginPath(); cx2.arc(c,c,ir + (R*0.99 - ir)*ph,0,Math.PI*2); cx2.stroke(); }
   }
-  // marcador do dia na órbita
-  const hr = new Intl.DateTimeFormat("en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date()).split(":").map(Number);
-  const am = ((hr[0]%24)*60 + hr[1]) / 1440 * Math.PI*2 - Math.PI/2;
-  cx2.fillStyle = `rgb(${gold})`; cx2.beginPath(); cx2.arc(c + Math.cos(am)*R*0.99, c + Math.sin(am)*R*0.99, 3.4, 0, Math.PI*2); cx2.fill();
   drawWaves(sp, e, dark, gold);
 }
 /* fios de onda que atravessam a tela atrás do círculo */
@@ -2656,11 +2654,14 @@ function renderDesk(){
   $("dkFocusN").textContent = foc.length ? `${foc.filter(x => x.done).length} de ${foc.length}` : "";
 
   const ag = $("dkAgenda"); ag.textContent = ""; const t = today();
-  const evs = [ ...calEvents.filter(e => e.day >= t).map(e => ({ day:e.day, time:e.time || "", title:e.title })),
+  const all = [ ...calEvents.filter(e => e.day >= t).map(e => ({ day:e.day, time:e.time || "", title:e.title })),
     ...items.filter(it => !it.done && it.date && it.date >= t && ["compromisso","reuniao","prova","atividade","obra"].includes(it.kind)).map(it => ({ day:it.date, time:"", title:it.title })) ]
-    .sort((a,b) => (a.day + (a.time || "99")) < (b.day + (b.time || "99")) ? -1 : 1).slice(0,5);
-  evs.forEach(e => ag.append(h("li",null, h("time",null, e.time || relDayLabel(e.day)), h("i"), h("span",null, e.title))));
-  if (!evs.length) ag.append(h("li",{class:"dk-empty"}, calState === "error" && calNeedsLink ? h("button",{class:"link",type:"button",onclick:openAgendaLink},"Ligar o Google Agenda") : "Nada marcado por enquanto."));
+    .sort((a,b) => (a.day + (a.time || "00")) < (b.day + (b.time || "00")) ? -1 : 1);
+  const evs = all.filter(e => e.day === t).slice(0,5);   // "Agenda de hoje" mostra só o que é de hoje
+  evs.forEach(e => ag.append(h("li",null, h("time",null, e.time || "Dia todo"), h("i"), h("span",null, e.title))));
+  if (!evs.length) ag.append(h("li",{class:"dk-empty"}, calState === "error" && calNeedsLink ? h("button",{class:"link",type:"button",onclick:openAgendaLink},"Ligar o Google Agenda") : "Nada marcado para hoje."));
+  const nxt = all.find(e => e.day > t);
+  if (nxt) ag.append(h("li",{class:"ag-next"}, h("small",null, "Próximo: " + relDayLabel(nxt.day) + (nxt.time ? " às " + nxt.time : "") + " · " + nxt.title)));
 
   try { $("agDate").textContent = new Intl.DateTimeFormat("pt-BR",{timeZone:TZ,weekday:"short",day:"2-digit",month:"short"}).format(new Date()).replace(".","").replace(/^./, m => m.toUpperCase()); } catch {}
   try { const c = finCalc(curYM()); const f = $("dkFin"); f.textContent = ""; $("finMon").textContent = new Intl.DateTimeFormat("pt-BR",{timeZone:"UTC",month:"short",year:"numeric"}).format(new Date(curYM() + "-15T12:00:00Z")).replace(".","").replace(" de ","/");
