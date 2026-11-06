@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest">
-<script>(function(){try{var m=localStorage.getItem("iris.theme")||"auto";var d=m==="dark"||(m==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",d?"dark":"light");document.documentElement.setAttribute("data-theme-mode",m);var tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=d?"#18120E":"#F4EBDD";}catch(e){document.documentElement.setAttribute("data-theme","light")}})();</script>
+<script>(function(){try{var m=localStorage.getItem("iris.theme")||"auto";var d=m==="dark"||(m==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",d?"dark":"light");document.documentElement.setAttribute("data-theme-mode",m);if(localStorage.getItem("iris.side")==="min")document.documentElement.classList.add("side-min");var tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=d?"#18120E":"#F4EBDD";}catch(e){document.documentElement.setAttribute("data-theme","light")}})();</script>
 <meta name="theme-color" content="#F4EBDD">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -493,7 +493,7 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
 .corewrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0}
 .corebox{position:relative;width:clamp(260px,27vw,420px);aspect-ratio:1/1}
 .corebox .core{position:absolute;inset:0;width:100%;height:100%;border-radius:50%}
-.orbmic{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);width:42px;height:42px;border-radius:50%;border:1px solid var(--glass-b);background:var(--glass);color:var(--gold2);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow)}
+.orbmic{position:absolute;left:50%;bottom:3.5%;transform:translateX(-50%);width:42px;height:42px;border-radius:50%;border:1px solid var(--glass-b);background:var(--glass);color:var(--gold2);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow)}
 .orbmic svg.i{width:20px;height:20px}
 .orbmic.on,.askbar button.on,.tabbar .fab.on{box-shadow:0 0 0 6px rgba(204,150,80,.3),0 0 30px rgba(204,150,80,.6);color:var(--gold2)}
 .hero-copy{position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;max-width:430px}
@@ -506,11 +506,6 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
 .askbar svg.i{width:21px;height:21px}
 .core-cap{font-size:14px;color:var(--taupe);min-height:20px;max-width:430px;text-align:left}
 .corename{display:none}
-.tiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:clamp(10px,1.1vw,18px);margin:6px 0 clamp(16px,1.6vw,26px)}
-.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px 8px 16px;min-height:104px;border-radius:18px;border:1px solid var(--glass-b);background:var(--tile);color:var(--ink);text-decoration:none;font-size:16px;box-shadow:var(--shadow);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative;transition:transform .15s,border-color .2s}
-.tile:hover{border-color:var(--gold);transform:translateY(-2px)}
-.tile svg.i{width:32px;height:32px;stroke-width:1.2;color:var(--gold2)}
-.tile .bdg{position:absolute;top:8px;right:10px;min-width:22px;height:22px;border-radius:11px;padding:0 6px;display:grid;place-items:center;background:var(--gold);color:#fff;font-size:12.5px}
 .cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.4vw,22px);align-items:stretch}
 .cards2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:clamp(14px,1.4vw,22px);margin-top:clamp(14px,1.4vw,22px)}
 .dk{margin:0}
@@ -606,7 +601,6 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
   .hero4{flex-direction:column;gap:10px;min-height:0;text-align:center}
   .hero-copy{align-items:center;text-align:center}
   .core-cap{text-align:center}
-  .tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
   .cards3{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cards3>.dk:last-child{grid-column:1/-1}
   .cards2{grid-template-columns:minmax(0,1fr)}
@@ -639,10 +633,6 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
   .hello-m{display:block;margin:12px 2px 12px}
   .hello-m h1{font-family:var(--f-title);font-weight:600;font-size:28px;margin:0;line-height:1.1}
   .hello-m p{margin:4px 0 0;color:var(--ink-2);font-size:14.5px}
-  .tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  .tile{min-height:88px;font-size:14.5px;padding:14px 4px 12px;gap:8px}
-  .tile svg.i{width:28px;height:28px}
-  .tiles .tile.mo-hide{display:none}
   .cards3,.cards2{grid-template-columns:minmax(0,1fr)}
   .cards3{gap:14px}
   .cards2{gap:14px;margin-top:14px}
@@ -665,6 +655,45 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
 @media (min-width:761px){.tabbar{display:none!important}}
 @media (min-width:1500px){:root{--side-w:280px}}
 
+
+/* ---------- refinos: logo clicável, menu retrátil, rolagem ---------- */
+a.brand{text-decoration:none;color:inherit;border-radius:14px;cursor:pointer}
+a.brand:hover{opacity:.88}
+.nav{margin-top:2px}
+.hero4{min-height:clamp(330px,40vw,520px)}
+.corebox{width:clamp(270px,29vw,460px)}
+.app{transition:grid-template-columns .28s ease}
+.side{box-sizing:border-box;transition:padding .28s ease}
+#sideToggle{margin-top:auto}
+#sideToggle svg{transition:transform .28s ease}
+.side .cfg#prefsSide{margin-top:0}
+@media (max-width:1099px){#sideToggle{display:none}}
+@media (min-width:1100px){
+  html.side-min .app{grid-template-columns:84px minmax(0,1fr)}
+  html.side-min .side{padding:22px 10px 16px;align-items:stretch;gap:12px}
+  html.side-min .nav{gap:2px}
+  html.side-min .brand{justify-content:center;padding:0 0 4px}
+  html.side-min .brand div,html.side-min .side .foot,html.side-min .side .cfg span{display:none}
+  html.side-min .nav a,html.side-min .side .cfg{font-size:0;justify-content:center;padding:11px;gap:0}
+  html.side-min .nav a svg.i,html.side-min .side .cfg svg.i{width:24px;height:24px}
+  html.side-min .nav a[data-r="iris"]{border:none;border-radius:14px;margin-top:0}
+  html.side-min .nav .sep{margin:10px 8px}
+  html.side-min #sideToggle svg{transform:rotate(180deg)}
+}
+@media (max-width:1099px) and (min-width:761px){a.brand{justify-content:center}}
+
+/* rolagem no estilo da ÍRIS */
+:root{--sb-track:rgba(216,199,171,.35);--sb-thumb:#B9A27F;--sb-thumb-h:#9C8460}
+:root[data-theme="dark"]{--sb-track:rgba(255,255,255,.03);--sb-thumb:#6B543C;--sb-thumb-h:#8A6F50}
+*{scrollbar-width:thin;scrollbar-color:var(--sb-thumb) transparent}
+html{scrollbar-color:var(--sb-thumb) var(--sb-track)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--sb-track);border-radius:10px}
+::-webkit-scrollbar-thumb{background:var(--sb-thumb);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--sb-thumb-h);background-clip:padding-box;border:2px solid transparent}
+::-webkit-scrollbar-corner{background:transparent}
+.side{scrollbar-width:none}
+.side::-webkit-scrollbar{display:none}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -695,6 +724,7 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m13 6-6 6 6 6M19 6l-6 6 6 6"/></symbol>
     <symbol id="i-logo" viewBox="-60 -35 120 70"><defs><linearGradient id="lgA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--lg1)"/><stop offset="1" style="stop-color:var(--lg2)"/></linearGradient><linearGradient id="lgB" x1="1" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--lg3)"/><stop offset="1" style="stop-color:var(--lg4)"/></linearGradient></defs><path fill="url(#lgA)" stroke="none" d="M42.7 -14.1L43.1 -13.0L43.3 -12.1L43.5 -11.2L43.7 -10.3L43.7 -9.4L43.7 -8.4L43.6 -7.5L43.5 -6.5L43.2 -5.6L43.0 -4.6L42.6 -3.7L42.2 -2.8L41.7 -1.9L41.2 -1.1L40.6 -0.3L39.9 0.5L39.2 1.2L38.5 1.9L37.7 2.6L36.9 3.2L36.1 3.8L35.2 4.3L34.3 4.8L33.4 5.2L32.4 5.6L31.5 6.0L30.5 6.3L29.5 6.5L28.5 6.8L27.5 7.0L26.5 7.1L25.5 7.3L24.5 7.3L23.5 7.4L22.5 7.4L21.5 7.4L20.4 7.4L19.5 7.1L18.6 6.7L17.7 6.4L16.8 6.0L15.9 5.6L15.0 5.2L14.2 4.7L13.4 4.3L12.5 3.8L11.7 3.3L10.9 2.9L10.1 2.4L9.3 1.9L8.6 1.4L7.8 0.9L7.0 0.4L6.2 -0.1L5.5 -0.6L4.7 -1.2L4.0 -1.7L3.2 -2.2L2.4 -2.7L1.7 -3.3L0.9 -3.8L0.1 -4.3L-0.7 -4.8L-1.5 -5.3L-2.3 -5.9L-3.1 -6.4L-3.9 -6.9L-4.7 -7.4L-5.6 -7.9L-6.5 -8.4L-7.3 -8.9L-8.2 -9.3L-9.1 -9.8L-10.1 -10.2L-11.0 -10.7L-12.0 -11.1L-12.9 -11.5L-13.9 -11.9L-15.0 -12.3L-16.0 -12.6L-17.1 -13.0L-18.2 -13.3L-19.3 -13.6L-20.5 -13.8L-21.6 -14.0L-22.8 -14.2L-24.0 -14.3L-25.3 -14.4L-26.5 -14.5L-27.8 -14.5L-29.1 -14.4L-30.4 -14.3L-31.7 -14.1L-33.1 -13.9L-34.4 -13.6L-35.8 -13.3L-37.1 -12.8L-38.5 -12.3L-39.8 -11.7L-41.1 -11.0L-42.4 -10.3L-43.7 -9.4L-44.9 -8.5L-46.1 -7.5L-47.3 -6.4L-48.3 -5.2L-49.3 -3.9L-50.2 -2.5L-51.1 -1.1L-51.8 0.4L-52.4 2.0L-52.9 3.6L-53.3 5.2L-53.6 6.9L-53.7 8.6L-53.7 10.3L-53.6 12.0L-53.3 13.7L-52.9 15.4L-52.4 17.0L-42.7 13.9L-42.9 13.0L-43.0 12.1L-43.1 11.2L-43.0 10.3L-42.9 9.4L-42.8 8.5L-42.5 7.7L-42.3 6.9L-41.9 6.1L-41.5 5.3L-41.1 4.6L-40.6 3.8L-40.1 3.2L-39.5 2.5L-38.9 1.9L-38.3 1.4L-37.6 0.8L-36.9 0.4L-36.2 -0.1L-35.5 -0.5L-34.7 -0.9L-33.9 -1.2L-33.1 -1.5L-32.3 -1.8L-31.5 -2.0L-30.7 -2.2L-29.9 -2.4L-29.0 -2.5L-28.2 -2.6L-27.3 -2.7L-26.5 -2.7L-25.6 -2.7L-24.8 -2.7L-23.9 -2.7L-23.1 -2.6L-22.2 -2.6L-21.4 -2.5L-20.5 -2.3L-19.6 -2.2L-18.8 -2.1L-17.9 -1.9L-17.1 -1.7L-16.2 -1.5L-15.4 -1.3L-14.5 -1.1L-13.7 -0.8L-12.8 -0.6L-12.0 -0.3L-11.1 -0.1L-10.3 0.2L-9.4 0.5L-8.6 0.8L-7.7 1.1L-6.9 1.4L-6.0 1.7L-5.1 2.0L-4.3 2.3L-3.4 2.6L-2.5 2.9L-1.7 3.3L-0.8 3.6L0.1 3.9L1.0 4.2L1.9 4.5L2.8 4.8L3.7 5.1L4.6 5.4L5.5 5.7L6.5 6.0L7.4 6.3L8.3 6.5L9.3 6.8L10.2 7.0L11.2 7.3L12.2 7.5L13.2 7.7L14.1 7.9L15.1 8.0L16.1 8.2L17.2 8.3L18.2 8.4L19.2 8.5L20.2 8.6L21.2 8.9L22.2 9.2L23.3 9.5L24.3 9.7L25.4 9.9L26.5 10.0L27.6 10.2L28.8 10.2L29.9 10.3L31.1 10.2L32.3 10.2L33.5 10.0L34.7 9.8L36.0 9.6L37.2 9.2L38.5 8.8L39.7 8.4L40.9 7.8L42.1 7.2L43.3 6.4L44.5 5.6L45.6 4.7L46.7 3.7L47.7 2.7L48.7 1.5L49.6 0.3L50.4 -1.1L51.1 -2.5L51.7 -3.9L52.2 -5.5L52.6 -7.0L52.9 -8.7L53.1 -10.3L53.1 -12.0L53.0 -13.7L52.7 -15.4L52.4 -16.8Z"/><path fill="url(#lgB)" stroke="none" fill-opacity=".92" d="M-52.4 17.0L-51.7 18.6L-50.9 20.1L-50.0 21.5L-49.0 22.9L-47.9 24.1L-46.7 25.2L-45.5 26.3L-44.2 27.2L-42.8 28.0L-41.4 28.7L-40.0 29.3L-38.5 29.8L-37.0 30.2L-35.6 30.5L-34.1 30.6L-32.7 30.7L-31.3 30.7L-29.9 30.5L-28.5 30.4L-27.2 30.1L-25.9 29.7L-24.7 29.3L-23.5 28.9L-22.3 28.4L-21.2 27.8L-20.2 27.2L-19.2 26.6L-18.2 25.9L-17.3 25.2L-16.4 24.5L-15.5 23.7L-14.7 22.9L-14.0 22.1L-13.3 21.3L-12.6 20.5L-11.9 19.7L-11.3 18.9L-10.5 18.2L-9.7 17.5L-9.0 16.8L-8.2 16.1L-7.5 15.4L-6.8 14.7L-6.1 14.0L-5.4 13.2L-4.8 12.5L-4.1 11.7L-3.5 10.9L-2.9 10.2L-2.3 9.4L-1.7 8.6L-1.1 7.9L-0.5 7.1L0.0 6.3L0.6 5.5L1.1 4.8L1.7 4.0L2.2 3.2L2.7 2.4L3.3 1.7L3.8 0.9L4.3 0.1L4.8 -0.6L5.3 -1.4L5.8 -2.2L6.4 -2.9L6.9 -3.7L7.4 -4.4L7.9 -5.1L8.4 -5.9L9.0 -6.6L9.5 -7.3L10.0 -8.0L10.6 -8.7L11.1 -9.4L11.7 -10.1L12.2 -10.8L12.8 -11.4L13.4 -12.1L14.0 -12.7L14.6 -13.3L15.2 -14.0L15.8 -14.5L16.5 -15.1L17.1 -15.7L17.8 -16.2L18.4 -16.8L19.1 -17.3L19.8 -17.8L20.6 -18.2L21.3 -18.7L22.0 -19.1L22.8 -19.5L23.5 -19.8L24.3 -20.1L25.1 -20.4L25.9 -20.7L26.7 -20.9L27.6 -21.1L28.4 -21.2L29.2 -21.3L30.1 -21.4L30.9 -21.4L31.8 -21.4L32.6 -21.3L33.5 -21.2L34.3 -21.0L35.1 -20.8L35.9 -20.5L36.7 -20.1L37.5 -19.7L38.2 -19.3L38.9 -18.8L39.6 -18.2L40.3 -17.6L40.9 -17.0L41.4 -16.2L41.9 -15.5L42.4 -14.7L42.8 -13.7L52.3 -17.2L51.8 -18.6L51.2 -20.2L50.4 -21.8L49.5 -23.2L48.5 -24.6L47.4 -25.9L46.2 -27.1L44.9 -28.2L43.6 -29.2L42.1 -30.1L40.7 -30.9L39.2 -31.6L37.6 -32.1L36.1 -32.6L34.5 -32.9L32.9 -33.2L31.4 -33.3L29.8 -33.3L28.3 -33.3L26.8 -33.1L25.3 -32.9L23.9 -32.6L22.5 -32.2L21.1 -31.8L19.8 -31.3L18.6 -30.7L17.4 -30.1L16.2 -29.5L15.1 -28.8L14.0 -28.0L12.9 -27.3L12.0 -26.5L11.0 -25.7L10.1 -24.9L9.3 -24.0L8.4 -23.2L7.7 -22.3L6.9 -21.4L6.2 -20.5L5.5 -19.6L4.9 -18.7L4.3 -17.8L3.7 -16.9L3.1 -16.0L2.6 -15.1L2.1 -14.2L1.6 -13.3L1.2 -12.4L0.7 -11.5L0.3 -10.6L-0.1 -9.7L-0.5 -8.8L-0.9 -7.9L-1.2 -7.0L-1.6 -6.1L-1.9 -5.2L-2.3 -4.3L-2.6 -3.4L-2.9 -2.5L-3.3 -1.7L-3.6 -0.8L-3.9 0.1L-4.2 1.0L-4.5 1.8L-4.8 2.7L-5.1 3.6L-5.4 4.4L-5.8 5.3L-6.1 6.2L-6.4 7.0L-6.8 7.9L-7.1 8.7L-7.5 9.6L-7.9 10.5L-8.3 11.3L-8.7 12.2L-9.1 13.0L-9.6 13.9L-10.1 14.7L-10.5 15.5L-11.1 16.4L-11.6 17.2L-12.2 18.0L-13.0 18.6L-13.8 19.2L-14.6 19.8L-15.5 20.3L-16.4 20.9L-17.2 21.3L-18.2 21.8L-19.1 22.2L-20.0 22.6L-21.0 23.0L-21.9 23.3L-22.9 23.6L-23.9 23.8L-24.9 24.0L-25.9 24.1L-27.0 24.2L-28.0 24.3L-29.0 24.3L-30.0 24.2L-31.0 24.0L-32.0 23.9L-33.0 23.6L-33.9 23.3L-34.9 22.9L-35.8 22.5L-36.6 22.0L-37.5 21.5L-38.2 20.9L-39.0 20.3L-39.7 19.6L-40.3 18.9L-40.9 18.1L-41.4 17.3L-41.8 16.5L-42.2 15.6L-42.5 14.8L-42.7 13.9Z"/></symbol>
     <symbol id="i-grad" viewBox="0 0 24 24"><path d="M2.5 9.5 12 5l9.5 4.5L12 14z"/><path d="M6.5 11.8V16c0 1.4 2.5 2.7 5.5 2.7s5.5-1.3 5.5-2.7v-4.2M21.5 9.5V15"/></symbol>
     <symbol id="i-bars" viewBox="0 0 24 24"><rect x="4" y="12" width="3.5" height="7.5" rx=".6"/><rect x="10.2" y="7.5" width="3.5" height="12" rx=".6"/><rect x="16.5" y="4" width="3.5" height="15.5" rx=".6"/></symbol>
@@ -710,9 +740,8 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
 <div class="app">
   <div class="scrim" id="scrim"></div>
   <aside class="side" aria-label="Navegação">
-    <div class="brand"><svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg><div><b id="brandName">ÍRIS</b><span>Assistente Pessoal Inteligente</span></div></div>
+    <a class="brand" href="#inicio" data-r="inicio" title="ÍRIS — início" aria-label="ÍRIS, ir para o início"><svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg><div><b id="brandName">ÍRIS</b><span>Assistente Pessoal Inteligente</span></div></a>
     <nav class="nav" id="nav">
-      <a href="#inicio" data-r="inicio" title="Início"><svg class="i"><use href="#i-home"/></svg>Início</a>
       <a href="#pessoal" data-r="pessoal" title="Pessoal"><svg class="i"><use href="#i-leaf"/></svg>Pessoal</a>
       <a href="#trabalho" data-r="trabalho" title="Trabalho"><svg class="i"><use href="#i-work"/></svg>Trabalho</a>
       <a href="#faculdade" data-r="faculdade" title="Faculdade"><svg class="i"><use href="#i-grad"/></svg>Faculdade</a>
@@ -725,8 +754,9 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
       <a href="#iris" data-r="iris" title="Conversar com a ÍRIS"><svg class="i"><use href="#i-chat"/></svg>Conversar com a ÍRIS</a>
     </nav>
     <button class="cfg" id="notifBtn" type="button" title="Avisos"><svg class="i"><use href="#i-bell"/></svg><span>Avisos no celular</span></button>
-    <button class="cfg" id="installBtn" type="button" hidden><svg class="i"><use href="#i-plus"/></svg><span>Instalar o app</span></button>
+    <button class="cfg" id="installBtn" type="button" title="Instalar o app" hidden><svg class="i"><use href="#i-plus"/></svg><span>Instalar o app</span></button>
     <button class="cfg" id="prefsSide" type="button" title="Configurações"><svg class="i"><use href="#i-cog"/></svg><span>Configurações</span></button>
+    <button class="cfg" id="sideToggle" type="button" title="Recolher menu" aria-label="Recolher menu" aria-expanded="true"><svg class="i"><use href="#i-chev"/></svg><span>Recolher menu</span></button>
     <div class="foot" id="sideFoot"><em>Lembrete da casa:</em> nem tudo precisa ser perfeito para ser bom.</div>
   </aside>
 
@@ -768,15 +798,6 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
           <div class="core-cap" id="coreCap" aria-live="polite">Toque no círculo para ouvir a ÍRIS</div>
         </div>
       </section>
-      <nav class="tiles" aria-label="Áreas">
-        <a class="tile" href="#pessoal"><svg class="i"><use href="#i-leaf"/></svg>Pessoal</a>
-        <a class="tile" href="#trabalho"><svg class="i"><use href="#i-work"/></svg>Trabalho</a>
-        <a class="tile" href="#faculdade"><svg class="i"><use href="#i-grad"/></svg>Faculdade</a>
-        <a class="tile" href="#casa"><svg class="i"><use href="#i-home"/></svg>Casa &amp; Obra</a>
-        <a class="tile" href="#financeiro"><svg class="i"><use href="#i-bars"/></svg>Finanças</a>
-        <a class="tile" href="#metas"><svg class="i"><use href="#i-target"/></svg>Metas</a>
-        <a class="tile mo-hide" href="#projetos"><svg class="i"><use href="#i-layers"/></svg>Projetos</a>
-      </nav>
       <div class="cards3">
         <div class="glass dk" id="dkComp"><div class="dk-h"><svg class="i"><use href="#i-cal"/></svg><h2>Agenda de hoje<small id="agDate"></small></h2><button class="plus" id="dkNewEv" type="button" aria-label="Novo evento">+</button></div><ul class="dk-agenda" id="dkAgenda"></ul></div>
         <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-target"/></svg><h2>Minhas metas</h2><a class="link" href="#metas">Ver todas →</a></div><ul class="dk-goals" id="dkGoals"></ul></div>
@@ -923,8 +944,8 @@ body:not([data-route="inicio"]) .topbar .hello{visibility:hidden}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=22"></script>
-<script src="adapter.js?v=22"></script>
+<script src="config.js?v=23"></script>
+<script src="adapter.js?v=23"></script>
 <script>
 (() => {
 "use strict";
@@ -2484,21 +2505,6 @@ function sizeCore(){ const r = cv.getBoundingClientRect(); const dpr = Math.min(
 function sizeWaves(){ if (!wv) return; const r = wv.getBoundingClientRect(); const dpr = Math.min(2, devicePixelRatio || 1); wvW = r.width; wvH = r.height; wv.width = Math.max(1, r.width*dpr); wv.height = Math.max(1, r.height*dpr); wx2.setTransform(dpr,0,0,dpr,0,0); }
 addEventListener("resize", () => { sizeCore(); sizeWaves(); });
 function setCore(m){ coreMode = m; target = m === "think" ? 0.6 : m === "speak" ? 1 : m === "listen" ? 0.8 : 0.18; $("core").classList.toggle("live", m !== "idle"); }
-/* fita de infinito (o símbolo da ÍRIS), desenhada em duas metades com largura variável */
-function ribbonPath(cx, cy, a, w0, rot, phase, half){
-  const n = 90, i0 = half ? n/2 : 0, i1 = half ? n : n/2, L = [], Rr = [];
-  const cr = Math.cos(rot), sr = Math.sin(rot);
-  const P = i => { const t = 2*Math.PI*i/n, s = Math.sin(t), c = Math.cos(t), d = 1 + s*s; return [a*c/d, a*s*c/d]; };
-  for (let i = i0; i <= i1; i++){
-    const p0 = P(Math.max(i-1,0)), p1 = P(Math.min(i+1,n)), p = P(i);
-    let dx = p1[0]-p0[0], dy = p1[1]-p0[1]; const l = Math.hypot(dx,dy) || 1; const nx = -dy/l, ny = dx/l;
-    const t = 2*Math.PI*i/n, w = w0*(0.10 + 0.90*Math.abs(Math.cos(t + 0.6 + phase)));
-    const f = (x,y) => [cx + x*cr - y*sr, cy + x*sr + y*cr];
-    L.push(f(p[0]+nx*w/2, p[1]+ny*w/2)); Rr.push(f(p[0]-nx*w/2, p[1]-ny*w/2));
-  }
-  const q = L.concat(Rr.reverse()); const path = new Path2D();
-  q.forEach((pt,k) => k ? path.lineTo(pt[0],pt[1]) : path.moveTo(pt[0],pt[1])); path.closePath(); return path;
-}
 function drawCore(ts){
   requestAnimationFrame(drawCore);
   if ($("v-inicio").hidden) return;
@@ -2511,49 +2517,50 @@ function drawCore(ts){
   if (coreMode === "listen" && Math.random() < 0.12) spike = Math.max(spike, 0.4 + Math.random()*0.5);
   const sp = reduceM ? 0 : ts/1000, e = Math.min(1.4, energy + spike*0.45);
   const pulse = 1 + Math.sin(sp*(1.4 + e*4)) * 0.025 * (0.4 + e);
-  const gold = dark ? "232,188,128" : "176,128,76";
-  // esfera de vidro
-  const g = cx2.createRadialGradient(c - R*0.25, c - R*0.3, R*0.05, c, c, R*0.8*pulse);
-  if (dark) { g.addColorStop(0, "rgba(96,72,48,.95)"); g.addColorStop(0.7, "rgba(40,29,20,.92)"); g.addColorStop(1, "rgba(24,17,12,.9)"); }
-  else { g.addColorStop(0, "rgba(255,253,248,.98)"); g.addColorStop(0.65, "rgba(243,230,210,.9)"); g.addColorStop(1, "rgba(226,206,176,.85)"); }
-  cx2.save(); if (dark) { cx2.shadowColor = `rgba(${gold},${0.35 + e*0.3})`; cx2.shadowBlur = W*0.06; } else { cx2.shadowColor = "rgba(150,110,60,.22)"; cx2.shadowBlur = W*0.05; cx2.shadowOffsetY = W*0.015; }
-  cx2.fillStyle = g; cx2.beginPath(); cx2.arc(c,c,R*0.74*pulse,0,Math.PI*2); cx2.fill(); cx2.restore();
-  cx2.strokeStyle = `rgba(${gold},${dark ? 0.8 : 0.5})`; cx2.lineWidth = dark ? 2 : 1.2; cx2.beginPath(); cx2.arc(c,c,R*0.74*pulse,0,Math.PI*2); cx2.stroke();
-  // brilho
-  const hl = cx2.createRadialGradient(c - R*0.28, c - R*0.34, 0, c - R*0.28, c - R*0.34, R*0.42);
-  hl.addColorStop(0, dark ? "rgba(255,230,190,.18)" : "rgba(255,255,255,.75)"); hl.addColorStop(1, "rgba(255,255,255,0)");
-  cx2.fillStyle = hl; cx2.beginPath(); cx2.arc(c,c,R*0.72*pulse,0,Math.PI*2); cx2.fill();
-  // anéis sutis
+  const gold = dark ? "238,178,100" : "166,112,58", hot = dark ? "255,218,160" : "196,132,66";
+  const L = a => Math.min(1, a);
+  const ring = (r, al, lw, dx, dy) => { cx2.strokeStyle = `rgba(${gold},${L(al)})`; cx2.lineWidth = lw; cx2.beginPath(); cx2.arc(c + (dx||0)*R, c + (dy||0)*R, R*r*pulse, 0, Math.PI*2); cx2.stroke(); };
+  const glowArc = (r, a0, a1, lw, al, blur) => { cx2.save(); cx2.shadowColor = `rgba(${hot},${L(al)})`; cx2.shadowBlur = blur; cx2.strokeStyle = `rgba(${hot},${L(al)})`; cx2.lineWidth = lw; cx2.lineCap = "round"; cx2.beginPath(); cx2.arc(c,c,R*r*pulse,a0,a1); cx2.stroke(); cx2.restore(); };
+  // fundo suave atrás dos anéis
+  const bgG = cx2.createRadialGradient(c, c, R*0.2, c, c, R*0.98);
+  if (dark) { bgG.addColorStop(0, "rgba(34,22,13,.85)"); bgG.addColorStop(0.75, "rgba(58,38,21,.55)"); bgG.addColorStop(1, "rgba(58,38,21,0)"); }
+  else { bgG.addColorStop(0, "rgba(255,250,240,.9)"); bgG.addColorStop(0.75, "rgba(240,226,203,.55)"); bgG.addColorStop(1, "rgba(240,226,203,0)"); }
+  cx2.fillStyle = bgG; cx2.beginPath(); cx2.arc(c,c,R*0.98,0,Math.PI*2); cx2.fill();
+  // anéis finos, levemente deslocados
   cx2.lineCap = "round";
-  cx2.strokeStyle = `rgba(${gold},${dark ? 0.35 : 0.3})`; cx2.lineWidth = 1; cx2.beginPath(); cx2.arc(c,c,R*0.86,0,Math.PI*2); cx2.stroke();
-  cx2.strokeStyle = `rgba(${gold},${dark ? 0.5 : 0.4})`; cx2.lineWidth = 1.2; cx2.beginPath(); cx2.arc(c,c,R*0.97,sp*0.08,sp*0.08 + Math.PI*1.35); cx2.stroke();
-  cx2.strokeStyle = `rgba(${gold},${dark ? 0.2 : 0.18})`; cx2.beginPath(); cx2.arc(c,c,R*0.97,sp*0.08 + Math.PI*1.45,sp*0.08 + Math.PI*2); cx2.stroke();
-  // ondas fluidas dentro da esfera
-  const rings = coreMode === "speak" || coreMode === "listen" ? 3 : 2;
-  for (let k = 0; k < rings; k++){
-    cx2.strokeStyle = `rgba(${gold},${(0.16 + e*0.4) * (1 - k*0.25)})`; cx2.lineWidth = k ? 0.8 : 1.2; cx2.beginPath();
-    for (let i = 0; i <= 160; i++){ const a = i/160*Math.PI*2;
-      const amp = (0.3 + e)*R*0.022*(Math.sin(a*5 + sp*(1.2+e*3) + k*1.7) + Math.sin(a*9 - sp*(1.8+e*4) + k)*0.6 + (coreMode === "speak" || coreMode === "listen" ? Math.sin(a*21 + sp*12 - k)*0.7*(0.4 + spike) : 0));
-      const rr = R*(0.64 + k*0.035) + amp; const x = c + Math.cos(a)*rr, y = c + Math.sin(a)*rr; i ? cx2.lineTo(x,y) : cx2.moveTo(x,y); }
-    cx2.closePath(); cx2.stroke();
+  ring(0.99, dark ? 0.30 : 0.32, 1);
+  ring(0.935, dark ? 0.40 : 0.38, 1, -0.008, 0.01);
+  ring(0.88, dark ? 0.34 : 0.34, 1, 0.012, 0);
+  ring(0.80, dark ? 0.55 : 0.5, 1.4);
+  ring(0.745, dark ? 0.30 : 0.3, 1, -0.01, -0.006);
+  // pontilhado em rotação lenta
+  cx2.save(); cx2.setLineDash([1.1, 5.2]); cx2.lineDashOffset = -sp*3; ring(0.67, dark ? 0.7 : 0.6, 1.5); cx2.restore();
+  ring(0.60, dark ? 0.55 : 0.5, 1.3, 0.006, 0.004);
+  ring(0.52, dark ? 0.42 : 0.4, 1.1, -0.01, 0.008);
+  // arcos luminosos (crescem quando a ÍRIS ouve ou fala)
+  const dr = Math.sin(sp*0.22)*0.18 + sp*0.015, k = 0.85 + e*0.4;
+  glowArc(0.80, -1.45 + dr, -0.2 + dr + 0.3*e, 3, 0.95*k, 30);
+  glowArc(0.80, 2.15 + dr, 3.1 + dr + 0.4*e, 3.2, 0.9*k, 30);
+  glowArc(0.935, 3.45 + dr*0.6, 3.95 + dr*0.6 + 0.25*e, 2.4, 0.9*k, 20);
+  glowArc(0.745, 0.15 - dr, 0.95 - dr + 0.3*e, 2.2, 0.7*k, 18);
+  glowArc(0.60, -1.3 - dr, -0.55 - dr, 1.6, 0.6*k, 10);
+  // disco interno com brilho quente embaixo
+  const ir = R*0.395*(1 + Math.sin(sp*(1.2 + e*4))*0.012*(0.5 + e) + spike*0.03);
+  cx2.save(); cx2.beginPath(); cx2.arc(c,c,ir,0,Math.PI*2); cx2.clip();
+  const inG = cx2.createRadialGradient(c, c + ir*0.75, 0, c, c + ir*0.75, ir*1.25);
+  if (dark) { inG.addColorStop(0, `rgba(210,130,50,${0.55 + e*0.3})`); inG.addColorStop(0.55, "rgba(90,52,24,.45)"); inG.addColorStop(1, "rgba(26,17,10,.95)"); }
+  else { inG.addColorStop(0, `rgba(222,160,90,${0.55 + e*0.3})`); inG.addColorStop(0.55, "rgba(246,230,205,.7)"); inG.addColorStop(1, "rgba(255,251,244,.96)"); }
+  cx2.fillStyle = inG; cx2.fillRect(c-ir, c-ir, ir*2, ir*2); cx2.restore();
+  cx2.save(); cx2.shadowColor = `rgba(${hot},${0.5 + e*0.4})`; cx2.shadowBlur = W*0.02; cx2.strokeStyle = `rgba(${hot},${dark ? 0.85 : 0.75})`; cx2.lineWidth = 1.6; cx2.beginPath(); cx2.arc(c,c,ir,0,Math.PI*2); cx2.stroke(); cx2.restore();
+  // ondas que se expandem ao ouvir / pensar / falar
+  if (coreMode !== "idle"){
+    for (let q = 0; q < 3; q++){ const ph = ((sp*(coreMode === "think" ? 0.3 : 0.6) + q/3) % 1);
+      cx2.strokeStyle = `rgba(${hot},${(1 - ph)*0.5})`; cx2.lineWidth = 1.4; cx2.beginPath(); cx2.arc(c,c,ir + (R*0.99 - ir)*ph,0,Math.PI*2); cx2.stroke(); }
   }
-  // ondas que se expandem ao ouvir/pensar
-  if (coreMode === "listen" || coreMode === "think"){
-    for (let k = 0; k < 3; k++){ const ph = ((sp*(coreMode === "listen" ? 0.55 : 0.3) + k/3) % 1);
-      cx2.strokeStyle = `rgba(${gold},${(1 - ph)*0.45})`; cx2.lineWidth = 1.4; cx2.beginPath(); cx2.arc(c,c,R*(0.74 + ph*0.26),0,Math.PI*2); cx2.stroke(); }
-  }
-  // símbolo autoral (fita de infinito) — leve flutuação
-  const fl = Math.sin(sp*0.8)*0.035, sz = R*0.62*(1 + Math.sin(sp*1.1)*0.012 + e*0.03);
-  const cols = dark ? ["#F6E4C2","#D8A864","#A97A40","#F0D3A0"] : ["#EBD8B8","#BC915B","#8C6439","#D4B78C"];
-  cx2.save(); if (dark) { cx2.shadowColor = "rgba(240,190,110,.55)"; cx2.shadowBlur = W*0.04; }
-  const gA = cx2.createLinearGradient(c - sz, c - sz*0.5, c + sz, c + sz*0.5); gA.addColorStop(0, cols[0]); gA.addColorStop(1, cols[1]);
-  const gB = cx2.createLinearGradient(c + sz, c - sz*0.5, c - sz, c + sz*0.5); gB.addColorStop(0, cols[2]); gB.addColorStop(1, cols[3]);
-  cx2.fillStyle = gA; cx2.fill(ribbonPath(c, c + R*0.01, sz, sz*0.24, -0.31 + fl, 0, 0));
-  cx2.globalAlpha = 0.93; cx2.fillStyle = gB; cx2.fill(ribbonPath(c, c + R*0.01, sz, sz*0.24, -0.31 + fl, 0, 1)); cx2.restore();
   // marcador do dia na órbita
   const hr = new Intl.DateTimeFormat("en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date()).split(":").map(Number);
   const am = ((hr[0]%24)*60 + hr[1]) / 1440 * Math.PI*2 - Math.PI/2;
-  cx2.fillStyle = `rgb(${gold})`; cx2.beginPath(); cx2.arc(c + Math.cos(am)*R*0.97, c + Math.sin(am)*R*0.97, 3.4, 0, Math.PI*2); cx2.fill();
+  cx2.fillStyle = `rgb(${gold})`; cx2.beginPath(); cx2.arc(c + Math.cos(am)*R*0.99, c + Math.sin(am)*R*0.99, 3.4, 0, Math.PI*2); cx2.fill();
   drawWaves(sp, e, dark, gold);
 }
 /* fios de onda que atravessam a tela atrás do círculo */
@@ -2563,13 +2570,13 @@ function drawWaves(sp, e, dark, gold){
   const cxp = box.left - hb.left + box.width/2, cyp = box.top - hb.top + box.height/2, rr = box.width*0.47*0.74;
   const lines = 5;
   for (let k = 0; k < lines; k++){
-    wx2.beginPath();
+    wx2.beginPath(); let first = true;
     wx2.strokeStyle = `rgba(${gold},${(dark ? 0.34 : 0.3) * (1 - k*0.14)})`; wx2.lineWidth = k === 0 ? 1.3 : 0.8;
-    for (let x = 0; x <= wW; x += 6){
+    for (let x = Math.max(0, cxp - wW*0.62); x <= Math.min(wW, cxp + rr*1.7); x += 6){
       const d = Math.abs(x - cxp);
       const fade = Math.min(1, d/(rr*0.9)) * (x < cxp ? Math.max(0, 1 - d/(wW*0.62)) : Math.max(0, 1 - d/(rr*1.7)));
       const y = cyp + fade*(wH*0.16)*(0.5 + e*0.8)*(Math.sin(x*0.011 + sp*(0.7 + k*0.15) + k*0.9) + 0.5*Math.sin(x*0.027 - sp*(1.1 + k*0.1) + k*1.3)) + (k-2)*fade*7;
-      x ? wx2.lineTo(x,y) : wx2.moveTo(x,y);
+      first ? (wx2.moveTo(x,y), first = false) : wx2.lineTo(x,y);
     }
     wx2.stroke();
   }
@@ -2693,6 +2700,9 @@ function themeApply(){
 }
 function themeSet(m){ try { localStorage.setItem(THEME_KEY, m); } catch {} themeApply(); }
 try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (themeMode() === "auto") themeApply(); }); } catch {}
+function sideApply(min){ document.documentElement.classList.toggle("side-min", min); const b = $("sideToggle"); if (b) { b.setAttribute("aria-expanded", String(!min)); const t = min ? "Expandir menu" : "Recolher menu"; b.title = t; b.setAttribute("aria-label", t); b.querySelector("span").textContent = t; } }
+sideApply(document.documentElement.classList.contains("side-min"));
+$("sideToggle").onclick = () => { const min = !document.documentElement.classList.contains("side-min"); try { localStorage.setItem("iris.side", min ? "min" : "open"); } catch {} sideApply(min); setTimeout(() => { try { dispatchEvent(new Event("resize")); } catch {} }, 300); };
 $("themeBtn").onclick = () => themeSet(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 themeApply();
 /* ---------- ouvir a Natália (microfone com estado claro) ---------- */
