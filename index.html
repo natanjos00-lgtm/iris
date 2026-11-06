@@ -405,11 +405,6 @@ body{background:
 .card,.acard,.dlg{background:rgba(35,25,19,.78)}
 .glass{background:rgba(38,27,19,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(224,164,88,.22);border-radius:20px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
 
-#v-inicio{max-width:1360px}
-.desk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start}
-.desk-c{align-self:center;display:flex;justify-content:center;width:100%}
-.desk-c .corewrap{width:100%}
-.clockrow{display:flex;align-items:center;flex-wrap:wrap;gap:14px 20px;margin-bottom:18px}
 .clock{font-family:var(--f-title);font-size:58px;line-height:1;font-weight:500;color:var(--ink)}
 .cdate{font-size:13.5px;color:var(--ink-2);margin-top:2px}
 .cdate::first-letter{text-transform:uppercase}
@@ -418,16 +413,12 @@ body{background:
 .wx svg.i{width:30px;height:30px;color:var(--brown);stroke-width:1.2}
 .wx b{display:block;font-size:24px;font-weight:500;font-family:var(--f-title);line-height:1.1}
 .wx span{font-size:12.5px;color:var(--ink-2)}
-.greet h1.t{font-size:38px;margin-top:0}
-.arealist{display:flex;flex-direction:column;gap:8px;margin:16px 0 6px}
 .arow{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(224,164,88,.14);text-decoration:none;color:var(--ink);transition:border-color .2s,background .2s}
 .arow:hover{border-color:rgba(224,164,88,.55);background:rgba(224,164,88,.09)}
 .arow svg.i{width:24px;height:24px;color:var(--brown);stroke-width:1.2}
 .arow b{display:block;font-weight:500;font-size:16px;font-family:var(--f-title);font-size:19px}
 .arow small{color:var(--ink-2);font-size:12.5px}
-.corebox{position:relative;width:min(470px,100%);aspect-ratio:1/1}
 .corebox .core{width:100%;height:100%}
-.corename{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;gap:8px;padding:0 24%}
 .corename b{font-family:var(--f-title);font-weight:500;font-size:clamp(34px,4.4vw,58px);line-height:1;text-shadow:0 0 30px rgba(255,170,80,.45)}
 .corename span{font-size:14.5px;color:var(--ink-2)}
 .dk{margin-bottom:16px}
@@ -453,50 +444,179 @@ body{background:
 .askbar button{background:none;border:none;color:var(--brown);cursor:pointer;display:grid;place-items:center;padding:7px;border-radius:50%}
 .askbar svg.i{width:16px;height:16px}
 .askbar button:hover{background:rgba(224,164,88,.12)}
-.more-h{margin:38px 0 14px}
+/* ============ PAINEL V2 (referência: marrom profundo + dourado) ============ */
+:root{--gold:#e6b57c;--gold-2:#f4cf9c;--gl:rgba(232,176,104,.26);--gl2:rgba(232,176,104,.14);--gp:rgba(44,30,20,.58);--side-w:236px}
+body{background:
+  radial-gradient(60% 50% at 50% 46%,rgba(255,150,60,.17),transparent 70%),
+  radial-gradient(35% 30% at 0% 0%,rgba(255,190,110,.10),transparent 70%),
+  radial-gradient(35% 30% at 100% 100%,rgba(255,150,60,.10),transparent 70%),
+  linear-gradient(180deg,#120d09,#1d140d 55%,#130d09);background-attachment:fixed;background-color:#130d09}
+.glass{background:var(--gp);border:1px solid var(--gl);border-radius:22px;padding:18px 20px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 12px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,220,170,.07)}
+.app{grid-template-columns:var(--side-w) minmax(0,1fr)}
+.side{gap:20px;padding:24px 14px 18px;background:rgba(20,14,9,.74);border-right:1px solid var(--gl2)}
+.brand{flex-direction:row;align-items:center;gap:10px;padding:0 8px}
+.brand svg.i{width:34px;height:34px;color:var(--gold);stroke-width:1.5}
+.brand b{font-family:var(--f-title);font-weight:500;font-size:26px;letter-spacing:.01em;line-height:1.05;display:block;color:var(--ink)}
+.brand span{font-size:10.5px;color:var(--taupe);letter-spacing:.02em;line-height:1.25;display:block}
+.nav a{padding:11px 14px;border-radius:14px;font-size:14.5px}
+.nav a:hover{background:rgba(232,176,104,.08);color:var(--ink)}
+.nav a[aria-current="page"]{background:linear-gradient(180deg,rgba(232,176,104,.22),rgba(232,176,104,.10));box-shadow:0 0 0 1px rgba(232,176,104,.5),0 0 22px rgba(232,150,70,.18);color:var(--gold-2)}
+.nav a[aria-current="page"] svg{color:var(--gold-2)}
+.side .cfg{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;color:var(--ink-2);font-size:14px;background:none;border:none;cursor:pointer;text-align:left;margin-top:auto}
+.side .cfg:hover{background:rgba(232,176,104,.08);color:var(--ink)}
+.side .foot{margin-top:0;padding:0 12px;font-size:11.5px}
 
-@media (max-width:1150px){
-  .desk{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .desk-c{grid-column:1/-1;order:-2}
-  .askbar{order:-1}
-  .corebox{width:min(400px,80vw)}
-}
-@media (max-width:700px){
-  .desk{grid-template-columns:minmax(0,1fr);gap:18px}
-  .corebox{width:min(310px,82vw)}
-  .clock{font-size:46px}
-  .clockrow{gap:14px}
-  .greet h1.t{font-size:32px}
-  .dk-goals li{grid-template-columns:20px minmax(0,1fr) 64px 36px}
-}
+main{padding:0 0 46px}
+.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;padding:16px 28px 10px}
+.topbar .mbar{display:none}
+.topbar .clockrow{margin:0;display:flex;align-items:center;gap:18px;flex-wrap:nowrap}
+.clock{font-size:46px}
+.tools{display:flex;gap:6px;align-items:center}
+.tools button{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid transparent;background:none;color:var(--gold);display:grid;place-items:center;cursor:pointer}
+.tools button:hover{background:rgba(232,176,104,.1);border-color:var(--gl2)}
+.tools svg.i{width:22px;height:22px}
+.dot-n{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:#ef6a3b;box-shadow:0 0 8px #ef6a3b}
+.dot-n[hidden]{display:none}
+.view{max-width:1080px}
+.view:not(#v-inicio){padding-top:18px}
+#v-inicio{max-width:none;padding:0}
+.eyebrow.more-h{margin:34px 28px 14px}
+#v-inicio .home{padding:0 28px;gap:22px}
 
-@media (max-width:1150px){
-  .desk-l{display:contents}
-  .clockrow{grid-column:1/-1;order:-3;margin:0;flex-wrap:nowrap;justify-content:space-between}
-  .desk-c{order:-2}
-  .askbar{order:-1}
-  .greet{grid-column:1}
-  .desk-r{grid-column:2}
-  .corename{display:none}
-  .corebox{width:min(300px,56vw)}
+/* grade do Início — desktop */
+.desk{display:grid;grid-template-columns:minmax(250px,.95fr) minmax(0,1.5fr) minmax(300px,1fr);grid-template-rows:minmax(0,1fr) auto;gap:18px 24px;height:calc(100dvh - 112px);min-height:620px;padding:0 28px 6px;align-items:stretch}
+.desk-l{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:auto;scrollbar-width:none;padding:2px}
+.desk-l::-webkit-scrollbar,.desk-r::-webkit-scrollbar{display:none}
+.desk-c{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:0;min-width:0}
+.desk-r{grid-column:3;grid-row:1;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:auto;scrollbar-width:none;padding:2px}
+.desk-b{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:24px}
+.desk .dk{margin:0}
+.greet2 h1.t{font-size:40px;margin:0 0 6px;line-height:1.05}
+.greet2 .lede{font-size:14.5px;max-width:34ch}
+.arealist{display:flex;flex-direction:column;gap:9px;margin:0}
+.arow{padding:8px 14px;border-radius:16px;background:rgba(44,30,20,.55);border:1px solid var(--gl2);gap:14px}
+.arow:hover{border-color:rgba(232,176,104,.6);background:rgba(232,176,104,.1)}
+.arow svg.i{width:26px;height:26px;color:var(--gold)}
+.arow b{font-size:19px;line-height:1.1}
+.iris-line{margin:0;max-width:none;font-size:13.5px;background:rgba(232,176,104,.08);border-left-color:var(--gold)}
+.iris-line b{color:var(--gold)}
+.mindbtn{align-self:flex-start}
+.corewrap{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding-bottom:26px}
+.corebox{position:relative;aspect-ratio:1/1;width:min(100%,calc(100dvh - 350px),580px);min-width:250px}
+.corebox .core{width:100%;height:100%}
+.corebox .core{filter:drop-shadow(0 0 28px rgba(255,150,60,.45))}
+.corename{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:0 22%;gap:8px}
+.corename b{font-family:var(--f-title);font-weight:500;line-height:1;text-shadow:0 0 30px rgba(255,170,80,.45)}
+.corename .wv{width:46px;height:34px;color:var(--gold);stroke-width:1.6}
+.corename b{font-size:clamp(34px,4.2vw,62px)}
+.corename span{font-size:clamp(13px,1.2vw,16px)}
+.corewrap::after{content:"";position:absolute;left:50%;bottom:2px;width:46%;height:26px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,190,110,.55),rgba(255,140,50,.18) 60%,transparent 72%);box-shadow:0 0 0 2px rgba(255,200,130,.35) inset;pointer-events:none}
+.core-cap{max-width:420px}
+.askbar{width:min(580px,100%);justify-self:auto;padding:4px 8px;background:rgba(30,21,14,.72);border-color:rgba(232,176,104,.55)}
+.askbar input{font-size:15px;padding:11px 6px}
+.askbar button svg.i{width:20px;height:20px}
+.dk-h h2{font-size:22px}
+.dk-list li{font-size:14px;padding:6px 0}
+.dk-agenda li{font-size:14px}
+.shortcuts h2,.weekfocus h2{font-family:var(--f-title);font-weight:500;font-size:22px;margin:0 0 10px}
+.sc-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.sc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 6px;border-radius:16px;border:1px solid var(--gl2);background:rgba(255,255,255,.035);color:var(--ink);font-size:13px;cursor:pointer;text-align:center;line-height:1.2}
+.sc svg.i{width:26px;height:26px;color:var(--gold)}
+.sc:hover{border-color:rgba(232,176,104,.6);background:rgba(232,176,104,.1)}
+.weekfocus{display:flex;gap:14px;align-items:center}
+.weekfocus>svg.i{width:34px;height:34px;color:var(--gold);stroke-width:1.2}
+.weekfocus p{margin:0;font-family:var(--f-title);font-size:21px;line-height:1.25;color:var(--ink-2)}
+.tabbar{display:none!important}
+.scrim{display:none}
+.menu-btn{display:none}
+
+/* tablet: menu em ícones */
+@media (max-width:1099px) and (min-width:761px){
+  :root{--side-w:76px}
+  .side{padding:20px 10px;align-items:center}
+  .brand div,.side .foot,.side .cfg span{display:none}
+  .brand{padding:0}
+  .nav a{font-size:0;justify-content:center;padding:12px}
+  .nav a svg{width:24px;height:24px}
+  .nav .sep{margin:8px 6px}
+  .side .cfg{justify-content:center;padding:12px}
+  .desk{height:auto;min-height:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:none;gap:16px 18px;padding:0 20px 6px}
+  .desk-l,.desk-r,.desk-b{display:contents}
+  .greet2{grid-column:1/-1;order:1}
+  .desk-c{grid-column:1/-1;grid-row:auto;order:2}
+  .desk-b{grid-row:auto}
+  .arealist{grid-column:1/-1;order:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .desk-r>.dk:nth-child(1){order:4}.desk-r>.dk:nth-child(2){order:5}.desk-r>.dk:nth-child(3){order:6}
+  .shortcuts{grid-column:1/-1;order:7}
+  .weekfocus{grid-column:1/-1;order:8}
+  .iris-line{grid-column:1/-1;order:9}.mindbtn{order:10;justify-self:start}
+  .corebox{width:min(60vw,440px)}
+  .topbar{padding:14px 20px 8px}
+  #v-inicio .home{padding:0 20px;grid-template-columns:minmax(0,1fr)}
+  .eyebrow.more-h{margin:28px 20px 12px}
 }
-@media (max-width:700px){
-  .greet,.desk-r{grid-column:1}
-  main{padding-top:14px}
-  .desk{gap:12px}
-  .clockrow{gap:10px}
-  .clock{font-size:38px}
-  .cdate{font-size:12.5px}
-  .wx svg.i{width:24px;height:24px}
-  .wx b{font-size:20px}
-  .wx span{font-size:11.5px}
+/* celular */
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{display:flex;position:fixed;left:0;top:0;bottom:0;width:min(300px,84vw);z-index:60;transform:translateX(-104%);transition:transform .25s ease;background:rgba(20,14,9,.97);padding-top:calc(24px + env(safe-area-inset-top,0px))}
+  body.menu .side{transform:none;box-shadow:0 0 60px rgba(0,0,0,.7)}
+  .scrim{display:block;position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .2s}
+  body.menu .scrim{opacity:1;pointer-events:auto}
+  main{padding:0 0 calc(96px + env(safe-area-inset-bottom,0px))}
+  .topbar{grid-template-columns:minmax(0,1fr);gap:6px;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 4px}
+  .topbar .mbar{display:flex;align-items:center;gap:10px}
+  .topbar .mbar .mb-brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0;font-family:var(--f-title);font-size:25px;color:var(--ink)}
+  .topbar .mbar .mb-brand svg.i{width:26px;height:26px;color:var(--gold)}
+  .menu-btn,.topbar .mbar button{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:none;border:none;color:var(--gold);cursor:pointer;position:relative}
+  .topbar .tools{display:none}
+  body:not([data-route="inicio"]) .topbar .clockrow{display:none}
+  .topbar .clockrow{gap:12px;justify-content:space-between}
+  .clock{font-size:36px}
+  .cdate{font-size:12px}
   .vsep{display:none}
-  .corebox{width:min(236px,60vw)}
-  .desk-c .core-cap{display:none}
-  .askbar{width:min(300px,86%)}
-  .greet{padding:16px 18px}
-  .greet h1.t{font-size:28px;margin-bottom:6px}
+  .wx svg.i{width:24px;height:24px}.wx b{font-size:19px}.wx span{font-size:11px}
+  .desk{display:flex;flex-direction:column;height:auto;min-height:0;gap:14px;padding:4px 16px 6px}
+  .desk-l,.desk-r,.desk-b{display:contents}
+  .greet2{order:1;padding:2px 2px 0}
+  .greet2 h1.t{font-size:32px;margin:0}
+  .greet2 .lede{font-size:13.5px;max-width:none}
+  .desk-c{order:2;gap:10px}
+  .corewrap{padding-bottom:16px}
+  .corebox{width:min(74vw,300px);min-width:0}
+  .corename{padding:0 16%}
+  .corename b{display:none}
+  .corename .wv{width:42px;height:30px}
+  .corename span{font-size:15px;color:var(--ink)}
+  .core-cap{display:none}
+  .askbar{width:100%}
+  .askbar input{font-size:15px;padding:9px 4px}
+  .arealist{order:3;flex-direction:row;overflow-x:auto;gap:10px;margin:0 -16px;padding:2px 16px 4px;scrollbar-width:none;scroll-snap-type:x proximity}
+  .arealist::-webkit-scrollbar{display:none}
+  .arow{flex:0 0 78px;flex-direction:column;justify-content:center;text-align:center;gap:6px;padding:12px 4px;scroll-snap-align:start}
+  .arow small{display:none}
+  .arow b{font-size:13px;font-family:var(--f-text)}
+  .arow svg.i{width:26px;height:26px}
+  .desk-r>.dk:nth-child(1){order:4}.desk-r>.dk:nth-child(2){order:5}.desk-r>.dk:nth-child(3){order:6}
+  .shortcuts{order:7}.weekfocus{order:8}.iris-line{order:9}.mindbtn{order:10}
+  .sc-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .weekfocus p{font-size:19px}
+  #v-inicio .home{padding:0 16px;grid-template-columns:minmax(0,1fr)}
+  .eyebrow.more-h{margin:26px 16px 12px}
+  .view:not(#v-inicio){padding:0 16px}
+  /* barra inferior */
+  .tabbar{display:flex!important;position:fixed;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:50;background:rgba(26,18,12,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--gl);border-radius:26px;padding:8px 6px;align-items:flex-end;box-shadow:0 10px 36px rgba(0,0,0,.55)}
+  .tabbar a,.tabbar .tb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:10.5px;color:var(--taupe);text-decoration:none;background:none;border:none;border-radius:14px;cursor:pointer;font-family:inherit}
+  .tabbar a[aria-current="page"]{color:var(--gold-2)}
+  .tabbar a[aria-current="page"] svg{color:var(--gold-2)}
+  .tabbar .fab{flex:0 0 66px;margin-top:-30px;width:66px;height:66px;padding:0;border-radius:50%;display:grid;place-items:center;color:var(--gold-2);background:radial-gradient(closest-side,rgba(60,38,20,.95),rgba(30,20,12,.98));border:2px solid rgba(244,190,120,.85);box-shadow:0 0 26px rgba(255,150,60,.55)}
+  .tabbar .fab svg.i{width:28px;height:28px}
+  .toast{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
 }
+@media (min-width:1500px){
+  .desk{grid-template-columns:minmax(300px,.9fr) minmax(0,1.6fr) minmax(360px,1fr)}
+  .greet2 h1.t{font-size:52px}
+}
+
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -520,65 +640,97 @@ body{background:
     <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 4l1.8 5.2L19 11l-5.2 1.8L12 18l-1.8-5.2L5 11l5.2-1.8z"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15zM10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
   </defs>
 </svg>
 
 <div class="app">
+  <div class="scrim" id="scrim"></div>
   <aside class="side" aria-label="Navegação">
-    <div class="brand"><b>ÍRIS</b><span>seu J.A.R.V.I.S., no seu ritmo</span></div>
+    <div class="brand"><svg class="i" aria-hidden="true"><use href="#i-wave"/></svg><div><b id="brandName">Natália</b><span>Assistente Pessoal Inteligente</span></div></div>
     <nav class="nav" id="nav">
-      <a href="#inicio" data-r="inicio"><svg class="i"><use href="#i-home"/></svg>Início</a>
+      <a href="#inicio" data-r="inicio" title="Início"><svg class="i"><use href="#i-home"/></svg>Início</a>
+      <a href="#pessoal" data-r="pessoal" title="Pessoal"><svg class="i"><use href="#i-leaf"/></svg>Pessoal</a>
+      <a href="#trabalho" data-r="trabalho" title="Trabalho"><svg class="i"><use href="#i-work"/></svg>Trabalho</a>
+      <a href="#faculdade" data-r="faculdade" title="Faculdade"><svg class="i"><use href="#i-book"/></svg>Faculdade</a>
+      <a href="#casa" data-r="casa" title="Casa e Obra"><svg class="i"><use href="#i-home"/></svg>Casa &amp; Obra</a>
+      <a href="#financeiro" data-r="financeiro" title="Finanças"><svg class="i"><use href="#i-coin"/></svg>Finanças</a>
+      <a href="#metas" data-r="metas" title="Metas"><svg class="i"><use href="#i-target"/></svg>Metas</a>
       <div class="sep" aria-hidden="true"></div>
-      <a href="#pessoal" data-r="pessoal"><svg class="i"><use href="#i-leaf"/></svg>Pessoal</a>
-      <a href="#trabalho" data-r="trabalho"><svg class="i"><use href="#i-work"/></svg>Trabalho</a>
-      <a href="#faculdade" data-r="faculdade"><svg class="i"><use href="#i-book"/></svg>Faculdade</a>
-      <a href="#casa" data-r="casa"><svg class="i"><use href="#i-home"/></svg>Casa &amp; Obra</a>
-      <a href="#metas" data-r="metas"><svg class="i"><use href="#i-target"/></svg>Metas</a>
-      <a href="#financeiro" data-r="financeiro"><svg class="i"><use href="#i-coin"/></svg>Financeiro</a>
-      <div class="sep" aria-hidden="true"></div>
-      <a href="#iris" data-r="iris"><svg class="i"><use href="#i-iris"/></svg>Conversar com a ÍRIS</a>
+      <a href="#iris" data-r="iris" title="Conversar com a ÍRIS"><svg class="i"><use href="#i-iris"/></svg>Conversar com a ÍRIS</a>
     </nav>
-    <button class="link" id="prefsSide" type="button" style="text-align:left;padding-left:12px;margin-top:auto">Ajustar nome e voz da ÍRIS</button>
-    <div class="foot" id="sideFoot" style="margin-top:0"><em>Lembrete da casa:</em> nem tudo precisa ser perfeito para ser bom.</div>
+    <button class="cfg" id="prefsSide" type="button" title="Nome e voz"><svg class="i"><use href="#i-cog"/></svg><span>Configurações</span></button>
+    <div class="foot" id="sideFoot"><em>Lembrete da casa:</em> nem tudo precisa ser perfeito para ser bom.</div>
   </aside>
 
   <main>
+    <header class="topbar">
+      <div class="mbar">
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="Abrir menu"><svg class="i"><use href="#i-menu"/></svg></button>
+        <div class="mb-brand"><svg class="i" aria-hidden="true"><use href="#i-wave"/></svg><span id="mbName">Natália</span></div>
+        <button id="bellM" type="button" aria-label="Compromissos de hoje"><svg class="i"><use href="#i-bell"/></svg><i class="dot-n" id="dotM" hidden></i></button>
+      </div>
+      <div class="clockrow">
+        <div><div class="clock" id="clock">--:--</div><div class="cdate" id="today">—</div></div>
+        <div class="vsep" aria-hidden="true"></div>
+        <div class="wx" id="wx"><svg class="i"><use href="#i-sun"/></svg><div><b id="wxT">--°C</b><span>Salvador - BA</span></div></div>
+      </div>
+      <div class="tools">
+        <button id="tSearch" type="button" aria-label="Falar ou digitar para a ÍRIS"><svg class="i"><use href="#i-search"/></svg></button>
+        <button id="tBell" type="button" aria-label="Compromissos de hoje"><svg class="i"><use href="#i-bell"/></svg><i class="dot-n" id="dotB" hidden></i></button>
+        <button id="tUser" type="button" aria-label="Nome e voz"><svg class="i"><use href="#i-user"/></svg></button>
+      </div>
+    </header>
+
     <!-- INÍCIO -->
     <section class="view" id="v-inicio" aria-labelledby="h-inicio">
       <div class="desk">
         <div class="desk-l">
-          <div class="clockrow">
-            <div><div class="clock" id="clock">--:--</div><div class="cdate" id="today">—</div></div>
-            <div class="vsep" aria-hidden="true"></div>
-            <div class="wx" id="wx"><svg class="i"><use href="#i-sun"/></svg><div><b id="wxT">--°C</b><span>Salvador - BA</span></div></div>
-          </div>
-          <div class="glass greet">
+          <div class="greet2">
             <h1 class="t" id="h-inicio">Bom dia.</h1>
             <p class="lede" id="dayShape">Preparando o seu dia…</p>
-            <div class="arealist" id="arealist"></div>
-            <div class="iris-line"><b>ÍRIS</b><p id="irisLine">À disposição. Quando quiser, comece por uma coisa só.</p></div>
-            <button class="mindbtn" id="mindOpen" type="button"><svg class="i"><use href="#i-wave"/></svg>Esvaziar a mente</button>
           </div>
+          <div class="arealist" id="arealist"></div>
+          <div class="iris-line"><b>ÍRIS</b><p id="irisLine">À disposição. Quando quiser, comece por uma coisa só.</p></div>
+          <button class="mindbtn" id="mindOpen" type="button"><svg class="i"><use href="#i-wave"/></svg>Esvaziar a mente</button>
         </div>
         <div class="desk-c">
           <div class="corewrap">
             <div class="corebox">
               <button class="core" id="core" type="button" aria-label="Tocar para a ÍRIS falar com você"><canvas id="reactor"></canvas></button>
-              <div class="corename" aria-hidden="true"><b id="coreName">Natália</b><span>Como posso te ajudar hoje?</span></div>
+              <div class="corename" aria-hidden="true"><svg class="i wv"><use href="#i-wave"/></svg><b id="coreName">Natália</b><span>Como posso te ajudar hoje?</span></div>
             </div>
             <div class="core-cap" id="coreCap" aria-live="polite">Toque para ouvir a ÍRIS</div>
           </div>
+          <form class="askbar" id="askbar" autocomplete="off">
+            <button type="button" id="askMic" aria-label="Falar com a ÍRIS"><svg class="i"><use href="#i-mic"/></svg></button>
+            <input id="askIn" type="text" placeholder="Fale comigo ou digite aqui…" aria-label="Mensagem para a ÍRIS">
+            <button type="submit" aria-label="Enviar"><svg class="i"><use href="#i-spark"/></svg></button>
+          </form>
         </div>
         <div class="desk-r">
-          <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-check"/></svg><h2>Prioridades de hoje</h2><span id="dkFocusN"></span></div><ul class="dk-list" id="dkFocus"></ul></div>
-          <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-cal"/></svg><h2>Compromissos</h2><button class="link" id="dkNewEv" type="button">+ evento</button></div><ul class="dk-agenda" id="dkAgenda"></ul></div>
+          <div class="glass dk" id="dkPrio"><div class="dk-h"><svg class="i"><use href="#i-check"/></svg><h2>Prioridades de hoje</h2><span id="dkFocusN"></span></div><ul class="dk-list" id="dkFocus"></ul></div>
+          <div class="glass dk" id="dkComp"><div class="dk-h"><svg class="i"><use href="#i-cal"/></svg><h2>Compromissos</h2><button class="link" id="dkNewEv" type="button">+ evento</button></div><ul class="dk-agenda" id="dkAgenda"></ul></div>
           <div class="glass dk"><div class="dk-h"><svg class="i"><use href="#i-target"/></svg><h2>Metas em foco</h2><span>Progresso</span></div><ul class="dk-goals" id="dkGoals"></ul></div>
         </div>
-        <form class="askbar" id="askbar" autocomplete="off">
-          <button type="button" id="askMic" aria-label="Falar com a ÍRIS"><svg class="i"><use href="#i-mic"/></svg></button>
-          <input id="askIn" type="text" placeholder="Fale comigo ou digite aqui…" aria-label="Mensagem para a ÍRIS">
-          <button type="submit" aria-label="Enviar"><svg class="i"><use href="#i-spark"/></svg></button>
-        </form>
+        <div class="desk-b">
+          <div class="glass shortcuts"><h2>Atalhos rápidos</h2>
+            <div class="sc-grid">
+              <button class="sc" type="button" data-go="trabalho"><svg class="i"><use href="#i-plus"/></svg>Nova tarefa</button>
+              <button class="sc" type="button" data-go="gasto"><svg class="i"><use href="#i-coin"/></svg>Registrar gasto</button>
+              <button class="sc" type="button" data-go="ideia"><svg class="i"><use href="#i-bulb"/></svg>Anotar ideia</button>
+              <button class="sc" type="button" data-go="plano"><svg class="i"><use href="#i-cal"/></svg>Criar plano</button>
+              <button class="sc" type="button" data-go="meta"><svg class="i"><use href="#i-target"/></svg>Adicionar meta</button>
+            </div>
+          </div>
+          <div class="glass weekfocus"><svg class="i"><use href="#i-leaf"/></svg><div><h2>Foco da semana</h2><p id="weekFocus">Escolha o que mais importa e a ÍRIS acompanha com você.</p></div></div>
+        </div>
       </div>
 
       <div class="eyebrow more-h">Mais do seu dia</div>
@@ -693,19 +845,18 @@ body{background:
 
 <nav class="tabbar" id="tabbar" aria-label="Navegação">
   <a href="#inicio" data-r="inicio"><svg class="i"><use href="#i-home"/></svg>Início</a>
-  <a href="#pessoal" data-r="pessoal"><svg class="i"><use href="#i-leaf"/></svg>Pessoal</a>
-  <a href="#trabalho" data-r="trabalho"><svg class="i"><use href="#i-work"/></svg>Trabalho</a>
-  <a href="#faculdade" data-r="faculdade"><svg class="i"><use href="#i-book"/></svg>Faculdade</a>
-  <a href="#financeiro" data-r="financeiro"><svg class="i"><use href="#i-coin"/></svg>Finanças</a>
-  <a href="#iris" data-r="iris"><svg class="i"><use href="#i-iris"/></svg>ÍRIS</a>
+  <a href="#pessoal" data-r="pessoal"><svg class="i"><use href="#i-cal"/></svg>Rotina</a>
+  <button class="fab" id="tabMic" type="button" aria-label="Falar com a ÍRIS"><svg class="i"><use href="#i-mic"/></svg></button>
+  <a href="#metas" data-r="metas"><svg class="i"><use href="#i-target"/></svg>Metas</a>
+  <button class="tb" id="tabMenu" type="button"><svg class="i"><use href="#i-menu"/></svg>Menu</button>
 </nav>
 <div id="toastSlot"></div>
 <div id="dlgSlot"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=10"></script>
-<script src="adapter.js?v=10"></script>
+<script src="config.js?v=11"></script>
+<script src="adapter.js?v=11"></script>
 <script>
 (() => {
 "use strict";
@@ -1801,7 +1952,7 @@ function route(){
   let r = (location.hash || "#inicio").slice(1); if (!ROUTES.includes(r)) r = "inicio";
   for (const k of ROUTES) $("v-"+k).hidden = k !== r;
   document.querySelectorAll("[data-r]").forEach(a => { if (a.dataset.r === r) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
-  current = r; renderView(); scrollTo(0,0);
+  current = r; document.body.dataset.route = r; document.body.classList.remove("menu"); renderView(); scrollTo(0,0);
 }
 let current = "inicio";
 function renderView(){ if (current === "inicio") renderHome(); else if (current === "financeiro") renderFin(); else if (AREAS[current]) renderArea(current); }
@@ -2334,7 +2485,7 @@ $("core").addEventListener("click", coreTalk);
 function relDayLabel(d){ const t = today(); return d === t ? "Hoje" : d === addDays(t,1) ? "Amanhã" : prettyDay(d); }
 function stepsPct(it){ const st = it.steps || []; return st.length ? Math.round(st.filter(x => x.done).length / st.length * 100) : (it.done ? 100 : 0); }
 function renderDesk(){
-  $("coreName").textContent = userName || "Natália";
+  $("coreName").textContent = userName || "Natália"; try { v2Extras(); } catch {}
   const al = $("arealist"); al.textContent = "";
   const rows = [...Object.entries(AREAS).filter(([k]) => k !== "metas").map(([k,c]) => ({ href:"#"+k, ic:c.icon, label:c.label, sub:c.sub || "" })),
     { href:"#financeiro", ic:"i-coin", label:"Finanças", sub:"Contas, mês e planejamento" }, { href:"#metas", ic:"i-target", label:AREAS.metas.label, sub:AREAS.metas.sub }];
@@ -2447,6 +2598,41 @@ async function gmailSearch(q){
   const msgs = await Promise.all((list.messages || []).slice(0,10).map(m => gapi("messages/" + m.id + "?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date", tok)));
   return msgs.map(m => { const hd = n => ((m.payload && m.payload.headers) || []).find(x => x.name.toLowerCase() === n); return { de:((hd("from")||{}).value || "").replace(/<.*>/,"").replace(/"/g,"").trim(), assunto:(hd("subject")||{}).value || "", trecho:String(m.snippet||"").slice(0,200), data:(hd("date")||{}).value || "", naoLido:(m.labelIds||[]).includes("UNREAD") }; });
 }
+
+
+/* ---------- painel v2: só apresentação (atalhos, marca, sino, menu) ---------- */
+function v2Extras(){
+  const nm = userName || "Natália";
+  ["brandName","mbName"].forEach(i => { const e = $(i); if (e) e.textContent = nm; });
+  const t = today();
+  const hasToday = calEvents.some(e => e.day === t) || items.some(it => !it.done && it.date === t && it.kind !== "ritual");
+  ["dotB","dotM"].forEach(i => { const e = $(i); if (e) e.hidden = !hasToday; });
+  const wf = $("weekFocus"); if (wf) {
+    const g = items.filter(it => ["meta","objetivo","projeto"].includes(it.kind) && !it.done).sort((a,b) => (b.focus - a.focus) || (stepsPct(b) - stepsPct(a))).slice(0,2).map(x => x.title);
+    const f = items.filter(it => it.focus && !it.done && it.kind !== "ritual").slice(0,2).map(x => x.title);
+    const list = g.length ? g : f;
+    wf.textContent = list.length ? list.join(" e ") + "." : "Escolha o que mais importa e a ÍRIS acompanha com você.";
+  }
+}
+function goFocus(hash, sel){ location.hash = hash; setTimeout(() => { const e = document.querySelector(sel); if (e) { e.scrollIntoView({ block:"center", behavior:"smooth" }); e.focus({ preventScroll:true }); } }, 250); }
+document.querySelectorAll(".sc").forEach(b => b.onclick = () => {
+  const k = b.dataset.go;
+  if (k === "trabalho") goFocus("#trabalho", "#v-trabalho input[type=text]");
+  else if (k === "gasto") goFocus("#financeiro", "#fVal");
+  else if (k === "ideia") openMind();
+  else if (k === "plano") { location.hash = "#iris"; setTimeout(() => send("Quero criar um plano. Me ajude a começar com duas ou três perguntas curtas."), 120); }
+  else if (k === "meta") goFocus("#metas", "#v-metas input[type=text]");
+});
+const toAgenda = () => { if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => { const e = $("dkComp"); if (e) e.scrollIntoView({ block:"center", behavior:"smooth" }); }, 150); };
+$("tBell").onclick = toAgenda; $("bellM").onclick = toAgenda;
+$("tSearch").onclick = () => { if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => $("askIn").focus(), 150); };
+$("tUser").onclick = () => openPrefs();
+$("menuBtn").onclick = () => document.body.classList.toggle("menu");
+$("tabMenu").onclick = () => document.body.classList.toggle("menu");
+$("scrim").onclick = () => document.body.classList.remove("menu");
+$("nav").addEventListener("click", () => document.body.classList.remove("menu"));
+$("tabMic").onclick = () => { if (current !== "inicio") { location.hash = "#inicio"; setTimeout(coreTalk, 250); } else coreTalk(); };
+document.body.dataset.route = "inicio";
 
 /* ---------- inicialização ---------- */
 route();
