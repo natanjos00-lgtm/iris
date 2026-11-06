@@ -1,5 +1,13 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#150e08">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ÍRIS">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+</head><body>
 <title>ÍRIS</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -846,7 +854,7 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
 <div class="app">
   <div class="scrim" id="scrim"></div>
   <aside class="side" aria-label="Navegação">
-    <div class="brand"><svg class="i" aria-hidden="true"><use href="#i-wave"/></svg><div><b id="brandName">Natália</b><span>Assistente Pessoal Inteligente</span></div></div>
+    <div class="brand"><svg class="i" aria-hidden="true"><use href="#i-wave"/></svg><div><b id="brandName">ÍRIS</b><span>Assistente Pessoal Inteligente</span></div></div>
     <nav class="nav" id="nav">
       <a href="#inicio" data-r="inicio" title="Início"><svg class="i"><use href="#i-home"/></svg>Início</a>
       <a href="#pessoal" data-r="pessoal" title="Pessoal"><svg class="i"><use href="#i-leaf"/></svg>Pessoal</a>
@@ -858,6 +866,7 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
       <div class="sep" aria-hidden="true"></div>
       <a href="#iris" data-r="iris" title="Conversar com a ÍRIS"><svg class="i"><use href="#i-iris"/></svg>Conversar com a ÍRIS</a>
     </nav>
+    <button class="cfg" id="installBtn" type="button" hidden><svg class="i"><use href="#i-plus"/></svg><span>Instalar o app</span></button>
     <button class="cfg" id="prefsSide" type="button" title="Nome e voz"><svg class="i"><use href="#i-cog"/></svg><span>Configurações</span></button>
     <div class="foot" id="sideFoot"><em>Lembrete da casa:</em> nem tudo precisa ser perfeito para ser bom.</div>
   </aside>
@@ -866,7 +875,7 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
     <header class="topbar">
       <div class="mbar">
         <button class="menu-btn" id="menuBtn" type="button" aria-label="Abrir menu"><svg class="i"><use href="#i-menu"/></svg></button>
-        <div class="mb-brand"><svg class="i" aria-hidden="true"><use href="#i-wave"/></svg><span id="mbName">Natália</span></div>
+        <div class="mb-brand"><svg class="i" aria-hidden="true"><use href="#i-wave"/></svg><span id="mbName">ÍRIS</span></div>
         <button id="bellM" type="button" aria-label="Compromissos de hoje"><svg class="i"><use href="#i-bell"/></svg><i class="dot-n" id="dotM" hidden></i></button>
       </div>
       <div class="clockrow">
@@ -897,7 +906,7 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
           <div class="corewrap">
             <div class="corebox">
               <button class="core" id="core" type="button" aria-label="Tocar para a ÍRIS falar com você"><canvas id="reactor"></canvas></button>
-              <div class="corename" aria-hidden="true"><svg class="i wv"><use href="#i-wave"/></svg><b id="coreName">Natália</b><span>Como posso te ajudar hoje?</span></div>
+              <div class="corename" aria-hidden="true"><svg class="i wv"><use href="#i-wave"/></svg><b id="coreName">ÍRIS</b><span>Como posso te ajudar hoje?</span></div>
             </div>
             <div class="core-cap" id="coreCap" aria-live="polite">Toque para ouvir a ÍRIS</div>
           </div>
@@ -1049,8 +1058,8 @@ input[type=text],input[type=number],input[type=date],select,textarea{font-size:v
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=14"></script>
-<script src="adapter.js?v=14"></script>
+<script src="config.js?v=18"></script>
+<script src="adapter.js?v=18"></script>
 <script>
 (() => {
 "use strict";
@@ -2679,7 +2688,7 @@ $("core").addEventListener("click", coreTalk);
 function relDayLabel(d){ const t = today(); return d === t ? "Hoje" : d === addDays(t,1) ? "Amanhã" : prettyDay(d); }
 function stepsPct(it){ const st = it.steps || []; return st.length ? Math.round(st.filter(x => x.done).length / st.length * 100) : (it.done ? 100 : 0); }
 function renderDesk(){
-  $("coreName").textContent = userName || "Natália"; try { v2Extras(); } catch {}
+  $("coreName").textContent = "ÍRIS"; try { v2Extras(); } catch {}
   const al = $("arealist"); al.textContent = "";
   const rows = [...Object.entries(AREAS).filter(([k]) => k !== "metas").map(([k,c]) => ({ href:"#"+k, ic:c.icon, label:c.label, sub:c.sub || "" })),
     { href:"#financeiro", ic:"i-coin", label:"Finanças", sub:"Contas, mês e planejamento" }, { href:"#metas", ic:"i-target", label:AREAS.metas.label, sub:AREAS.metas.sub }];
@@ -2822,8 +2831,6 @@ async function gmailSearch(q){
 
 /* ---------- painel v2: só apresentação (atalhos, marca, sino, menu) ---------- */
 function v2Extras(){
-  const nm = userName || "Natália";
-  ["brandName","mbName"].forEach(i => { const e = $(i); if (e) e.textContent = nm; });
   const t = today();
   const hasToday = calEvents.some(e => e.day === t) || items.some(it => !it.done && it.date === t && it.kind !== "ritual");
   ["dotB","dotM"].forEach(i => { const e = $(i); if (e) e.hidden = !hasToday; });
@@ -2854,6 +2861,13 @@ $("nav").addEventListener("click", () => document.body.classList.remove("menu"))
 $("tabMic").onclick = () => toggleListen();
 document.body.dataset.route = "inicio";
 
+
+/* ---------- app instalável ---------- */
+let installEv = null;
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEv = e; const b = $("installBtn"); if (b) b.hidden = false; });
+addEventListener("appinstalled", () => { installEv = null; const b = $("installBtn"); if (b) b.hidden = true; toast("App instalado."); });
+$("installBtn").onclick = async () => { if (!installEv) return; installEv.prompt(); try { await installEv.userChoice; } catch {} installEv = null; $("installBtn").hidden = true; };
+if ("serviceWorker" in navigator) addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
 /* ---------- inicialização ---------- */
 route();
 renderTimers();
