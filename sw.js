@@ -1,7 +1,9 @@
-// ÍRIS — service worker mínimo (necessário para instalar o app). Avisos (push) entram aqui depois.
+// ÍRIS — service worker mínimo (v2) (necessário para instalar o app). Avisos (push) entram aqui depois.
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
-self.addEventListener("fetch", e => { if (e.request.method === "GET") e.respondWith(fetch(e.request).catch(() => new Response("Sem conexão.", { status: 503 }))); });
+/* Páginas e scripts do próprio app sempre vêm frescos (sem usar a cópia guardada pelo navegador), para as atualizações chegarem na hora. */
+self.addEventListener("fetch", e => { if (e.request.method !== "GET") return; const same = new URL(e.request.url).origin === self.location.origin;
+  e.respondWith((same ? fetch(e.request, { cache: "no-store" }) : fetch(e.request)).catch(() => new Response("Sem conexão.", { status: 503 }))); });
 self.addEventListener("push", e => {
   let d = {}; try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
   e.waitUntil(self.registration.showNotification(d.title || "ÍRIS", { body: d.body || "", icon: "icon-192.png", badge: "icon-192.png", data: { url: d.url || "./" } }));
