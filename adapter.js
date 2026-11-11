@@ -185,6 +185,34 @@
     try { return JSON.parse(d.text); } catch { const m = d.text.match(/[\[{][\s\S]*[\]}]/); if (m) return JSON.parse(m[0]); throw { code: "bad_json" }; }
   };
 
+
+  /* ---------- CASA: lê (só leitura) o enxoval do app House to Home ----------
+     O House to Home mora no mesmo endereço (natanjos00-lgtm.github.io), então a ÍRIS reaproveita a entrada
+     que você já fez lá (guardada neste aparelho). Ela nunca grava nada e não guarda senha nem chave secreta. */
+  if (cfg.HOUSE_URL && cfg.HOUSE_KEY) {
+    let hsb = null;
+    window.irisCasaRead = async function () {
+      if (!hsb) hsb = window.supabase.createClient(cfg.HOUSE_URL, cfg.HOUSE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+      let ses; try { ses = (await hsb.auth.getSession()).data.session; } catch { throw { code: "casa_rede" }; }
+      if (!ses) throw { code: "casa_login" };
+      let info; { const r = await hsb.rpc("household_info"); if (r.error) throw { code: /JWT|401|expired/i.test(String(r.error.message || r.error.code)) ? "casa_sessao" : "casa_rede" }; info = r.data; }
+      if (!info || !info.household_id) throw { code: "casa_sem_casa" };
+      const rows = [];
+      for (let from = 0; ; from += 1000) {
+        const r = await hsb.from("records").select("coll,id,data").eq("household_id", info.household_id).eq("del", false).in("coll", ["items", "rooms", "pays", "_meta"]).order("coll").order("id").range(from, from + 999);
+        if (r.error) throw { code: "casa_rede" };
+        rows.push(...r.data); if (r.data.length < 1000) break;
+      }
+      /* só os campos que a ÍRIS usa; fotos viram apenas uma contagem */
+      return rows.map(r => { const x = r.data || {}; let d;
+        if (r.coll === "items") d = { name: x.name, area: x.area, kind: x.kind, cat: x.cat, roomId: x.roomId, planned: x.planned, contracted: x.contracted, status: x.status, qtyNeed: x.qtyNeed, qtyBought: x.qtyBought, store: x.store, buyDate: x.buyDate, returned: x.returned, researching: x.researching, end: x.end, deleted: x.deleted, fotos: Array.isArray(x.img) ? x.img.length : 0 };
+        else if (r.coll === "rooms") d = { name: x.name, w: x.w, l: x.l, h: x.h };
+        else if (r.coll === "pays") d = { itemId: x.itemId, amount: x.amount, paid: x.paid, date: x.date, kind: x.kind };
+        else d = { budget: x.budget, casa: x.house && x.house.name };
+        return { coll: r.coll, id: r.id, d }; });
+    };
+  }
+
   const caps = {
     db: { collection },
     user: { id: () => userId },
