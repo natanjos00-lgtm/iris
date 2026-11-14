@@ -952,8 +952,8 @@ html{scrollbar-color:var(--sb-thumb) var(--sb-track)}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=24"></script>
-<script src="adapter.js?v=24"></script>
+<script src="config.js?v=25"></script>
+<script src="adapter.js?v=25"></script>
 <script>
 (() => {
 "use strict";
@@ -2244,12 +2244,16 @@ function casaBuild(rows){
     else if (r.coll === "_meta") meta = d; }
   const cents = v => Number.isFinite(+v) ? Math.round(+v) : 0;
   const paid = {}; for (const p of pays) if (p.paid) paid[p.itemId] = (paid[p.itemId] || 0) + (p.kind === "refund" ? -1 : 1) * cents(p.amount);
+  const real = {}; for (const p of pays) if (p.kind !== "refund") real[p.itemId] = 1;
+  const FORMAS = { pix:"Pix", cash:"Dinheiro", debit:"Débito", credit:"Crédito", transfer:"Transferência", boleto:"Boleto", other:"Outro" };
   const list = its.filter(i => !i.deleted && (i.area === "enxoval" || i.area === "obra")).map(i => {
     const need = Math.max(1, +i.qtyNeed || 1), got = Math.max(0, +i.qtyBought || 0);
     const sit = i.returned ? "devolvido" : got >= need ? "comprado" : got > 0 ? "parcial" : i.researching ? "pesquisando" : "pendente";
     return { area:i.area, nome:String(i.name || "").slice(0,90), categoria:String(i.cat || ""), ambiente:rooms[i.roomId] || "",
       ...(i.area === "enxoval" ? { situacao:sit, quantidade:`${Math.min(got,need)} de ${need}` } : { andamento:String(i.status || "") }),
-      previsto: cents(i.planned)/100, contratado: i.contracted == null ? null : cents(i.contracted)/100, pago: (paid[i.id] || 0)/100,
+      /* regra do House to Home: no enxoval, comprado (com valor informado) conta como pago, a menos que existam lançamentos feitos à mão */
+      previsto: cents(i.planned)/100, contratado: i.contracted == null ? null : cents(i.contracted)/100, pago: ((paid[i.id] || 0) + (i.area === "enxoval" && !i.returned && got > 0 && cents(i.contracted) > 0 && !real[i.id] ? cents(i.contracted) : 0))/100,
+      ...(i.area === "enxoval" && FORMAS[i.payMethod] ? { comoFoiPago: FORMAS[i.payMethod] + (i.payMethod === "credit" && +i.payN > 1 ? ` em ${+i.payN}x` : "") } : {}),
       loja:String(i.store || ""), dataCompra:i.buyDate || null, prazo:i.end || null, fotos:+i.fotos || 0 };
   });
   const b = meta.budget || {}; const bud = k => b[k] == null ? null : cents(b[k])/100;
@@ -2396,7 +2400,7 @@ const TOOLS = [
   { name:"iniciar_temporizador", description:"Inicia um temporizador ou lembrete na tela, que toca um som suave ao terminar. Use para 'me lembra em X minutos' ou foco/pausa.",
     inputSchema:{ type:"object", properties:{ minutos:{type:"number"}, rotulo:{type:"string"} }, required:["minutos"] },
     execute(i){ const r = startTimer(i.minutos, i.rotulo); if (!r) throw new Error("minutos inválidos"); return r; } },
-  { name:"consultar_casa", description:"Lê o app House to Home (enxoval e obra da casa dela), só leitura. Retorna totais, orçamento e a lista de itens com situação (comprado, parcial, pesquisando, pendente, devolvido), quantidade, ambiente, categoria, previsto e pago em reais. Filtros opcionais: area (enxoval|obra), situacao, ambiente, categoria, busca (parte do nome). Até 60 itens por chamada.",
+  { name:"consultar_casa", description:"Lê o app House to Home (enxoval e obra da casa dela), só leitura. Retorna totais, orçamento e a lista de itens com situação (comprado, parcial, pesquisando, pendente, devolvido), quantidade, ambiente, categoria, previsto e pago em reais (no enxoval, tudo que foi comprado conta como pago) e, quando informado, como foi pago (ex.: Crédito em 3x). Filtros opcionais: area (enxoval|obra), situacao, ambiente, categoria, busca (parte do nome). Até 60 itens por chamada.",
     inputSchema:{ type:"object", properties:{ area:{type:"string"}, situacao:{type:"string"}, ambiente:{type:"string"}, categoria:{type:"string"}, busca:{type:"string"} } },
     async execute(i, ctx){ await loadCasa(false, ctx && ctx.signal); if (!casa) throw new Error(casaMsg || "não consegui ler o app da casa agora");
       const nm = v => String(v || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim(); i = i || {};

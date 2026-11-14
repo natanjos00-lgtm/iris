@@ -205,7 +205,7 @@
       }
       /* só os campos que a ÍRIS usa; fotos viram apenas uma contagem */
       return rows.map(r => { const x = r.data || {}; let d;
-        if (r.coll === "items") d = { name: x.name, area: x.area, kind: x.kind, cat: x.cat, roomId: x.roomId, planned: x.planned, contracted: x.contracted, status: x.status, qtyNeed: x.qtyNeed, qtyBought: x.qtyBought, store: x.store, buyDate: x.buyDate, returned: x.returned, researching: x.researching, end: x.end, deleted: x.deleted, fotos: Array.isArray(x.img) ? x.img.length : 0 };
+        if (r.coll === "items") d = { name: x.name, area: x.area, kind: x.kind, cat: x.cat, roomId: x.roomId, planned: x.planned, contracted: x.contracted, status: x.status, qtyNeed: x.qtyNeed, qtyBought: x.qtyBought, store: x.store, buyDate: x.buyDate, returned: x.returned, researching: x.researching, payMethod: x.payMethod, payN: x.payN, end: x.end, deleted: x.deleted, fotos: Array.isArray(x.img) ? x.img.length : 0 };
         else if (r.coll === "rooms") d = { name: x.name, w: x.w, l: x.l, h: x.h };
         else if (r.coll === "pays") d = { itemId: x.itemId, amount: x.amount, paid: x.paid, date: x.date, kind: x.kind };
         else d = { budget: x.budget, casa: x.house && x.house.name };
