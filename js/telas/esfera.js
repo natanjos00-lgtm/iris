@@ -142,7 +142,7 @@ function nnSaveZoom() { try { localStorage.setItem("iris.nnZoom", String(nnZ)); 
   });
   core.addEventListener("pointermove", ev => {
     if (pts.has(ev.pointerId)) pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
-    if (pinch && pts.size === 2) { nnSetZoom(pinch.z * gap() / pinch.d); return; }
+    if (pinch && pts.size === 2) { const want = pinch.z * gap() / pinch.d; nnSetZoom(want); if (want > NN_ZMAX * 1.18) { pinch = null; pts.clear(); nnSaveZoom(); nnDeepEnter(); } return; }
     const d = nn.drag; if (!d || d.id !== ev.pointerId) return;
     const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
     if (!nn.moved && Math.hypot(dx, dy) > 6) { nn.moved = true; try { core.setPointerCapture(ev.pointerId); } catch {} }
@@ -159,12 +159,175 @@ function nnSaveZoom() { try { localStorage.setItem("iris.nnZoom", String(nnZ)); 
   };
   core.addEventListener("pointerup", end); core.addEventListener("pointercancel", end);
   let wt = 0;
-  box.addEventListener("wheel", ev => { if (!ev.ctrlKey) return; ev.preventDefault(); nnSetZoom(nnZoom() * Math.exp(-ev.deltaY * 0.01)); clearTimeout(wt); wt = setTimeout(nnSaveZoom, 300); }, { passive: false });
+  let over = 0;
+  box.addEventListener("wheel", ev => {
+    if (!ev.ctrlKey) return; ev.preventDefault();
+    const want = nnZoom() * Math.exp(-ev.deltaY * 0.01);
+    if (want > NN_ZMAX) { over += want / NN_ZMAX - 1; if (over > 0.25) { over = 0; nnDeepEnter(); } } else over = 0;
+    nnSetZoom(want); clearTimeout(wt); wt = setTimeout(() => { nnSaveZoom(); over = 0; }, 300);
+  }, { passive: false });
   core.addEventListener("dblclick", ev => { if (nnZoom() !== 1) { ev.preventDefault(); nnSetZoom(1); nnSaveZoom(); } });
   nnSetZoom(nnZoom());
   box.addEventListener("click", ev => { if (nn.suppress) { nn.suppress = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
   core.addEventListener("keydown", ev => { if (ev.key === "ArrowLeft") { ev.preventDefault(); nnSelect(nn.sel - 1); } else if (ev.key === "ArrowRight") { ev.preventDefault(); nnSelect(nn.sel + 1); } });
 })();
+
+/* entrar na ÍRIS: abrir a pinça além do máximo leva a câmera para dentro da esfera.
+   Lá dentro as áreas ficam em volta de você; arraste para olhar, toque numa área para vê-la e abri-la,
+   feche a pinça (ou toque no X, ou Esc) para sair. */
+const nnDeep = { on: false, c: 2.4, target: 2.4, ry: 0, rx: 0, drag: null, moved: false, sel: -1, el: null, cv: null, x: null, W: 0, H: 0, last: 0, AP: [] };
+function nnDeepFull(){ return nnDeep.on && nnDeep.c < 0.6; }
+function nnDeepBuild(){
+  if (nnDeep.el) return nnDeep.el;
+  const el = h("div", { id: "nnDeep", class: "nn-deep", role: "dialog", "aria-modal": "true", "aria-label": "Dentro da ÍRIS", hidden: "" });
+  const cv = h("canvas", { "aria-hidden": "true" });
+  const x = h("button", { type: "button", class: "nd-x", "aria-label": "Sair de dentro da ÍRIS", onclick: () => nnDeepExit() }, icon("i-plus"));
+  const hint = h("p", { class: "nd-hint" }, "Arraste para olhar em volta · toque numa área · feche a pinça para sair");
+  const card = h("div", { class: "nd-card glass", hidden: "" },
+    h("span", { class: "nn-k" }, "Área"), h("b", { class: "nd-n" }), h("span", { class: "nd-i" }),
+    h("a", { class: "btn nd-go", href: "#" }, "Abrir"));
+  const mic = h("button", { type: "button", class: "nd-mic", "aria-label": "Falar com a ÍRIS", onclick: () => { try { coreTalk(); } catch {} } }, icon("i-mic"));
+  card.querySelector(".nd-go").addEventListener("click", () => { nnDeep.on = false; nnDeepHide(); });
+  el.append(cv, x, hint, card, mic); document.body.append(el);
+  nnDeep.el = el; nnDeep.cv = cv; nnDeep.x = cv.getContext("2d");
+  const pts = new Map(); let pinch = null;
+  const gap = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+  cv.addEventListener("pointerdown", ev => {
+    pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pts.size === 2) { nnDeep.drag = null; pinch = gap(); return; }
+    nnDeep.drag = { x: ev.clientX, y: ev.clientY, ry: nnDeep.ry, rx: nnDeep.rx, id: ev.pointerId }; nnDeep.moved = false;
+  });
+  cv.addEventListener("pointermove", ev => {
+    if (pts.has(ev.pointerId)) pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pinch && pts.size === 2) { if (gap() / pinch < 0.7) { pinch = null; pts.clear(); nnDeepExit(); } return; }
+    const d = nnDeep.drag; if (!d || d.id !== ev.pointerId) return;
+    const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
+    if (!nnDeep.moved && Math.hypot(dx, dy) > 6) { nnDeep.moved = true; try { cv.setPointerCapture(ev.pointerId); } catch {} }
+    if (nnDeep.moved) { const k = 2.6 / Math.min(nnDeep.W, nnDeep.H); nnDeep.ry = d.ry - dx * k; nnDeep.rx = Math.max(-1.1, Math.min(1.1, d.rx - dy * k)); }
+  });
+  const end = ev => {
+    pts.delete(ev.pointerId); if (pinch) { if (pts.size < 2) pinch = null; return; }
+    const d = nnDeep.drag; if (!d) return; nnDeep.drag = null;
+    if (nnDeep.moved || ev.type !== "pointerup") return;
+    let best = -1, bd = Math.min(nnDeep.W, nnDeep.H) * 0.12;
+    nnDeep.AP.forEach((p, i) => { if (!p) return; const dd = Math.hypot(p[0] - ev.clientX, p[1] - ev.clientY); if (dd < bd) { bd = dd; best = i; } });
+    if (best >= 0) nnDeepPick(best);
+  };
+  cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+  cv.addEventListener("wheel", ev => { if (ev.ctrlKey && ev.deltaY > 4) { ev.preventDefault(); nnDeepExit(); } }, { passive: false });
+  addEventListener("keydown", ev => { if (nnDeep.on && ev.key === "Escape") { ev.preventDefault(); nnDeepExit(); } });
+  addEventListener("hashchange", () => { if (nnDeep.on) { nnDeep.on = false; nnDeepHide(); } });
+  return el;
+}
+function nnDeepPick(i){
+  nnDeep.sel = i; nnSelect(i);
+  const k = NN_KEYS[i], card = nnDeep.el.querySelector(".nd-card");
+  card.querySelector(".nd-n").textContent = nnLabel(k); card.querySelector(".nd-i").textContent = nnInfo(k);
+  const go = card.querySelector(".nd-go"); go.href = "#" + k; go.setAttribute("aria-label", "Abrir " + nnLabel(k));
+  card.hidden = false; card.classList.remove("in"); void card.offsetWidth; card.classList.add("in");
+  const raw = nn.geo.areas[i].phi + Math.PI / 2; nnDeep.turn = raw + Math.round((nnDeep.ry - raw) / (2 * Math.PI)) * 2 * Math.PI;
+}
+function nnDeepEnter(){
+  if (nnDeep.on || !nn.geo) return;
+  const el = nnDeepBuild(); nnDeep.on = true; nnDeep.sel = nn.sel; nnDeep.turn = null;
+  nnDeep.ry = nn.geo.areas[nn.sel].phi + Math.PI / 2; nnDeep.rx = 0;
+  nnDeep.c = nnReduce ? 0 : 2.4; nnDeep.target = 0; nnDeep.el.querySelector(".nd-card").hidden = true;
+  el.hidden = false; el.classList.remove("out"); requestAnimationFrame(() => el.classList.add("in"));
+  document.documentElement.classList.add("deep-on");
+  const box = $("core") && $("core").parentElement; if (box) box.classList.add("diving");
+  nnDeep.last = 0; requestAnimationFrame(nnDeepFrame);
+  setTimeout(() => { try { nnDeep.el.querySelector(".nd-x").focus({ preventScroll: true }); } catch {} }, 400);
+}
+function nnDeepExit(){
+  if (!nnDeep.on) return; nnDeep.on = false; nnDeep.target = 2.4;
+  nnSetZoom(1); nnSaveZoom();
+  if (nnReduce) { nnDeepHide(); return; }
+  nnDeep.el.classList.add("out"); nnDeep.el.classList.remove("in");
+  const box = $("core") && $("core").parentElement; if (box) box.classList.remove("diving");
+  setTimeout(() => { if (!nnDeep.on) nnDeepHide(); }, 650);
+}
+function nnDeepHide(){
+  if (!nnDeep.el) return; nnDeep.el.hidden = true; nnDeep.el.classList.remove("in", "out");
+  document.documentElement.classList.remove("deep-on");
+  const box = $("core") && $("core").parentElement; if (box) box.classList.remove("diving");
+  try { $("core").focus({ preventScroll: true }); } catch {}
+}
+function nnDeepFrame(ts){
+  const D = nnDeep; if (D.el.hidden) return; requestAnimationFrame(nnDeepFrame);
+  const now = ts / 1000, dt = Math.min(0.05, D.last ? now - D.last : 0.016); D.last = now;
+  const dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
+  if (W !== D.W || H !== D.H) { D.W = W; D.H = H; D.cv.width = W * dpr; D.cv.height = H * dpr; }
+  const x = D.x; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  D.c += (D.target - D.c) * Math.min(1, dt * (D.on ? 1.9 : 3.2)); if (Math.abs(D.c - D.target) < 0.002) D.c = D.target;
+  if (D.turn != null && !D.drag) { D.ry += (D.turn - D.ry) * Math.min(1, dt * 3); if (Math.abs(D.turn - D.ry) < 0.002) D.turn = null; }
+  if (D.on && !D.drag && D.turn == null && !nnReduce) D.ry += dt * 0.025;
+  if (!D.drag) D.rx += (0 - D.rx) * Math.min(1, dt * 0.8);
+  const G = nn.geo, t = nnReduce ? 10 : now, CX = W / 2, CY = H * 0.46, f = Math.min(W, H) * 0.78;
+  if (!D.dust) { let s = 21; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647; D.dust = Array.from({ length: 240 }, () => { const u = rnd() * 2 - 1, a = rnd() * 6.283, q = Math.sqrt(1 - u * u), r = 0.18 + Math.pow(rnd(), 0.7) * 0.6; return { p: [Math.cos(a) * q * r, u * r, Math.sin(a) * q * r], c: rnd(), s: rnd() * 6, v: 0.4 + rnd() }; }); }
+  const cy = Math.cos(D.ry), sy = Math.sin(D.ry), cr = Math.cos(D.rx), sr = Math.sin(D.rx);
+  const rot = p => { const X = p[0] * cy + p[2] * sy, Z = -p[0] * sy + p[2] * cy; return [X, p[1] * cr - Z * sr, p[1] * sr + Z * cr]; };
+  // câmera no eixo z, olhando para -z; c = 0 é o centro da esfera
+  const proj = v => { const d = D.c - v[2]; if (d < 0.06) return null; return [CX + v[0] / d * f, CY + v[1] / d * f, 1 / d]; };
+  const inside = Math.max(0, Math.min(1, 1 - D.c / 1.2));
+  x.globalCompositeOperation = "source-over"; x.clearRect(0, 0, W, H);
+  const bgA = Math.min(1, 0.25 + inside * 0.75);
+  const bg = x.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.75);
+  bg.addColorStop(0, `rgba(58,14,44,${bgA})`); bg.addColorStop(0.55, `rgba(22,6,18,${bgA})`); bg.addColorStop(1, `rgba(8,2,6,${bgA})`);
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = "lighter";
+  const act = Math.min(1.4, (typeof energy === "number" ? energy : 0.18) + (typeof spike === "number" ? spike * 0.45 : 0));
+  const core = x.createRadialGradient(CX, CY, 0, CX, CY, f * 0.5); core.addColorStop(0, `rgba(255,150,120,${0.08 + act * 0.14})`); core.addColorStop(1, "rgba(0,0,0,0)");
+  x.fillStyle = core; x.fillRect(0, 0, W, H);
+  for (const a of G.arcs) {
+    x.beginPath(); let on = false;
+    for (let k = 0; k <= 48; k++) { const th = a.a0 + t * 0.15 + a.len * (k / 48); const P = proj(rot([0, 1, 2].map(i => (a.u[i] * Math.cos(th) + a.v[i] * Math.sin(th)) * a.r))); if (!P) { on = false; continue; } if (on) x.lineTo(P[0], P[1]); else { x.moveTo(P[0], P[1]); on = true; } }
+    const col = nnMix(NN_GOLD, NN_PINK, a.c); x.strokeStyle = nnRgba(col, 0.1); x.lineWidth = 4; x.stroke(); x.strokeStyle = nnRgba(col, 0.4); x.lineWidth = 1; x.stroke();
+  }
+  const NP = G.nodes.map(n => proj(rot(n.p)));
+  const speed = 0.5 * (1 + act * 1.6);
+  for (const q of D.dust) {
+    const dr = nnReduce ? 0 : Math.sin(t * 0.3 * q.v + q.s) * 0.04;
+    const P = proj(rot([q.p[0] * (1 + dr), q.p[1] + dr, q.p[2] * (1 + dr)])); if (!P) continue;
+    const r = Math.min(4, 0.5 + P[2] * 0.9), al = Math.min(0.85, 0.15 + P[2] * 0.25) * (0.6 + 0.4 * Math.sin(t * 1.5 + q.s)) * inside;
+    x.fillStyle = nnRgba(nnMix(NN_GOLD, NN_PINK, q.c), al); x.beginPath(); x.arc(P[0], P[1], r, 0, 7); x.fill();
+  }
+  for (const [i, j, w] of G.links) {
+    const a = NP[i], b = NP[j]; if (!a || !b) continue;
+    const near = Math.min(1, (a[2] + b[2]) / 2 * 0.9), lc = nnMix(NN_GOLD, NN_PINK, G.nodes[i].c);
+    const pa = G.nodes[i].p, pb = G.nodes[j].p, ra = Math.hypot(...pa), rb = Math.hypot(...pb);
+    x.beginPath(); let ok = true;
+    for (let k = 0; k <= 8; k++) { const u = k / 8, m = [0, 1, 2].map(d => pa[d] + (pb[d] - pa[d]) * u), l = Math.hypot(...m) || 1, rr = (ra + (rb - ra) * u) / l; const P = proj(rot(m.map(v => v * rr))); if (!P) { ok = false; break; } if (k) x.lineTo(P[0], P[1]); else x.moveTo(P[0], P[1]); }
+    if (!ok) continue;
+    x.strokeStyle = nnRgba(lc, 0.05 + 0.12 * near); x.lineWidth = 2 + 4 * near; x.stroke();
+    x.strokeStyle = nnRgba(lc, 0.2 + 0.55 * near + act * 0.1); x.lineWidth = 0.6 + 1.2 * near; x.stroke();
+    if (!nnReduce) { const u = (t * speed + w) % 1; x.fillStyle = nnRgba([255, 236, 210], 0.6 + 0.3 * near); x.beginPath(); x.arc(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, 1.2 + 1.4 * near, 0, 7); x.fill(); }
+  }
+  for (let i = 0; i < G.nodes.length; i++) {
+    const p = NP[i]; if (!p) continue;
+    const tw = 0.6 + 0.4 * Math.sin(t * 2 + G.nodes[i].s), col = nnMix(NN_GOLD, NN_PINK, G.nodes[i].c), r = Math.min(9, (1.2 + 2.6 * p[2]) * tw);
+    const gg = x.createRadialGradient(p[0], p[1], 0, p[0], p[1], r * 5); gg.addColorStop(0, nnRgba(col, 0.5)); gg.addColorStop(1, "rgba(0,0,0,0)");
+    x.fillStyle = gg; x.beginPath(); x.arc(p[0], p[1], r * 5, 0, 7); x.fill();
+    x.fillStyle = nnRgba([255, 240, 220], 0.9); x.beginPath(); x.arc(p[0], p[1], r * 0.6, 0, 7); x.fill();
+  }
+  D.AP = G.areas.map(a => proj(rot(a.p)));
+  D.AP.forEach((p, i) => {
+    if (!p) return; const sel = i === nn.sel, col = sel ? NN_PINK : NN_GOLD, r = Math.min(26, (sel ? 9 : 6.5) * Math.max(0.6, p[2]));
+    const gg = x.createRadialGradient(p[0], p[1], 0, p[0], p[1], r * 5); gg.addColorStop(0, nnRgba(col, 0.75)); gg.addColorStop(1, "rgba(0,0,0,0)");
+    x.fillStyle = gg; x.beginPath(); x.arc(p[0], p[1], r * 5, 0, 7); x.fill();
+    x.fillStyle = nnRgba([255, 242, 230], 1); x.beginPath(); x.arc(p[0], p[1], r * 0.75, 0, 7); x.fill();
+    if (sel) { x.strokeStyle = nnRgba(NN_PINK, 0.9); x.lineWidth = 1.3; x.beginPath(); x.arc(p[0], p[1], r + 12 + (nnReduce ? 0 : Math.sin(t * 4) * 3), 0, 7); x.stroke(); }
+    if (inside > 0.3) {
+      x.globalCompositeOperation = "source-over";
+      const al = Math.min(1, (inside - 0.3) / 0.5), fs = Math.round(Math.max(13, Math.min(20, Math.min(W, H) / 26)) * (sel ? 1.1 : 1));
+      x.font = `${sel ? 500 : 400} ${fs}px Jost, system-ui, sans-serif`; x.textAlign = "center"; x.lineJoin = "round";
+      const lab = nnLabel(NN_KEYS[i]).toUpperCase(), ly = p[1] + r + fs + 8;
+      x.lineWidth = 4; x.strokeStyle = nnRgba([12, 3, 10], 0.85 * al); x.strokeText(lab, p[0], ly);
+      x.fillStyle = sel ? nnRgba([255, 214, 232], al) : nnRgba([246, 226, 210], 0.9 * al); x.fillText(lab, p[0], ly);
+      x.globalCompositeOperation = "lighter";
+    }
+  });
+  x.globalCompositeOperation = "source-over";
+}
 
 /* fundo de todas as telas: poeira de luz e filamentos que ondulam devagar */
 (function bgFx(){

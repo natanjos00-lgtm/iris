@@ -168,7 +168,7 @@ addEventListener("resize", () => { sizeCore(); sizeWaves(); });
 function setCore(m){ coreMode = m; target = m === "think" ? 0.6 : m === "speak" ? 1 : m === "listen" ? 0.8 : 0.18; $("core").classList.toggle("live", m !== "idle"); }
 function drawCore(ts){
   requestAnimationFrame(drawCore);
-  if ($("v-inicio").hidden || document.hidden) return;
+  if ($("v-inicio").hidden || document.hidden || nnDeepFull()) return;
   const W = cv.getBoundingClientRect().width; if (!W) return; if (Math.abs(W - coreW) > 0.5) sizeCore();
   if (wv) { const r = wv.getBoundingClientRect(); if (Math.abs(r.width - wvW) > 0.5 || Math.abs(r.height - wvH) > 0.5) sizeWaves(); }
   energy += (target - energy) * 0.05; spike *= 0.9;
