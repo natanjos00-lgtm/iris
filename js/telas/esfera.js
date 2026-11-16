@@ -25,7 +25,8 @@ function nnInfo(k){
 
 function nnGeometry(){
   let s = 9; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  const nodes = Array.from({ length: 150 }, () => { const u = rnd() * 2 - 1, a = rnd() * 6.283, q = Math.sqrt(1 - u * u), rr = 0.82 + rnd() * 0.2; return { p: [Math.cos(a) * q * rr, u * rr, Math.sin(a) * q * rr], c: Math.pow(rnd(), 1.4), s: rnd() * 6, from: [(rnd() - 0.5) * 7, (rnd() - 0.5) * 7, (rnd() - 0.5) * 7], d: rnd() * 0.6 }; });
+  // ao abrir, cada neurônio nasce perto do centro e se expande até o lugar dele (nada voa para fora da esfera)
+  const nodes = Array.from({ length: 150 }, () => { const u = rnd() * 2 - 1, a = rnd() * 6.283, q = Math.sqrt(1 - u * u), rr = 0.82 + rnd() * 0.2; const p = [Math.cos(a) * q * rr, u * rr, Math.sin(a) * q * rr], c = Math.pow(rnd(), 1.4), sv = rnd() * 6; const k = 0.06 + rnd() * 0.22, j1 = (rnd() - 0.5) * 0.12, j2 = (rnd() - 0.5) * 0.12; return { p, c, s: sv, from: [p[0] * k + j1, p[1] * k + j2, p[2] * k - j1], d: rnd() * 0.6 }; });
   const links = []; nodes.forEach((n, i) => { const ds = nodes.map((m, j) => [Math.hypot(n.p[0] - m.p[0], n.p[1] - m.p[1], n.p[2] - m.p[2]), j]).filter(d => d[1] !== i).sort((a, b) => a[0] - b[0]); for (const [, j] of ds.slice(0, 4)) if (i < j) links.push([i, j, rnd()]); });
   const basis = n => { const t = Math.abs(n[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0]; let u = [n[1] * t[2] - n[2] * t[1], n[2] * t[0] - n[0] * t[2], n[0] * t[1] - n[1] * t[0]]; const l = Math.hypot(u[0], u[1], u[2]); u = u.map(v => v / l); return [u, [n[1] * u[2] - n[2] * u[1], n[2] * u[0] - n[0] * u[2], n[0] * u[1] - n[1] * u[0]]]; };
   const arcs = Array.from({ length: 18 }, () => { const ax = [rnd() - 0.5, rnd() - 0.5, rnd() - 0.5]; const l = Math.hypot(ax[0], ax[1], ax[2]); const b = basis(ax.map(v => v / l)); return { u: b[0], v: b[1], a0: rnd() * 6.283, len: 1 + rnd() * 2.6, r: 0.95 + rnd() * 0.12, c: Math.pow(rnd(), 1.4) }; });
@@ -49,6 +50,7 @@ function drawNeural(x, W, sp, e, mode, spike){
   const ease = v => { const k = Math.min(1, Math.max(0, v)); return 1 - Math.pow(1 - k, 3); };
   const grow = ease((t - 0.2) / 1.8), act = Math.min(1.4, e);
   x.clearRect(0, 0, W, W);
+  x.save(); x.beginPath(); x.arc(W / 2, W / 2, W / 2, 0, 7); x.clip(); // a esfera nunca vira um quadrado: tudo fica dentro do círculo
   x.globalCompositeOperation = "lighter";
   const hg = x.createRadialGradient(CX, CY, 0, CX, CY, R * 1.55); hg.addColorStop(0, `rgba(255,130,120,${0.22 + act * 0.18})`); hg.addColorStop(0.6, "rgba(255,90,140,0.06)"); hg.addColorStop(1, "rgba(0,0,0,0)");
   x.fillStyle = hg; x.beginPath(); x.arc(CX, CY, R * 1.55, 0, 7); x.fill();
@@ -100,6 +102,7 @@ function drawNeural(x, W, sp, e, mode, spike){
     }
   });
   x.globalCompositeOperation = "source-over";
+  x.restore();
 }
 
 /* área ativa: cartão e botões abaixo da esfera */
