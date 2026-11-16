@@ -94,6 +94,13 @@ function instTimeline(){
   }
   return out;
 }
+/* parcelas que ainda vão cair: as projetadas e as já lançadas em meses à frente (ex.: lidas de uma fatura) */
+function instAhead(){
+  const cur = curYM();
+  const real = fintx.filter(t => t.type === "saida" && t.month > cur && t.inst && t.inst.n > 1).map(t => ({ month:t.month, k:t.inst.k, n:t.inst.n, amount:t.amount, desc:t.desc, card:t.card, cat:t.cat, real:true }));
+  return [...real, ...instTimeline().filter(p => p.month > cur)];
+}
+function outAhead(m){ return sum(fintx.filter(t => t.type === "saida" && t.month === m && !t.fixedId && !(t.inst && t.inst.n > 1)), t => t.amount); }
 function finCalc(M){
   const cur = curYM(), inc = +fincfg.income || 0;
   const txM = fintx.filter(t => t.month === M);
@@ -120,9 +127,10 @@ function varAvg(){
 }
 function projection(n){
   const cur = curYM(), tl = instTimeline(), fx = sum(fincfg.fixed || [], f => +f.amount || 0), va = varAvg();
-  return Array.from({ length:n }, (_, i) => { const m = addM(cur, i+1); return { m, fixas:fx, parcelas:sum(tl.filter(x => x.month === m), x => x.amount), variavel:va, renda:+fincfg.income || 0 }; });
+  const ah = instAhead();
+  return Array.from({ length:n }, (_, i) => { const m = addM(cur, i+1); return { m, fixas:fx, parcelas:sum(ah.filter(x => x.month === m), x => x.amount), variavel:Math.max(va, outAhead(m)), renda:+fincfg.income || 0 }; });
 }
-function committedAhead(){ const cur = curYM(); return sum(instTimeline().filter(p => p.month > cur), p => p.amount); }
+function committedAhead(){ return sum(instAhead(), p => p.amount); }
 function avgMonthlyExpense(){
   const cur = curYM(); const ms = [1,2,3].map(n => addM(cur,-n)).filter(m => fintx.some(t => t.month === m && t.type === "saida"));
   const vals = ms.map(m => sum(fintx.filter(t => t.month === m && t.type === "saida"), t => t.amount));
@@ -147,7 +155,7 @@ function cardUse(card){
   const cur = curYM();
   const used = sum(fintx.filter(t => t.type === "saida" && t.method === "credito" && t.card === card.name && t.month === cur), t => t.amount)
              + sum(instTimeline().filter(p => p.card === card.name && p.month === cur), p => p.amount);
-  const fut = sum(instTimeline().filter(p => p.card === card.name && p.month > cur), p => p.amount);
+  const fut = sum(instAhead().filter(p => p.card === card.name), p => p.amount);
   return { used, fut, total:used + fut, limit:+card.limit || 0 };
 }
 function daysUntilDay(day){

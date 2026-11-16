@@ -112,7 +112,7 @@ function finOverview(root){
   if ((fincfg.cards || []).length) cardsC.append(h("div",{class:"legend-row"}, h("span",null, h("i",{style:"background:var(--olive)"}), "fatura do mês"), h("span",null, h("i",{style:`background:${SER.parcelas}`}), "parcelas futuras")));
 
   const instC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Parcelas em andamento")));
-  const groups = {}; instTimeline().forEach(p => { const k = normDesc(p.desc) + "|" + p.n + "|" + Math.round(p.amount); (groups[k] = groups[k] || { desc:p.desc, n:p.n, amount:p.amount, card:p.card, rest:[] }).rest.push(p); });
+  const groups = {}; instAhead().concat(instTimeline().filter(p => p.month === curYM())).forEach(p => { const k = normDesc(p.desc) + "|" + p.n + "|" + Math.round(p.amount); (groups[k] = groups[k] || { desc:p.desc, n:p.n, amount:p.amount, card:p.card, rest:[] }).rest.push(p); });
   const gl = Object.values(groups).sort((a,b) => b.amount*b.rest.length - a.amount*a.rest.length);
   if (!gl.length) instC.append(h("div",{class:"empty"},"Nenhuma compra parcelada em aberto."));
   else { const ul = h("ul",{class:"items"}); gl.slice(0,8).forEach(g => { const last = g.rest.reduce((a,p) => p.month > a ? p.month : a, ""); const firstK = Math.min(...g.rest.map(p=>p.k));
