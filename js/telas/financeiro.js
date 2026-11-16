@@ -55,7 +55,7 @@ function finOverview(root){
   const kp = h("div",{class:"card kpis"});
   const kpi = (l, v, sub, strong) => h("div",{class:"kpi"+(strong?" strong":"")}, h("span",null,l), h("b",null,v), sub ? h("small",null,sub) : null);
   kp.append(
-    kpi("Entradas", brl(c.received || c.renda), c.received ? "registradas no mês" : (c.benef ? `salário + ${brl(c.benef)} de benefícios (${plural(workInfo(M).worked, "dia trabalhado", "dias trabalhados")})` : (c.renda ? "renda planejada" : "—"))),
+    kpi("Entradas", c.renda ? brl(c.renda) : "—", [c.regular ? "salário registrado" : (c.inc ? "salário planejado" : ""), c.benef && !c.regular ? `${brl(c.benef)} de benefícios (${plural(workInfo(M).worked, "dia", "dias")})` : "", c.extra ? `${brl(c.extra)} de extras` : ""].filter(Boolean).join(" + ") || "—"),
     kpi("Gasto até agora", brl(c.spent), plural(c.out.length, "lançamento", "lançamentos")),
     kpi(M >= cur ? "Previsto até o fim do mês" : "Total do mês", brl(M >= cur ? c.forecast : c.spent), M >= cur ? `inclui ${brl(c.fixedPendSum)} em contas fixas a pagar e ${brl(c.instSum + sum(c.out.filter(t => t.inst && t.inst.n > 1), t => t.amount))} em parcelas` : null),
     kpi("Livre para gastar", c.renda ? brl(c.free) : "—", c.renda ? `depois de guardar ${fincfg.savingsPct || 0}% (${brl(c.save)})` : "precisa da renda", true),

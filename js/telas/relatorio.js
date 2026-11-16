@@ -11,7 +11,7 @@ function relMonths(){
 }
 function relData(){
   const months = relMonths(), first = months[0], last = months[months.length - 1];
-  const per = months.map(m => { const c = finCalc(m); return { m, entradas:c.received || c.renda, saidas:c.spent + (m >= curYM() ? c.fixedPendSum + c.instSum : 0), benef:c.benef || 0 }; });
+  const per = months.map(m => { const c = finCalc(m); return { m, entradas:c.renda, saidas:c.spent + (m >= curYM() ? c.fixedPendSum + c.instSum : 0), benef:c.benef || 0 }; });
   const tx = fintx.filter(t => t.month >= first && t.month <= last).sort((a,b) => (a.month + a.date) < (b.month + b.date) ? -1 : 1);
   const out = tx.filter(t => t.type === "saida");
   const byCat = {}; for (const t of out) byCat[t.cat] = (byCat[t.cat] || 0) + t.amount;

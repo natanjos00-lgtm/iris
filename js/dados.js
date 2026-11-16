@@ -31,7 +31,8 @@ const BRL0 = new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maxi
 const brl = v => BRL.format(Math.round((+v||0)*100)/100);
 const brl0 = v => BRL0.format(+v||0);
 const CATS = ["Moradia","Contas da casa","Mercado","Alimentação fora","Delivery","Transporte","Saúde","Educação","Beleza e cuidado","Lazer","Compras","Enxoval","Assinaturas","Presentes","Outros"];
-const INCATS = ["Salário","Estágio / bolsa","Freelance","Outras entradas"];
+const INCATS = ["Salário","13º salário","Estágio / bolsa","Freelance","Outras entradas"];
+const INC_REGULAR = ["Salário","Estágio / bolsa"]; // o que substitui a renda planejada; o resto (13º, freelas, estornos) soma por cima
 const METHODS = { credito:"Crédito", debito:"Débito", pix:"Pix", dinheiro:"Dinheiro", boleto:"Boleto" };
 const SER = { fixas:"#5F7A2E", parcelas:"#336FA8", variavel:"#C27840" };
 const SER_LABEL = { fixas:"Contas fixas", parcelas:"Parcelas", variavel:"Gastos do dia a dia (média)" };
@@ -143,7 +144,8 @@ function finCalc(M){
   const txM = fintx.filter(t => t.month === M);
   const out = txM.filter(t => t.type === "saida"), inn = txM.filter(t => t.type === "entrada");
   const spent = sum(out, t => t.amount), received = sum(inn, t => t.amount);
-  const renda = Math.max(received, inc);
+  const regular = sum(inn.filter(t => INC_REGULAR.includes(t.cat)), t => t.amount), extra = received - regular;
+  const renda = Math.max(regular, inc) + extra;
   const fixed = fincfg.fixed || [];
   const fixedPend = M >= cur ? fixed.filter(f => !txM.some(t => t.fixedId === f.id)) : [];
   const instM = M >= cur ? instTimeline().filter(p => p.month === M) : [];
@@ -153,7 +155,7 @@ function finCalc(M){
   const free = renda - forecast - save;
   const byCat = {}; for (const t of out) byCat[t.cat] = (byCat[t.cat] || 0) + t.amount;
   for (const p of instM) byCat[p.cat || "Compras"] = (byCat[p.cat || "Compras"] || 0) + p.amount;
-  return { M, renda, received, inc, benef, spent, fixedPend, fixedPendSum, instM, instSum, forecast, save, free, byCat, out, inn };
+  return { M, renda, received, regular, extra, inc, benef, spent, fixedPend, fixedPendSum, instM, instSum, forecast, save, free, byCat, out, inn };
 }
 function varOf(m){ return sum(fintx.filter(t => t.month === m && t.type === "saida" && !t.fixedId && !(t.inst && t.inst.n > 1)), t => t.amount); }
 function varAvg(){
