@@ -5,6 +5,7 @@
 let calEvents = [], calState = "loading", calMsg = "";
 function renderHome(){
   const t = today();
+  try { nnRefresh(); } catch {}
   renderDesk();
   $("today").textContent = longDate.format(new Date());
   const gTxt = `${greet()}${userName ? ", " + userName : ""}`;

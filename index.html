@@ -8,12 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="stylesheet" href="css/iris.css?v=27">
+<link rel="stylesheet" href="css/iris.css?v=28">
+<link rel="stylesheet" href="css/identidade.css?v=28">
 </head><body>
+<canvas id="bgfx" aria-hidden="true"></canvas>
 <title>ÍRIS</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap">
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -116,7 +118,12 @@
             <input id="askIn" type="text" placeholder="Fale com a ÍRIS ou escreva…" aria-label="Mensagem para a ÍRIS">
             <button type="submit" aria-label="Enviar"><svg class="i"><use href="#i-send"/></svg></button>
           </form>
-          <div class="core-cap" id="coreCap" aria-live="polite">Toque no círculo para ouvir a ÍRIS</div>
+          <div class="core-cap" id="coreCap" aria-live="polite">Toque no centro para ouvir a ÍRIS · arraste para girar</div>
+          <div class="nn-sel" id="nnSel">
+            <div class="nn-tx"><div class="nn-k">Área ativa</div><div class="nn-n" id="nnName">Pessoal</div><div class="nn-i" id="nnInfo" aria-live="polite"></div></div>
+            <a class="nn-go" id="nnGo" href="#pessoal">Abrir</a>
+          </div>
+          <div class="nn-chips" id="nnChips" role="group" aria-label="Escolher área"></div>
         </div>
       </section>
       <div class="cards3">
@@ -265,7 +272,7 @@
   <a href="#inicio" data-r="inicio"><svg class="i"><use href="#i-home"/></svg>Início</a>
   <button class="tb" id="tabAgenda" type="button"><svg class="i"><use href="#i-cal"/></svg>Agenda</button>
   <button class="fab" id="tabMic" type="button" aria-label="Falar com a ÍRIS"><svg class="logo"><use href="#i-logo"/></svg><i><svg class="i"><use href="#i-mic"/></svg></i></button>
-  <a href="#projetos" data-r="projetos"><svg class="i"><use href="#i-layers"/></svg>Projetos</a>
+  <a href="#entrada" data-r="entrada"><svg class="i"><use href="#i-down"/></svg>Entrada</a>
   <button class="tb" id="tabMenu" type="button"><svg class="i"><use href="#i-menu"/></svg>Menu</button>
 </nav>
 <div id="toastSlot"></div>
@@ -273,27 +280,28 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=27"></script>
-<script src="js/privacidade.js?v=27"></script>
-<script src="js/permissoes.js?v=27"></script>
-<script src="adapter.js?v=27"></script>
-<script src="js/base.js?v=27"></script>
-<script src="js/dados.js?v=27"></script>
-<script src="js/integracoes/google.js?v=27"></script>
-<script src="js/integracoes/casa.js?v=27"></script>
-<script src="js/integracoes/avisos.js?v=27"></script>
-<script src="js/integracoes/conectores.js?v=27"></script>
-<script src="js/voz.js?v=27"></script>
-<script src="js/inteligencia.js?v=27"></script>
-<script src="js/telas/inicio.js?v=27"></script>
-<script src="js/telas/area.js?v=27"></script>
-<script src="js/telas/tempo.js?v=27"></script>
-<script src="js/telas/financeiro.js?v=27"></script>
-<script src="js/telas/esvaziar.js?v=27"></script>
-<script src="js/telas/painel.js?v=27"></script>
-<script src="js/telas/aprovacoes.js?v=27"></script>
-<script src="js/telas/entrada.js?v=27"></script>
-<script src="js/telas/navegacao.js?v=27"></script>
-<script src="js/iniciar.js?v=27"></script>
+<script src="config.js?v=28"></script>
+<script src="js/privacidade.js?v=28"></script>
+<script src="js/permissoes.js?v=28"></script>
+<script src="adapter.js?v=28"></script>
+<script src="js/base.js?v=28"></script>
+<script src="js/dados.js?v=28"></script>
+<script src="js/integracoes/google.js?v=28"></script>
+<script src="js/integracoes/casa.js?v=28"></script>
+<script src="js/integracoes/avisos.js?v=28"></script>
+<script src="js/integracoes/conectores.js?v=28"></script>
+<script src="js/telas/esfera.js?v=28"></script>
+<script src="js/voz.js?v=28"></script>
+<script src="js/inteligencia.js?v=28"></script>
+<script src="js/telas/inicio.js?v=28"></script>
+<script src="js/telas/area.js?v=28"></script>
+<script src="js/telas/tempo.js?v=28"></script>
+<script src="js/telas/financeiro.js?v=28"></script>
+<script src="js/telas/esvaziar.js?v=28"></script>
+<script src="js/telas/painel.js?v=28"></script>
+<script src="js/telas/aprovacoes.js?v=28"></script>
+<script src="js/telas/entrada.js?v=28"></script>
+<script src="js/telas/navegacao.js?v=28"></script>
+<script src="js/iniciar.js?v=28"></script>
 
 </body></html>

@@ -168,57 +168,15 @@ addEventListener("resize", () => { sizeCore(); sizeWaves(); });
 function setCore(m){ coreMode = m; target = m === "think" ? 0.6 : m === "speak" ? 1 : m === "listen" ? 0.8 : 0.18; $("core").classList.toggle("live", m !== "idle"); }
 function drawCore(ts){
   requestAnimationFrame(drawCore);
-  if ($("v-inicio").hidden) return;
+  if ($("v-inicio").hidden || document.hidden) return;
   const W = cv.getBoundingClientRect().width; if (!W) return; if (Math.abs(W - coreW) > 0.5) sizeCore();
   if (wv) { const r = wv.getBoundingClientRect(); if (Math.abs(r.width - wvW) > 0.5 || Math.abs(r.height - wvH) > 0.5) sizeWaves(); }
-  const dark = document.documentElement.dataset.theme === "dark";
-  const c = W/2, R = W*0.47; cx2.clearRect(0,0,W,W);
   energy += (target - energy) * 0.05; spike *= 0.9;
   if (coreMode === "speak") { if (curSrc) spike = Math.max(spike, Math.min(1.2, audioLevel()*5)); else if (Math.random() < 0.09) spike = Math.max(spike, 0.5 + Math.random()*0.5); }
   if (coreMode === "listen" && Math.random() < 0.12) spike = Math.max(spike, 0.4 + Math.random()*0.5);
   const sp = reduceM ? 0 : ts/1000, e = Math.min(1.4, energy + spike*0.45);
-  const pulse = 1 + Math.sin(sp*(1.4 + e*4)) * 0.025 * (0.4 + e);
-  const gold = dark ? "238,178,100" : "166,112,58", hot = dark ? "255,218,160" : "196,132,66";
-  const L = a => Math.min(1, a);
-  const ring = (r, al, lw, dx, dy) => { cx2.strokeStyle = `rgba(${gold},${L(al)})`; cx2.lineWidth = lw; cx2.beginPath(); cx2.arc(c + (dx||0)*R, c + (dy||0)*R, R*r*pulse, 0, Math.PI*2); cx2.stroke(); };
-  const glowArc = (r, a0, a1, lw, al, blur) => { cx2.save(); cx2.strokeStyle = `rgba(${hot},${L(al*0.16)})`; cx2.lineWidth = lw*4.5; cx2.lineCap = "round"; cx2.beginPath(); cx2.arc(c,c,R*r*pulse,a0,a1); cx2.stroke(); cx2.shadowColor = `rgba(${hot},${L(al)})`; cx2.shadowBlur = blur; cx2.strokeStyle = `rgba(${hot},${L(al)})`; cx2.lineWidth = lw; cx2.lineCap = "round"; cx2.beginPath(); cx2.arc(c,c,R*r*pulse,a0,a1); cx2.stroke(); cx2.restore(); };
-  // fundo suave atrás dos anéis
-  const bgG = cx2.createRadialGradient(c, c, R*0.2, c, c, R*0.98);
-  if (dark) { bgG.addColorStop(0, "rgba(34,22,13,.85)"); bgG.addColorStop(0.75, "rgba(58,38,21,.55)"); bgG.addColorStop(1, "rgba(58,38,21,0)"); }
-  else { bgG.addColorStop(0, "rgba(255,250,240,.9)"); bgG.addColorStop(0.75, "rgba(240,226,203,.55)"); bgG.addColorStop(1, "rgba(240,226,203,0)"); }
-  cx2.fillStyle = bgG; cx2.beginPath(); cx2.arc(c,c,R*0.98,0,Math.PI*2); cx2.fill();
-  // anéis finos, levemente deslocados
-  cx2.lineCap = "round";
-  ring(0.99, dark ? 0.30 : 0.32, 1);
-  ring(0.935, dark ? 0.40 : 0.38, 1, -0.008, 0.01);
-  ring(0.88, dark ? 0.34 : 0.34, 1, 0.012, 0);
-  ring(0.80, dark ? 0.55 : 0.5, 1.4);
-  ring(0.745, dark ? 0.30 : 0.3, 1, -0.01, -0.006);
-  // pontilhado em rotação lenta
-  cx2.save(); cx2.setLineDash([1.1, 5.2]); cx2.lineDashOffset = -sp*3; ring(0.67, dark ? 0.7 : 0.6, 1.5); cx2.restore();
-  ring(0.60, dark ? 0.55 : 0.5, 1.3, 0.006, 0.004);
-  ring(0.52, dark ? 0.42 : 0.4, 1.1, -0.01, 0.008);
-  // arcos luminosos (crescem quando a ÍRIS ouve ou fala)
-  const dr = Math.sin(sp*0.22)*0.18 + sp*0.015, k = 0.85 + e*0.4;
-  glowArc(0.80, -1.45 + dr, -0.2 + dr + 0.3*e, 3, 0.95*k, 30);
-  glowArc(0.80, 2.15 + dr, 3.1 + dr + 0.4*e, 3.2, 0.9*k, 30);
-  glowArc(0.935, 3.45 + dr*0.6, 3.95 + dr*0.6 + 0.25*e, 2.4, 0.9*k, 20);
-  glowArc(0.745, 0.15 - dr, 0.95 - dr + 0.3*e, 2.2, 0.7*k, 18);
-  glowArc(0.60, -1.3 - dr, -0.55 - dr, 1.6, 0.6*k, 10);
-  // disco interno com brilho quente embaixo
-  const ir = R*0.395*(1 + Math.sin(sp*(1.2 + e*4))*0.012*(0.5 + e) + spike*0.03);
-  cx2.save(); cx2.beginPath(); cx2.arc(c,c,ir,0,Math.PI*2); cx2.clip();
-  const inG = cx2.createRadialGradient(c, c + ir*0.75, 0, c, c + ir*0.75, ir*1.25);
-  if (dark) { inG.addColorStop(0, `rgba(210,130,50,${0.55 + e*0.3})`); inG.addColorStop(0.55, "rgba(90,52,24,.45)"); inG.addColorStop(1, "rgba(26,17,10,.95)"); }
-  else { inG.addColorStop(0, `rgba(222,160,90,${0.55 + e*0.3})`); inG.addColorStop(0.55, "rgba(246,230,205,.7)"); inG.addColorStop(1, "rgba(255,251,244,.96)"); }
-  cx2.fillStyle = inG; cx2.fillRect(c-ir, c-ir, ir*2, ir*2); cx2.restore();
-  cx2.save(); cx2.shadowColor = `rgba(${hot},${0.5 + e*0.4})`; cx2.shadowBlur = W*0.02; cx2.strokeStyle = `rgba(${hot},${dark ? 0.85 : 0.75})`; cx2.lineWidth = 1.6; cx2.beginPath(); cx2.arc(c,c,ir,0,Math.PI*2); cx2.stroke(); cx2.restore();
-  // ondas que se expandem ao ouvir / pensar / falar
-  if (coreMode !== "idle"){
-    for (let q = 0; q < 3; q++){ const ph = ((sp*(coreMode === "think" ? 0.3 : 0.6) + q/3) % 1);
-      cx2.strokeStyle = `rgba(${hot},${(1 - ph)*0.5})`; cx2.lineWidth = 1.4; cx2.beginPath(); cx2.arc(c,c,ir + (R*0.99 - ir)*ph,0,Math.PI*2); cx2.stroke(); }
-  }
-  drawWaves(sp, e, dark, gold);
+  // a esfera neural da ÍRIS (js/telas/esfera.js) reage à energia: ouvir, pensar e falar acendem os sinais
+  drawNeural(cx2, W, sp, e, coreMode, spike);
 }
 /* fios de onda que atravessam a tela atrás do círculo */
 function drawWaves(sp, e, dark, gold){
