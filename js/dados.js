@@ -205,7 +205,11 @@ function daysUntilDay(day){
 const inDays = d => d === 0 ? "hoje" : d === 1 ? "amanhã" : `em ${d} dias`;
 /* metas com dinheiro separado (ex.: casa nova em janeiro, com o 13º) */
 function goalSaved(g){ return (+g.inicial || 0) + sum(fintx.filter(t => t.type === "entrada" && t.goal === g.id), t => t.amount); }
-function overBudget(c){ return Object.entries(fincfg.budgets || {}).map(([k, lim]) => [k, (c.byCat[k] || 0) - (+lim || 0), c.byCat[k] || 0, +lim || 0]).filter(x => x[3] > 0 && x[1] > 0).sort((a,b) => b[1] - a[1]); }
+/* onde dá para segurar: só gasto do dia a dia (sem parcelas, contas fixas nem "Outros"), comparado ao limite da categoria */
+function overBudget(c){
+  const v = {}; for (const t of c.out) if (!(t.inst && t.inst.n > 1) && !t.fixedId && t.cat !== "Outros") v[t.cat] = (v[t.cat] || 0) + t.amount;
+  return Object.entries(fincfg.budgets || {}).map(([k, lim]) => [k, (v[k] || 0) - (+lim || 0), v[k] || 0, +lim || 0]).filter(x => x[3] > 0 && x[1] > 0).sort((a,b) => b[1] - a[1]);
+}
 function goalsBrief(){
   const G = fincfg.goals || []; if (!G.length) return "nenhuma";
   const c = finCalc(curYM());
