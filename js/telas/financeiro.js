@@ -12,7 +12,7 @@ function finHeader(){
       h("b",null, ymLabel(finMonth).replace(/^./, ch => ch.toUpperCase())),
       h("button",{class:"ib",type:"button","aria-label":"Próximo mês",onclick:()=>{ finMonth = addM(finMonth,1); renderFin(); }}, "›")));
   const tabs = h("div",{class:"subtabs",role:"tablist"});
-  [["visao","Visão geral"],["lanc","Lançamentos"],["fatura","Ler fatura"],["plano","Planejamento"]].forEach(([k,l]) =>
+  [["visao","Visão geral"],["lanc","Lançamentos"],["rel","Relatório"],["fatura","Ler fatura"],["plano","Planejamento"]].forEach(([k,l]) =>
     tabs.append(h("button",{type:"button",role:"tab","aria-selected":String(finTab === k),class:finTab === k ? "on" : "",onclick:()=>{ finTab = k; renderFin(); }}, l)));
   return [v, tabs];
 }
@@ -22,7 +22,7 @@ function renderFin(){
   if (a && v.contains(a) && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.tagName === "SELECT") && finTab !== "visao") { pendingRender = true; return; }
   v.textContent = ""; v.append(...finHeader());
   const body = h("div",{class:"finbody"}); v.append(body);
-  if (finTab === "visao") finOverview(body); else if (finTab === "lanc") finLanc(body); else if (finTab === "fatura") finFatura(body); else finPlano(body);
+  if (finTab === "visao") finOverview(body); else if (finTab === "lanc") finLanc(body); else if (finTab === "fatura") finFatura(body); else if (finTab === "rel") finRel(body); else finPlano(body);
 }
 
 function finOverview(root){

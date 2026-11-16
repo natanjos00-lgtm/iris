@@ -30,7 +30,7 @@ const BRL = new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"});
 const BRL0 = new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
 const brl = v => BRL.format(Math.round((+v||0)*100)/100);
 const brl0 = v => BRL0.format(+v||0);
-const CATS = ["Moradia","Contas da casa","Mercado","Alimentação fora","Delivery","Transporte","Saúde","Educação","Beleza e cuidado","Lazer","Compras","Assinaturas","Presentes","Outros"];
+const CATS = ["Moradia","Contas da casa","Mercado","Alimentação fora","Delivery","Transporte","Saúde","Educação","Beleza e cuidado","Lazer","Compras","Enxoval","Assinaturas","Presentes","Outros"];
 const INCATS = ["Salário","Estágio / bolsa","Freelance","Outras entradas"];
 const METHODS = { credito:"Crédito", debito:"Débito", pix:"Pix", dinheiro:"Dinheiro", boleto:"Boleto" };
 const SER = { fixas:"#5F7A2E", parcelas:"#336FA8", variavel:"#C27840" };

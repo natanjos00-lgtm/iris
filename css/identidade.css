@@ -203,3 +203,37 @@ html.deep-on .hero4{overflow:clip}
 .wm-tot b{font-size:18px;font-weight:500}
 .wdays{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px}
 .wdays .chip{min-height:34px;padding:0 12px;cursor:pointer;font:inherit;font-size:13px}
+
+/* relatório financeiro */
+.rp-ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.rp-per,.rp-act{display:flex;flex-wrap:wrap;gap:8px}
+.rp-per .chip{min-height:36px;padding:0 14px;cursor:pointer;font:inherit;font-size:13.5px}
+.report{display:flex;flex-direction:column;gap:10px}
+.rp-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px}
+.rp-head .t{margin:2px 0 0}
+.rp-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:8px 0}
+.rp-k{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:14px;background:rgba(255,79,163,.07);border:1px solid var(--line)}
+.rp-k span{font-size:12.5px;color:var(--taupe)}.rp-k b{font-size:20px;font-weight:500}.rp-k small{font-size:12px;color:var(--taupe)}
+.rp-k.neg b,.rp-t .neg{color:#FF8CA8}.rp-k.pos b{color:var(--olive)}
+.rp-h{font-family:var(--f-title);font-weight:500;font-size:17px;margin:14px 0 2px}
+.rp-t{width:100%;border-collapse:collapse;font-size:14px}
+.rp-t th{text-align:left;font-weight:500;font-size:12px;color:var(--taupe);padding:6px 8px;border-bottom:1px solid var(--line)}
+.rp-t td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top;position:relative}
+.rp-t .n{text-align:right;white-space:nowrap}
+.rp-t tr.over td:nth-child(3){color:#FF8CA8}
+.rp-bar{display:block;height:3px;width:var(--w);border-radius:2px;background:var(--grad);margin-bottom:4px}
+.rp-tx td{font-size:13px}
+.rp-an{white-space:pre-wrap;line-height:1.5;margin:0}
+.report{overflow-x:auto}
+#printRoot{display:none}
+@media print{
+  html.print-report body>*:not(#printRoot){display:none!important}
+  html.print-report #printRoot{display:block!important}
+  html.print-report,html.print-report body{background:#fff!important;color:#1d1218!important}
+  #printRoot .report{--ink:#1d1218;--taupe:#6b5862;--line:#e4d6dd;--olive:#B8336A;color:#1d1218;overflow:visible}
+  #printRoot .rp-k{background:#faf4f7;border-color:#e4d6dd}
+  #printRoot .rp-bar{background:#c9567f;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printRoot .rp-t tr{break-inside:avoid}
+  #printRoot .rp-h{break-after:avoid}
+  @page{margin:14mm}
+}
