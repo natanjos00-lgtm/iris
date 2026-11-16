@@ -472,7 +472,45 @@ function finPlano(root){
   pdC.append(pf, h("div",{class:"wdays",role:"group","aria-label":"Dias da semana em que você trabalha"}, h("span",{class:"muted small"},"Trabalho em:"),
     ...[1,2,3,4,5,6,0].map(d => h("button",{type:"button",class:"chip"+(wd.includes(d)?" on":""),"aria-pressed":String(wd.includes(d)),onclick:()=>cfgSave({ workDays: wd.includes(d) ? wd.filter(x => x !== d) : [...wd, d].sort() }, true)}, DOW[d]))));
 
-  root.append(h("div",{class:"home"}, h("div",{class:"stack"}, basics, pdC), h("div",{class:"stack"}, cardsC, fxC)));
+  // holerite e 13º
+  const ps = Object.assign({ salarioBase:0, anuenio:0, inss:0, vtDesconto:0, irrf:0 }, c.payslip || {});
+  const bruto = (+ps.salarioBase || 0) + (+ps.anuenio || 0), liq = bruto - (+ps.inss || 0) - (+ps.vtDesconto || 0) - (+ps.irrf || 0);
+  const row = (l, v, cls) => h("li",{class:"hl-r" + (cls ? " " + cls : "")}, h("span",null,l), h("b",null,v));
+  const hlC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Holerite"), ps.mes ? h("span",{class:"hint"}, `referência: ${ymLabel(ps.mes)}`) : null));
+  if (bruto) hlC.append(h("ul",{class:"hl"},
+    row("Salário base", brl(ps.salarioBase)), +ps.anuenio ? row("Anuênio", "+ " + brl(ps.anuenio)) : null, row("Bruto", brl(bruto), "sub"),
+    row("INSS", "− " + brl(ps.inss || 0)), +ps.vtDesconto ? row("Vale-transporte (sua parte)", "− " + brl(ps.vtDesconto)) : null,
+    row("IRRF", +ps.irrf ? "− " + brl(ps.irrf) : "R$ 0,00 · isento até R$ 5 mil"), row("Líquido", brl(liq), "tot"),
+    (+ps.vaEmpresa || +ps.vtEmpresa) ? h("li",{class:"muted small",style:"padding-top:6px"}, `Benefícios pagos pela empresa no mês: ${[+ps.vaEmpresa ? "alimentação " + brl(ps.vaEmpresa) : "", +ps.vtEmpresa ? "transporte " + brl(ps.vtEmpresa) : ""].filter(Boolean).join(" · ")}. Eles entram em "Recebo por dia trabalhado".`) : null,
+    Math.abs(liq - (+c.income || 0)) > 0.01 ? h("li",null, h("button",{class:"btn ghost",type:"button",style:"margin-top:8px",onclick:()=>cfgSave({ income: Math.round(liq * 100) / 100 })}, `Usar ${brl(liq)} como renda mensal`)) : h("li",{class:"muted small",style:"padding-top:6px"},"A renda mensal do planejamento usa este líquido.")));
+  else hlC.append(h("div",{class:"empty"},"Cadastre os valores do seu contracheque para a ÍRIS calcular o líquido e o 13º."));
+  const hf = h("form",{class:"lgrid",style:"margin-top:12px",autocomplete:"off"},
+    h("label",null,"Mês de referência", h("input",{type:"month",id:"hMes",value:ps.mes || curYM()})),
+    h("label",null,"Salário base (R$)", h("input",{type:"number",id:"hBase",step:"0.01",min:"0",value:ps.salarioBase || ""})),
+    h("label",null,"Adicionais / anuênio (R$)", h("input",{type:"number",id:"hAn",step:"0.01",min:"0",value:ps.anuenio || ""})),
+    h("label",null,"INSS (R$)", h("input",{type:"number",id:"hInss",step:"0.01",min:"0",value:ps.inss || ""})),
+    h("label",null,"Desconto do vale-transporte (R$)", h("input",{type:"number",id:"hVt",step:"0.01",min:"0",value:ps.vtDesconto || ""})),
+    h("label",null,"IRRF (R$)", h("input",{type:"number",id:"hIr",step:"0.01",min:"0",value:ps.irrf || "",placeholder:"0"})),
+    h("div",{style:"display:flex;align-items:flex-end"}, h("button",{class:"btn ghost",type:"submit"},"Salvar holerite")));
+  hf.onsubmit = e => { e.preventDefault(); const np = Object.assign({}, c.payslip || {}, { mes:$("hMes").value || curYM(), salarioBase:+$("hBase").value || 0, anuenio:+$("hAn").value || 0, inss:+$("hInss").value || 0, vtDesconto:+$("hVt").value || 0, irrf:+$("hIr").value || 0 });
+    np.bruto = np.salarioBase + np.anuenio; np.liquido = Math.round((np.bruto - np.inss - np.vtDesconto - np.irrf) * 100) / 100; cfgSave({ payslip:np }); };
+  const det = h("details",{class:"hl-edit"}, h("summary",null, bruto ? "Atualizar valores do holerite" : "Preencher holerite"), hf); hlC.append(det);
+
+  // 13º salário
+  const y = +curYM().slice(0,4), adm = ps.admissao ? new Date(ps.admissao + "T12:00:00") : null;
+  const avos = adm && adm.getFullYear() === y ? Math.max(0, 12 - adm.getMonth() - (adm.getDate() > 15 ? 1 : 0)) : 12;
+  const b13 = bruto * avos / 12, p1 = Math.round(b13 / 2 * 100) / 100, inss13 = avos === 12 ? (+ps.inss || 0) : Math.round((+ps.inss || 0) * avos / 12 * 100) / 100, p2 = Math.round((b13 - p1 - inss13 - 0) * 100) / 100;
+  const t13 = fintx.filter(t => t.type === "entrada" && t.cat === "13º salário" && t.month && t.month.startsWith(String(y)));
+  const d13 = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"}, `13º salário de ${y}`), bruto ? h("span",{class:"hint"}, `${avos}/12 avos`) : null));
+  if (!bruto) d13.append(h("div",{class:"empty"},"Preencha o holerite para ver o 13º."));
+  else { d13.append(h("ul",{class:"hl"}, row("Base (bruto)", brl(b13)),
+      row(`1ª parcela · até 30/11`, brl(p1)), h("li",{class:"muted small"},"50% do bruto, sem INSS nem IRRF."),
+      row(`2ª parcela · até 20/12`, brl(p2)), h("li",{class:"muted small"}, `Bruto − 1ª parcela − INSS (${brl(inss13)}). IRRF: R$ 0, isento até R$ 5 mil.`),
+      row("Total líquido", brl(p1 + p2), "tot")));
+    d13.append(t13.length ? h("p",{class:"muted small",style:"margin:10px 0 0"}, `Lançado no Financeiro: ${t13.map(t => `${brl(t.amount)} em ${ymLabel(t.month).split(" ")[0]}`).join(" e ")}.`)
+      : h("button",{class:"btn ghost",type:"button",style:"margin-top:10px",onclick:async()=>{ await txAdd({ type:"entrada", amount:p1, desc:"13º salário — 1ª parcela", cat:"13º salário", method:"pix", date:y + "-11-30", month:y + "-11" }); await txAdd({ type:"entrada", amount:p2, desc:"13º salário — 2ª parcela", cat:"13º salário", method:"pix", date:y + "-12-18", month:y + "-12" }); toast("13º lançado em novembro e dezembro."); renderFin(); }}, "Lançar as duas parcelas no Financeiro")); }
+
+  root.append(h("div",{class:"home"}, h("div",{class:"stack"}, basics, hlC, d13, pdC), h("div",{class:"stack"}, cardsC, fxC)));
 }
 
 /* resumo no início */

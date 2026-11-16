@@ -237,3 +237,9 @@ html.deep-on .hero4{overflow:clip}
   #printRoot .rp-h{break-after:avoid}
   @page{margin:14mm}
 }
+.hl{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column}
+.hl-r{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.hl-r b{font-weight:500;white-space:nowrap}
+.hl-r.sub b,.hl-r.sub span{color:var(--ink-2)}
+.hl-r.tot{border-bottom:0;padding-top:10px}.hl-r.tot span{font-weight:500}.hl-r.tot b{font-size:19px;color:var(--olive)}
+.hl-edit{margin-top:12px}.hl-edit summary{cursor:pointer;color:var(--olive);font-size:14px}
