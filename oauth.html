@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ÍRIS</title>
+<body style="background:#F4EBDD;font-family:-apple-system,'Segoe UI',sans-serif;color:#4a4237;display:grid;place-items:center;min-height:100vh;margin:0">
+<p>Voltando para a ÍRIS…</p>
+<script>
+// Recebe a permissão do Google (volta do login do Google, no app instalado) e devolve para a ÍRIS.
+(function(){
+  var p = new URLSearchParams(location.hash.slice(1));
+  try {
+    var expected = localStorage.getItem("iris.gstate"); localStorage.removeItem("iris.gstate");
+    if (!expected || p.get("state") !== expected) localStorage.setItem("iris.gerr", "state");
+    else if (p.get("error")) localStorage.setItem("iris.gerr", p.get("error"));
+    else if (p.get("access_token")) localStorage.setItem("iris.gtok", JSON.stringify({ tok:p.get("access_token"), exp:Date.now() + (Number(p.get("expires_in")) || 3600) * 1000 }));
+    else localStorage.setItem("iris.gerr", "sem_token");
+  } catch (e) {}
+  history.replaceState(null, "", location.pathname);
+  location.replace("./");
+})();
+</script>

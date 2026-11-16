@@ -47,14 +47,14 @@ function watchMail(){
 }
 
 /* ---------- LEVAR PARA A AGENDA (criar evento) ---------- */
-async function createEvent({ title, date, start, end, allDay, location }){
+async function createEvent({ title, date, start, end, allDay, location, itemId }){
   const input = { summary:String(title).slice(0,200), timeZone:TZ };
   if (allDay) { input.allDay = true; input.startTime = date + "T00:00:00"; input.endTime = addDays(date,1) + "T00:00:00"; }
   else { input.startTime = `${date}T${start}:00`; input.endTime = `${date}T${end}:00`; }
   if (location) input.location = String(location).slice(0,200);
   if (!mcp) { // versão fora do Claude: API do Google Agenda, com a permissão de criar eventos
-    let tok;
-    try { tok = await calToken(false); } catch { tok = await calToken(true); }
+    // Sem nenhuma espera antes: o pedido de permissão sai no mesmo toque, senão o iPhone bloqueia a janela do Google.
+    const tok = await googleToken("cal", "", true, { kind:"event", ev:{ title, date, start, end, allDay, location, itemId } });
     const body = { summary:input.summary, location:input.location };
     if (allDay) { body.start = { date }; body.end = { date:addDays(date,1) }; } else { body.start = { dateTime:`${date}T${start}:00`, timeZone:TZ }; body.end = { dateTime:`${date}T${end}:00`, timeZone:TZ }; }
     const r = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", { method:"POST", headers:{ Authorization:"Bearer " + tok, "Content-Type":"application/json" }, body:JSON.stringify(body) });
@@ -96,10 +96,11 @@ function openCalDialog(pre){
     if (!title || !date) { err.hidden = false; err.textContent = "Preencha o título e o dia."; return; }
     if (!allDay && (!start || !end || end <= start)) { err.hidden = false; err.textContent = "O horário de término precisa ser depois do início."; return; }
     $("evGo").disabled = true; $("evGo").textContent = "Criando…";
-    try { await createEvent({ title, date, start, end, allDay, location:$("evL").value.trim() });
+    try { await createEvent({ title, date, start, end, allDay, location:$("evL").value.trim(), itemId:pre.itemId });
       if (pre.itemId) await updateItem(pre.itemId, { onCal:true, date });
       close(); toast("Evento criado no Google Agenda."); }
-    catch (x) { err.hidden = false; err.textContent = x.code === "no_client" || x.code === "no_gis" ? "O Google não carregou. Recarregue a página e tente de novo." : x.code === "popup_closed" || x.code === "access_denied" ? "A permissão do Google Agenda não foi dada." : x.code === "cal_api" ? "A API do Google Agenda não está ligada no Google Cloud (Ativar em APIs e serviços)." : x.code === "cal_scope" ? "Faltou a permissão de criar eventos. Toque em Criar evento de novo e aceite no Google." : x.code === "http_403" ? "O Google Agenda recusou" + (x.detail ? ": " + x.detail : ". Confira a API do Google Agenda no Google Cloud.") : x.code === "http_401" ? "A permissão expirou. Tente de novo." : x.code === "approval_required" ? "O claude.ai precisa da sua permissão para criar eventos. Tente de novo e permita." : x.code === "server_unavailable" || x.code === "upstream_error" ? "A agenda não confirmou. Confira no Google Agenda antes de tentar de novo, para não duplicar." : calErr(x.code);
+    catch (x) { if (x && x.code === "redirect") { $("evGo").textContent = "Abrindo o Google…"; return; }
+      err.hidden = false; err.textContent = x.code === "no_client" || x.code === "no_gis" ? "O Google não carregou. Recarregue a página e tente de novo." : x.code === "popup_closed" || x.code === "access_denied" ? "A permissão do Google Agenda não foi dada." : x.code === "popup_failed_to_open" ? "O navegador bloqueou a janela do Google. Libere pop-ups para este site e tente de novo." : x.code === "cal_api" ? "A API do Google Agenda não está ligada no Google Cloud (Ativar em APIs e serviços)." : x.code === "cal_scope" ? "Faltou a permissão de criar eventos. Toque em Criar evento de novo e aceite no Google." : x.code === "http_403" ? "O Google Agenda recusou" + (x.detail ? ": " + x.detail : ". Confira a API do Google Agenda no Google Cloud.") : x.code === "http_401" ? "A permissão expirou. Tente de novo." : x.code === "approval_required" ? "O claude.ai precisa da sua permissão para criar eventos. Tente de novo e permita." : x.code === "server_unavailable" || x.code === "upstream_error" ? "A agenda não confirmou. Confira no Google Agenda antes de tentar de novo, para não duplicar." : calErr(x.code) + (x && x.code ? " (código: " + x.code + ")" : "");
       $("evGo").disabled = false; $("evGo").textContent = "Criar evento"; }
   };
   setTimeout(() => $("evT").focus(), 0);
@@ -145,19 +146,45 @@ const gToks = {};
 const G_SCOPE = "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.events";
 function gLoad(){ try { const t = JSON.parse(localStorage.getItem("iris.gtok") || "null"); if (t && t.tok && Date.now() < t.exp - 60000) return t; } catch {} return null; }
 async function gHint(){ try { const { data } = await window.irisSb.auth.getSession(); return (data && data.session && data.session.user && data.session.user.email) || undefined; } catch { return undefined; } }
-function googleToken(kind, scope, interactive){
-  return new Promise(async (res, rej) => {
+function googleToken(kind, scope, interactive, pending){
+  return new Promise((res, rej) => {
     const t = gToks.all && Date.now() < gToks.all.exp - 60000 ? gToks.all : gLoad();
     if (t) { gToks.all = t; return res(t.tok); }
     const cid = window.IRIS_CONFIG && window.IRIS_CONFIG.GOOGLE_CLIENT_ID;
     if (!cid) return rej({ code:"no_client" });
+    // Sem toque da pessoa, uma janela do Google seria bloqueada: só usa a permissão já guardada.
+    if (!interactive) return rej({ code:"no_token" });
+    // No app instalado na tela inicial, a janelinha do Google não devolve a permissão: vai e volta pela página.
+    if (IS_STANDALONE) { gRedirect(pending || { kind }); return rej({ code:"redirect" }); }
     if (!(window.google && google.accounts && google.accounts.oauth2)) return rej({ code:"no_gis" });
-    const hint = await gHint();
-    const c = google.accounts.oauth2.initTokenClient({ client_id:cid, scope:G_SCOPE, hint, include_granted_scopes:true,
+    const c = google.accounts.oauth2.initTokenClient({ client_id:cid, scope:G_SCOPE, hint:gHintVal, include_granted_scopes:true,
       callback: r => { if (r.error) return rej({ code:r.error }); const o = { tok:r.access_token, exp:Date.now() + (r.expires_in || 3600) * 1000 }; gToks.all = o; try { localStorage.setItem("iris.gtok", JSON.stringify(o)); } catch {} store.set("iris.g_gmail", true); res(r.access_token); },
       error_callback: e => rej({ code:(e && e.type) || "popup" }) });
     c.requestAccessToken({ prompt: interactive ? "" : "none" });
   });
+}
+const IS_STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+let gHintVal; gHint().then(v => { gHintVal = v; });
+function gRedirect(pending){
+  const cid = window.IRIS_CONFIG && window.IRIS_CONFIG.GOOGLE_CLIENT_ID;
+  const state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  try { localStorage.setItem("iris.gstate", state); localStorage.removeItem("iris.gerr"); localStorage.setItem("iris.gpending", JSON.stringify(pending || {})); } catch {}
+  const q = { client_id:cid, redirect_uri:new URL("oauth.html", location.href).href, response_type:"token", scope:G_SCOPE, include_granted_scopes:"true", state };
+  if (gHintVal) q.login_hint = gHintVal;
+  location.assign("https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams(q));
+}
+/* volta do Google (app instalado): termina o que ficou pendente antes de sair */
+async function resumeGoogle(){
+  let pend = null, gerr = null;
+  try { pend = JSON.parse(localStorage.getItem("iris.gpending") || "null"); gerr = localStorage.getItem("iris.gerr"); localStorage.removeItem("iris.gpending"); localStorage.removeItem("iris.gerr"); } catch {}
+  if (gerr) { toast(gerr === "access_denied" ? "A permissão do Google não foi dada." : "O Google não devolveu a permissão (código: " + gerr + ")."); return; }
+  if (!pend || !gLoad()) return;
+  store.set("iris.g_gmail", true);
+  loadGmail(false);
+  if (pend.kind === "event" && pend.ev) {
+    try { await createEvent(pend.ev); if (pend.ev.itemId) await updateItem(pend.ev.itemId, { onCal:true, date:pend.ev.date }); toast("Evento criado no Google Agenda."); }
+    catch (x) { toast("Não consegui criar o evento (código: " + ((x && x.code) || "erro") + ")."); }
+  }
 }
 function gForget(){ gToks.all = null; try { localStorage.removeItem("iris.gtok"); } catch {} }
 const gmailToken = interactive => googleToken("gmail", "", interactive);
@@ -175,6 +202,7 @@ async function loadGmail(interactive){
     mailState = "ok"; mailNeedsLink = false;
   } catch (e) {
     mailState = "error"; mailNeedsLink = true;
+    if (e && e.code === "redirect") return;
     mailMsg = e && e.code === "no_client" ? "O Gmail ainda não foi configurado no Google Cloud." : (e && (e.code === "popup_closed" || e.code === "access_denied")) ? "A permissão do Gmail não foi dada." : "Ligue o Gmail para ver aqui os e-mails importantes.";
   }
   renderInbox();
