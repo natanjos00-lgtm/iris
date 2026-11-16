@@ -155,8 +155,11 @@
     const role = m.role === "assistant" ? "model" : "user"; const last = out[out.length - 1];
     if (last && last.role === role && !last.parts.some(p => !p.text)) last.parts.push({ text: m.content }); else out.push({ role, parts: [{ text: m.content }] }); } return out; };
 
+  /* Toda chamada à IA passa pela privacidade: CPF, cartões e valores saem como marcadores e voltam reais só na tela. */
+  const priv = () => (window.irisPrivacy ? window.irisPrivacy.session() : { maskContents: c => c, maskDeep: v => v, unmask: t => t, unmaskDeep: v => v, mask: t => t });
   const sample = async (messages, opts = {}) => {
-    const contents = toContents(messages);
+    const P = priv();
+    const contents = P.maskContents(toContents(messages));
     const tools = Array.isArray(opts.tools) && opts.tools.length ? opts.tools : null;
     for (let step = 0; step < 7; step++) {
       if (opts.signal && opts.signal.aborted) throw { code: "cancelled" };
@@ -166,23 +169,26 @@
         const parts = [];
         for (const fc of d.functionCalls) {
           const t = tools.find(x => x.name === fc.name); let resp;
-          try { const r = t ? await t.execute(fc.args || {}, { signal: opts.signal }) : { erro: "ferramenta desconhecida" }; resp = { result: r === undefined ? "ok" : r }; }
+          try { const r = t ? await t.execute(P.unmaskDeep(fc.args || {}), { signal: opts.signal }) : { erro: "ferramenta desconhecida" }; resp = { result: r === undefined ? "ok" : r }; }
           catch (e) { resp = { erro: String((e && e.message) || e || "falhou") }; }
-          parts.push({ functionResponse: { name: fc.name, response: resp } });
+          parts.push({ functionResponse: { name: fc.name, response: P.maskDeep(resp) } });
         }
         contents.push({ role: "user", parts });
         continue;
       }
-      if (opts.onText) opts.onText({ text: d.text, delta: d.text });
-      return { text: d.text, truncated: !!d.truncated };
+      const text = P.unmask(d.text);
+      if (opts.onText) opts.onText({ text, delta: text });
+      return { text, truncated: !!d.truncated };
     }
     return { text: "Fiz o que consegui por aqui. Me diga se quer que eu continue.", truncated: false };
   };
   sample.limits = async () => ({ tools: true, images: { maxCount: 4, mediaTypes: ["image/png", "image/jpeg", "image/webp"] } });
   sample.json = async (prompt, opts = {}) => {
     const images = opts.images ? await Promise.all(opts.images.map(blobToB64)) : [];
-    const d = await callFn("chat", { messages: [{ role: "user", content: prompt }], json: true, images });
-    try { return JSON.parse(d.text); } catch { const m = d.text.match(/[\[{][\s\S]*[\]}]/); if (m) return JSON.parse(m[0]); throw { code: "bad_json" }; }
+    const P = priv();
+    const d = await callFn("chat", { messages: [{ role: "user", content: P.mask(prompt) }], json: true, images });
+    let out; try { out = JSON.parse(d.text); } catch { const m = d.text.match(/[\[{][\s\S]*[\]}]/); if (m) out = JSON.parse(m[0]); else throw { code: "bad_json" }; }
+    return P.unmaskDeep(out);
   };
 
 
