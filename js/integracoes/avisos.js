@@ -39,3 +39,16 @@ async function openNotif(){
   refresh();
 }
 $("notifBtn").onclick = openNotif;
+
+/* ao abrir o app com avisos permitidos, confirma a inscrição deste aparelho (o iPhone às vezes troca o endereço sem avisar) */
+addEventListener("load", () => setTimeout(async () => {
+  try {
+    if (!pushOk() || Notification.permission !== "granted" || !window.irisSb) return;
+    const key = window.IRIS_CONFIG && window.IRIS_CONFIG.VAPID_PUBLIC_KEY; if (!key) return;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64u(key) });
+    const j = sub.toJSON();
+    await window.irisSb.from("push_subs").upsert({ endpoint:j.endpoint, p256dh:j.keys.p256dh, auth:j.keys.auth, ua:navigator.userAgent.slice(0,180) }, { onConflict:"endpoint" });
+  } catch {}
+}, 4000));
