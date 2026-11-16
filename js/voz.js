@@ -211,7 +211,10 @@ function localBrief(){
   s += ev.length ? `Você tem ${ev.length === 1 ? "um compromisso" : ev.length + " compromissos"} hoje, o primeiro às ${ev[0].time}. ` : "Sua agenda está livre hoje. ";
   if (focus.length) s += `No foco: ${focus.map(f => f.title).slice(0,2).join(" e ")}. `;
   else { const nx = nextFor(); if (nx) s += `Se quiser um próximo passo, que tal: ${nx.title}? `; }
-  const c = finCalc(curYM()); if (c.renda) s += c.free >= 0 ? `Ainda há ${brl0(c.free)} livres no mês. ` : `O mês está um pouco apertado; vale olhar o financeiro com calma. `;
+  const c = finCalc(curYM());
+  try { const g = (fincfg.goals || []).find(x => goalSaved(x)); const ob = overBudget(c)[0];
+    if (g && c.free < 0) { s += `Lembra que ${brl0(goalSaved(g))} estão separados para ${g.nome.toLowerCase()}; o mês já passou ${brl0(-c.free)} do que entra. `; if (ob) s += `Hoje, segurar ${ob[0].toLowerCase()} já ajuda: está em ${brl0(ob[2])}, para um limite de ${brl0(ob[3])}. `; return s + "Estou por aqui."; } } catch {}
+  if (c.renda) s += c.free >= 0 ? `Ainda há ${brl0(c.free)} livres no mês. ` : `O mês está um pouco apertado; vale olhar o financeiro com calma. `;
   return s + "Estou por aqui.";
 }
 async function coreTalk(){
@@ -220,7 +223,7 @@ async function coreTalk(){
   setCore("think"); $("coreCap").textContent = "Pensando no que te dizer…";
   let text = localBrief();
   if (sample) { coreAbort = new AbortController();
-    try { const r = await sample(`${persona()}\n\nEla acabou de tocar no núcleo para ouvir você. Fale com ela em voz alta, em 2 a 4 frases curtas e naturais (no máximo 60 palavras): cumprimente pelo nome, diga como está o dia (compromissos e foco), traga uma observação útil das listas ou das finanças se houver algo relevante, e sugira um próximo passo possível. Sem listas, sem markdown, sem emojis.${SPOKEN}`, { modelTier:"quick", signal:coreAbort.signal, cache:{ gcTime:600000 } }); text = r.text.trim() || text; }
+    try { const r = await sample(`${persona()}\n\nEla acabou de tocar no núcleo para ouvir você. Fale com ela em voz alta, em 2 a 4 frases curtas e naturais (no máximo 60 palavras): cumprimente pelo nome, diga como está o dia (compromissos e foco), traga uma observação útil das listas, e se houver meta financeira (como a casa) ou categoria acima do limite, dê uma sugestão concreta e pequena para hoje que proteja esse dinheiro, e sugira um próximo passo possível. Sem listas, sem markdown, sem emojis.${SPOKEN}`, { modelTier:"quick", signal:coreAbort.signal, cache:{ gcTime:600000 } }); text = r.text.trim() || text; }
     catch (e) { if (e.code === "cancelled") return; } }
   $("coreCap").textContent = text;
   sayWithWaves(text);

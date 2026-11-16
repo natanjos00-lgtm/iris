@@ -55,7 +55,7 @@ function finOverview(root){
   const kp = h("div",{class:"card kpis"});
   const kpi = (l, v, sub, strong) => h("div",{class:"kpi"+(strong?" strong":"")}, h("span",null,l), h("b",null,v), sub ? h("small",null,sub) : null);
   kp.append(
-    kpi("Entradas", c.renda ? brl(c.renda) : "—", [c.regular ? "salário registrado" : (c.inc ? "salário planejado" : ""), c.benef && !c.regular ? `${brl(c.benef)} de benefícios (${plural(workInfo(M).worked, "dia", "dias")})` : "", c.extra ? `${brl(c.extra)} de extras` : ""].filter(Boolean).join(" + ") || "—"),
+    kpi("Entradas", c.renda ? brl(c.renda) : "—", [c.regular ? "salário registrado" : (c.inc ? "salário planejado" : ""), c.benef && !c.regular ? `${brl(c.benef)} de benefícios (${plural(workInfo(M).worked, "dia", "dias")})` : "", c.extra ? `${brl(c.extra)} de extras` : ""].filter(Boolean).join(" + ") + (c.earmarked ? ` · ${brl(c.earmarked)} separados para metas, fora daqui` : "") || "—"),
     kpi("Gasto até agora", brl(c.spent), plural(c.out.length, "lançamento", "lançamentos")),
     kpi(M >= cur ? "Previsto até o fim do mês" : "Total do mês", brl(M >= cur ? c.forecast : c.spent), M >= cur ? `inclui ${brl(c.fixedPendSum)} em contas fixas a pagar e ${brl(c.instSum + sum(c.out.filter(t => t.inst && t.inst.n > 1), t => t.amount))} em parcelas` : null),
     kpi("Livre para gastar", c.renda ? brl(c.free) : "—", c.renda ? `depois de guardar ${fincfg.savingsPct || 0}% (${brl(c.save)})` : "precisa da renda", true),
@@ -113,6 +113,12 @@ function finOverview(root){
   if ((fincfg.cards || []).length) cardsC.append(h("div",{class:"legend-row"}, h("span",null, h("i",{style:"background:var(--olive)"}), "fatura do mês"), h("span",null, h("i",{style:`background:${SER.parcelas}`}), "parcelas futuras")));
 
   const ahead = committedAhead();
+  const goalC = (fincfg.goals || []).length ? h("div",{class:"card goalc"}, ...(fincfg.goals || []).map(g => { const sv = goalSaved(g), cc = finCalc(curYM()), ob = overBudget(cc).slice(0,2);
+    return h("div",null, h("div",{class:"card-h"}, h("h2",{class:"t"}, g.nome), g.mes ? h("span",{class:"hint"}, ymLabel(g.mes)) : null),
+      h("div",{class:"goal-v"}, h("b",null, brl(sv)), h("span",null, +g.alvo ? `de ${brl(g.alvo)}` : "separados")),
+      +g.alvo ? h("div",{class:"track"}, h("i",{class:"fill",style:`width:${Math.min(100, sv / g.alvo * 100).toFixed(1)}%`})) : null,
+      h("p",{class:"muted small",style:"margin:8px 0 0"}, cc.free < 0 ? `Esse dinheiro fica fora do livre para gastar. ${ymLabel(cc.M).split(" ")[0].replace(/^./, x => x.toUpperCase())} está ${brl(-cc.free)} acima do que entra; se continuar assim, a diferença sai daqui.${ob.length ? " Onde dá para segurar: " + ob.map(x => `${x[0]} (${brl(x[2])} de ${brl(x[3])})`).join(" e ") + "." : ""}` : "Esse dinheiro fica fora do livre para gastar. O mês está cabendo no que entra."));
+  })) : null;
   const instC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Parcelas em andamento"), ahead ? h("span",{class:"hint"}, `${brl(ahead)} a pagar nos próximos meses`) : null));
   const groups = {}; instAhead().concat(instTimeline().filter(p => p.month === curYM())).forEach(p => { const k = normDesc(p.desc) + "|" + p.n + "|" + Math.round(p.amount); (groups[k] = groups[k] || { desc:p.desc, n:p.n, amount:p.amount, card:p.card, rest:[] }).rest.push(p); });
   const gl = Object.values(groups).sort((a,b) => b.amount*b.rest.length - a.amount*a.rest.length);
@@ -132,6 +138,7 @@ function finOverview(root){
       h("b",{style:"font-weight:500"}, brl(fixedAmt(f, M))))); });
     fxC.append(ul); }
 
+  if (goalC) side.append(goalC);
   side.append(cardsC, fxC, instC);
   const grid = h("div",{class:"home",style:"margin-top:22px"}, h("div",{class:"stack"}, ac, cc, pc, anc), side);
   root.append(grid);

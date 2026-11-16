@@ -13,6 +13,7 @@ Ferramentas: use-as para ler agenda, e-mails e as listas dela, para adicionar ou
 Agora: ${longDate.format(new Date())}, ${hmFmt.format(new Date())} (fuso America/Sao_Paulo). Hoje = ${today()}.
 Resumo das listas dela: ${JSON.stringify(snapshotForAI()).slice(0, 6000)}
 Finanças (mês atual): ${(() => { try { const c = finCalc(curYM()); return `renda ${brl(c.renda)}, gasto ${brl(c.spent)}, previsto ${brl(c.forecast)}, livre ${brl(c.free)}`; } catch { return "{}"; } })()}
+Metas com dinheiro separado: ${(() => { try { return goalsBrief(); } catch { return "nenhuma"; } })()}. Quando houver meta, ajude a protegê-la: no resumo do dia ou quando o assunto for dinheiro, sugira um corte concreto e pequeno para hoje, a partir das categorias acima do limite (resumo_financeiro traz acimaDoLimite), sem sermão.
 Casa e enxoval (app House to Home, só leitura): ${casaBrief()}
 Agenda dos próximos dias: ${JSON.stringify(calEvents.slice(0,20).map(e => ({ t:e.title, dia:e.day, hora:e.time||"dia todo" })))}`;
 }
@@ -163,7 +164,7 @@ $("chatForm").onsubmit = e => { e.preventDefault(); if (voiceOn) ensureAudio(); 
 const PROTOS = {
   clareza: "Protocolo Clareza: minha cabeça está cheia e confusa. Me ajuda a organizar os pensamentos? Faça no máximo duas perguntas antes de propor algo.",
   calma: "Protocolo Calma: estou sobrecarregada. Olhe minhas listas e minha agenda e me diga o que realmente precisa ser feito hoje, o que pode esperar e o que posso soltar.",
-  briefing: "Me dá o briefing do dia: compromissos, as prioridades que fazem sentido hoje e se tem algum e-mail na caixa principal que pede atenção (ignore propaganda e notificações automáticas).",
+  briefing: "Me dá o briefing do dia: compromissos, as prioridades que fazem sentido hoje, se tem algum e-mail na caixa principal que pede atenção (ignore propaganda e notificações automáticas) e uma sugestão financeira concreta para hoje que ajude a proteger minhas metas.",
   ideia: "Quero analisar uma ideia com você. Me pergunte qual é e depois avalie cenários, custos, riscos e o que eu não estou vendo, com sinceridade.",
   dinheiro: "Vamos conversar sobre dinheiro. Olhe meu resumo financeiro e me diga, com sinceridade e sem sermão, como estou, o que mais pesa e onde dá para respirar este mês.",
   casa: "Olhe o meu enxoval no House to Home com a ferramenta consultar_casa. Me diga o que já comprei, o que ainda falta e sugira em que ordem comprar o que falta, por ambiente e prioridade, considerando o orçamento do enxoval. Seja objetiva e não invente preços.",

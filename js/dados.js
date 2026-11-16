@@ -144,8 +144,8 @@ function finCalc(M){
   const txM = fintx.filter(t => t.month === M);
   const out = txM.filter(t => t.type === "saida"), inn = txM.filter(t => t.type === "entrada");
   const spent = sum(out, t => t.amount), received = sum(inn, t => t.amount);
-  const regular = sum(inn.filter(t => INC_REGULAR.includes(t.cat)), t => t.amount), extra = received - regular;
-  const renda = Math.max(regular, inc) + extra;
+  const regular = sum(inn.filter(t => INC_REGULAR.includes(t.cat)), t => t.amount), earmarked = sum(inn.filter(t => t.goal && !INC_REGULAR.includes(t.cat)), t => t.amount), extra = received - regular - earmarked;
+  const renda = Math.max(regular, inc) + extra; // dinheiro separado para uma meta (ex.: 13º para a casa) não vira dinheiro livre
   const fixed = fincfg.fixed || [];
   const fixedPend = M >= cur ? fixed.filter(f => !txM.some(t => t.fixedId === f.id)) : [];
   const instM = M >= cur ? instTimeline().filter(p => p.month === M) : [];
@@ -155,7 +155,7 @@ function finCalc(M){
   const free = renda - forecast - save;
   const byCat = {}; for (const t of out) byCat[t.cat] = (byCat[t.cat] || 0) + t.amount;
   for (const p of instM) byCat[p.cat || "Compras"] = (byCat[p.cat || "Compras"] || 0) + p.amount;
-  return { M, renda, received, regular, extra, inc, benef, spent, fixedPend, fixedPendSum, instM, instSum, forecast, save, free, byCat, out, inn };
+  return { M, renda, received, regular, extra, earmarked, inc, benef, spent, fixedPend, fixedPendSum, instM, instSum, forecast, save, free, byCat, out, inn };
 }
 function varOf(m){ return sum(fintx.filter(t => t.month === m && t.type === "saida" && !t.fixedId && !(t.inst && t.inst.n > 1)), t => t.amount); }
 function varAvg(){
@@ -203,6 +203,15 @@ function daysUntilDay(day){
   return Math.round((target - base) / 864e5);
 }
 const inDays = d => d === 0 ? "hoje" : d === 1 ? "amanhã" : `em ${d} dias`;
+/* metas com dinheiro separado (ex.: casa nova em janeiro, com o 13º) */
+function goalSaved(g){ return (+g.inicial || 0) + sum(fintx.filter(t => t.type === "entrada" && t.goal === g.id), t => t.amount); }
+function overBudget(c){ return Object.entries(fincfg.budgets || {}).map(([k, lim]) => [k, (c.byCat[k] || 0) - (+lim || 0), c.byCat[k] || 0, +lim || 0]).filter(x => x[3] > 0 && x[1] > 0).sort((a,b) => b[1] - a[1]); }
+function goalsBrief(){
+  const G = fincfg.goals || []; if (!G.length) return "nenhuma";
+  const c = finCalc(curYM());
+  return G.map(g => `${g.nome}${g.mes ? " (" + ymLabel(g.mes) + ")" : ""}: ${brl(goalSaved(g))} separados${+g.alvo ? " de " + brl(g.alvo) : ""}; esse dinheiro NÃO é livre para gastar`).join("; ")
+    + (c.free < 0 ? `. Atenção: sem esse dinheiro, ${ymLabel(c.M).split(" ")[0]} fecha ${brl(-c.free)} no vermelho, então o excesso sairia da meta.` : "");
+}
 function finAlerts(){
   const A = []; const c = finCalc(curYM());
   if (!c.renda) A.push({ k:"info", t:"Informe sua renda mensal em Planejamento para a ÍRIS calcular saúde financeira, limites e projeções." });
@@ -215,7 +224,9 @@ function finAlerts(){
     if (+card.dueDay) { const d = daysUntilDay(+card.dueDay); if (d <= 5) A.push({ k:"soft", t:`A fatura do ${card.name} vence ${inDays(d)}.` }); }
   }
   for (const f of c.fixedPend) if (+f.day && f.freq !== "semanal") { const d = daysUntilDay(+f.day); if (d <= 3 && +f.day >= +today().slice(8)) A.push({ k:"soft", t:`${f.desc} (${brl(f.amount)}) vence ${inDays(d)}.` }); }
-  if (c.renda && c.free < 0) A.push({ k:"warn", t:`No ritmo atual, ${ymLabel(c.M).split(" ")[0]} fecha ${brl(-c.free)} abaixo do planejado, já contando a meta de guardar ${fincfg.savingsPct || 0}%.` });
+  for (const g of fincfg.goals || []) { const sv = goalSaved(g); if (sv && c.free < 0) { const ob = overBudget(c).slice(0,2);
+    A.push({ k:"warn", t:`${g.nome}: ${brl(sv)} estão separados e não contam como livre. Sem eles, ${ymLabel(c.M).split(" ")[0]} fecha ${brl(-c.free)} no vermelho, e essa diferença sairia da meta.${ob.length ? " Onde dá para segurar: " + ob.map(x => `${x[0]} (${brl(x[2])} de ${brl(x[3])})`).join(" e ") + "." : ""}` }); } }
+  if (c.renda && c.free < 0 && !(fincfg.goals || []).some(g => goalSaved(g))) A.push({ k:"warn", t:`No ritmo atual, ${ymLabel(c.M).split(" ")[0]} fecha ${brl(-c.free)} abaixo do planejado, já contando a meta de guardar ${fincfg.savingsPct || 0}%.` });
   const nx = projection(1)[0];
   if (c.renda && (nx.fixas + nx.parcelas) / c.renda > 0.5) A.push({ k:"soft", t:`Mais da metade da renda de ${ymLabel(nx.m).split(" ")[0]} já está comprometida com contas fixas e parcelas (${brl(nx.fixas + nx.parcelas)}).` });
   const h = health(); if (h && h.months < 3) A.push({ k:"soft", t:`Sua reserva cobre ${monthsTxt(h.months)} de gastos. A meta é ${h.goal}.` });
@@ -230,5 +241,7 @@ function finSummary(){
     porCategoria:Object.fromEntries(Object.entries(c.byCat).map(([k,v]) => [k, Math.round(v)])), limites:fincfg.budgets,
     cartoes:(fincfg.cards || []).map(cd => { const u = cardUse(cd); return { nome:cd.name, limite:u.limit, usadoNoMes:Math.round(u.used), parcelasFuturas:Math.round(u.fut), vencimento:cd.dueDay }; }),
     projecao:projection(6).map(p => ({ mes:p.m, renda:p.renda, fixas:Math.round(p.fixas), parcelas:Math.round(p.parcelas), variavelEstimada:Math.round(p.variavel), sobra:Math.round(p.renda - p.fixas - p.parcelas - p.variavel) })),
+    metas:(fincfg.goals || []).map(g => ({ nome:g.nome, mes:g.mes, separado:Math.round(goalSaved(g)), alvo:+g.alvo || null, regra:"dinheiro separado, não é livre para gastar" })),
+    acimaDoLimite:overBudget(c).map(x => ({ categoria:x[0], gasto:Math.round(x[2]), limite:x[3], passou:Math.round(x[1]) })),
     avisos:finAlerts().map(a => a.t) };
 }
