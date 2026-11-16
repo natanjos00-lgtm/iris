@@ -316,7 +316,7 @@ function nnDeepHide(){
   if (!nnDeep.el) return; nnDeep.el.hidden = true; nnDeep.el.classList.remove("in", "out");
   document.documentElement.classList.remove("deep-on");
   const box = $("core") && $("core").parentElement; if (box) box.classList.remove("diving");
-  try { $("core").focus({ preventScroll: true }); } catch {}
+  if (matchMedia("(hover:hover) and (pointer:fine)").matches) try { $("core").focus({ preventScroll: true }); } catch {}
 }
 function nnDeepFrame(ts){
   const D = nnDeep; if (D.el.hidden) return; requestAnimationFrame(nnDeepFrame);
