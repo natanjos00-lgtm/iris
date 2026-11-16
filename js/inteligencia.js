@@ -86,46 +86,74 @@ const TOOLS = [
 ];
 
 /* ---------- ÍRIS: conversa ---------- */
-const log = $("log"); const turns = []; let ctl = null, busy = false;
+/* a conversa fica guardada: no aparelho (na hora) e no banco dela (para os outros aparelhos), últimas 40 mensagens */
+const log = $("log"); let ctl = null, busy = false;
+const CHAT_MAX = 40;
+let chatMsgs = [], chatAt = 0;
+try { const c = store.get("iris.chat", null); if (c && Array.isArray(c.msgs)) { chatMsgs = c.msgs; chatAt = +c.at || 0; } } catch {}
+function chatTurns(){ const L = chatMsgs.slice(-20).filter(m => m.k === "me" || m.k === "ai").map(m => ({ role: m.k === "me" ? "user" : "assistant", content: m.t })); while (L[0] && L[0].role !== "user") L.shift(); return L; }
+function chatSave(){
+  chatMsgs = chatMsgs.slice(-CHAT_MAX); chatAt = Date.now(); const doc = { at: chatAt, msgs: chatMsgs };
+  try { store.set("iris.chat", doc); } catch {}
+  clearTimeout(chatSave.t); chatSave.t = setTimeout(() => { if (finMeta) finMeta.doc("chat").set(JSON.parse(JSON.stringify(doc))).catch(() => {}); }, 600);
+}
+function chatRemote(doc){ // chegou de outro aparelho
+  if (!doc || !Array.isArray(doc.msgs) || !(+doc.at > chatAt) || busy) return;
+  chatMsgs = doc.msgs.slice(-CHAT_MAX); chatAt = +doc.at; try { store.set("iris.chat", { at: chatAt, msgs: chatMsgs }); } catch {} renderChat();
+}
 function addMsg(kind, text){ const t = h("div",{class:"txt"}, text); log.append(h("div",{class:"msg "+kind}, h("div",{class:"who"}, kind==="ai"?"ÍRIS":kind==="me"?"Você":"Aviso"), t)); log.scrollTop = log.scrollHeight; return t; }
-function hello(){ log.textContent = ""; addMsg("ai", `${greet()}${userName ? ", " + userName : ""}. Estou por aqui. Pode me contar o que está na cabeça do jeito que vier, que a gente organiza junto. Se preferir, escolha um protocolo ao lado.`); }
+function renderChat(){
+  log.textContent = "";
+  if (!chatMsgs.length) { addMsg("ai", `${greet()}${userName ? ", " + userName : ""}. Estou por aqui. Pode me contar o que está na cabeça do jeito que vier, que a gente organiza junto. Se preferir, escolha um protocolo ao lado.`); return; }
+  for (const m of chatMsgs) addMsg(m.k, m.t);
+}
+function hello(){ if (!busy) renderChat(); }
 hello();
 $("prefsBtn").onclick = openPrefs; $("prefsSide").onclick = openPrefs;
-$("clearBtn").onclick = () => { ctl?.abort(); turns.length = 0; hello(); };
+$("clearBtn").onclick = () => { ctl?.abort(); chatMsgs = []; chatSave(); renderChat(); };
 function setBusy(b){ busy = b; $("sendBtn").disabled = b; $("stopBtn").hidden = !b; $("minicore").classList.toggle("thinking", b); $("irisState").textContent = b ? "Pensando com você…" : "À disposição"; document.querySelectorAll(".proto").forEach(x => x.disabled = b); }
 $("stopBtn").onclick = () => { ctl?.abort(); stopSpeaking(); };
 
 let voiceOn = store.get("iris.voice2", false);
 function renderVoice(){ $("voiceBtn").textContent = voiceOn ? "Voz ligada" : "Voz desligada"; $("voiceBtn").setAttribute("aria-pressed", String(voiceOn)); }
-renderVoice(); $("voiceBtn").onclick = () => { voiceOn = !voiceOn; store.set("iris.voice2", voiceOn); renderVoice(); if (!voiceOn) try{ speechSynthesis.cancel(); }catch{} };
-function speak(text){ if (!voiceOn) return; speakAny(String(text).slice(0,1400)); }
+renderVoice(); $("voiceBtn").onclick = () => { voiceOn = !voiceOn; store.set("iris.voice2", voiceOn); renderVoice(); if (voiceOn) unlockAudio(); else try{ speechSynthesis.cancel(); }catch{} };
+// quando ela fala com a ÍRIS pela voz, a ÍRIS sempre responde falando
+function speak(text, o = {}){ if (!voiceOn && !o.voice) { o.onend && o.onend(); return; } speakAny(String(text).slice(0,1400), { onstart: o.onstart, onend: o.onend }); }
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SR) { $("micBtn").hidden = false; $("micBtn").onclick = () => { try { const r = new SR(); r.lang = "pt-BR";
-  r.onresult = e => { const s = Array.from(e.results).map(x => x[0].transcript).join(" "); $("chatIn").value = s; send(s); };
+if (SR) { $("micBtn").hidden = false; $("micBtn").onclick = () => { unlockAudio(); try { const r = new SR(); r.lang = "pt-BR";
+  r.onresult = e => { const s = Array.from(e.results).map(x => x[0].transcript).join(" "); $("chatIn").value = s; send(s, { voice:true }); };
   r.onerror = e => { if (/not-allowed/.test(e.error)) { $("micBtn").hidden = true; addMsg("sys","O microfone não está liberado nesta visualização. Pode escrever."); } };
   r.start(); $("irisState").textContent = "Ouvindo…"; r.onend = () => { if (!busy) $("irisState").textContent = "À disposição"; }; } catch { $("micBtn").hidden = true; } }; }
 
-async function send(text){
-  text = String(text||"").trim(); if (!text || busy) return;
+/* o: voice (responder falando), onText(parcial), onDone(texto), onFail(mensagem), onSpeakStart, onSpeakEnd */
+async function send(text, o = {}){
+  text = String(text||"").trim(); if (!text) return;
+  if (busy) { o.onFail && o.onFail("Ainda estou terminando a resposta anterior."); return; }
   $("chatIn").value = ""; autoGrow();
+  if (log.querySelector(".msg") && !chatMsgs.length) log.textContent = "";
   addMsg("me", text);
-  if (!sample) { addMsg("sys", "A conversa precisa do Claude, que não está disponível nesta visualização. Abra a página no claude.ai."); return; }
-  turns.push({ role:"user", content:text }); while (turns.length > 16) turns.shift(); while (turns[0] && turns[0].role !== "user") turns.shift();
+  if (!sample) { const m = "A conversa não está disponível agora. Tente de novo em instantes."; addMsg("sys", m); o.onFail && o.onFail(m); return; }
+  chatMsgs.push({ k:"me", t:text.slice(0, 3000) }); chatSave();
+  const talk = voiceOn || !!o.voice;
   const out = addMsg("ai", "…"); setBusy(true); ctl = new AbortController();
-  const opts = { signal: ctl.signal, onText: ({ text }) => { out.textContent = text; log.scrollTop = log.scrollHeight; } };
+  const opts = { signal: ctl.signal, onText: ({ text }) => { out.textContent = text; log.scrollTop = log.scrollHeight; o.onText && o.onText(text); } };
   let lim = null; try { lim = await sample.limits(); } catch {}
   if (lim && lim.tools) opts.tools = TOOLS; else opts.cache = false;
   try {
-    const r = await sample([{ role:"user", content: persona() + (voiceOn ? SPOKEN : "") }, ...turns], opts);
-    turns.push({ role:"assistant", content:r.text }); out.textContent = r.text + (r.truncated ? "\n(a resposta foi cortada; peça para continuar)" : ""); speak(r.text);
+    const r = await sample([{ role:"user", content: persona() + (talk ? SPOKEN : "") }, ...chatTurns()], opts);
+    chatMsgs.push({ k:"ai", t:String(r.text).slice(0, 3000) }); chatSave();
+    out.textContent = r.text + (r.truncated ? "\n(a resposta foi cortada; peça para continuar)" : "");
+    o.onDone && o.onDone(r.text);
+    speak(r.text, { voice: o.voice, onstart: o.onSpeakStart, onend: o.onSpeakEnd });
   } catch (e) {
-    turns.pop();
+    if (chatMsgs.length && chatMsgs[chatMsgs.length - 1].k === "me") { chatMsgs.pop(); chatSave(); }
     const copy = { cancelled: e.text ? e.text + "\n(interrompido)" : "Tudo bem, parei.",
       not_granted:"A conversa precisa da sua permissão para usar o Claude. Recarregue a página e permita quando o claude.ai perguntar.",
       sampling_disabled:"O Claude não está disponível nesta conta.", rate_limited:"Muitas mensagens em pouco tempo. Espere um pouco e tente de novo.",
       session_expired:"Sua sessão expirou. Entre de novo no claude.ai.", refused:"Não consigo ajudar com isso, mas posso tentar de outro jeito se você reformular.",
       fn_error:"Não consegui falar com o Gemini agora." + (e.detail ? " (" + e.detail + ")" : ""), bad_json:"A resposta veio num formato que não entendi. Tente de novo." }[e.code];
     out.textContent = copy || ((e.text ? e.text + "\n" : "") + "A conexão caiu no meio do caminho. Pode tentar de novo.");
+    o.onFail && o.onFail(out.textContent);
   } finally { setBusy(false); }
 }
 function autoGrow(){ const t = $("chatIn"); t.style.height = "auto"; t.style.height = Math.min(160, t.scrollHeight) + "px"; }

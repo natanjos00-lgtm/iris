@@ -193,13 +193,18 @@ function nnDeepBuild(){
   const el = h("div", { id: "nnDeep", class: "nn-deep", role: "dialog", "aria-modal": "true", "aria-label": "Dentro da ÍRIS", hidden: "" });
   const cv = h("canvas", { "aria-hidden": "true" });
   const x = h("button", { type: "button", class: "nd-x", "aria-label": "Sair de dentro da ÍRIS", onclick: () => nnDeepExit() }, icon("i-plus"));
-  const hint = h("p", { class: "nd-hint" }, "Arraste para olhar em volta · toque numa área · feche a pinça para sair");
+  const hint = h("p", { class: "nd-hint" }, "Arraste para olhar · toque numa área ou no microfone · feche a pinça para sair");
   const card = h("div", { class: "nd-card glass", hidden: "" },
     h("span", { class: "nn-k" }, "Área"), h("b", { class: "nd-n" }), h("span", { class: "nd-i" }),
     h("a", { class: "btn nd-go", href: "#" }, "Abrir"));
-  const mic = h("button", { type: "button", class: "nd-mic", "aria-label": "Falar com a ÍRIS", onclick: () => { try { coreTalk(); } catch {} } }, icon("i-mic"));
+  const mic = h("button", { type: "button", class: "nd-mic", "aria-label": "Falar com a ÍRIS", onclick: () => nnDeepTalk() }, icon("i-mic"));
+  const say = h("div", { class: "nd-say glass", hidden: "", "aria-live": "polite" }, h("span", { class: "nn-k nd-who" }), h("p", { class: "nd-txt" }));
+  const type = h("form", { class: "nd-type glass", hidden: "", autocomplete: "off" },
+    h("input", { type: "text", class: "nd-in", placeholder: "Escreva para a ÍRIS…", "aria-label": "Escreva para a ÍRIS", enterkeyhint: "send" }),
+    h("button", { type: "submit", class: "nd-send", "aria-label": "Enviar" }, icon("i-send")));
+  type.addEventListener("submit", ev => { ev.preventDefault(); const i = type.querySelector(".nd-in"), v = i.value.trim(); if (!v) return; i.value = ""; i.blur(); nnDeepAsk(v); });
   card.querySelector(".nd-go").addEventListener("click", () => { nnDeep.on = false; nnDeepHide(); });
-  el.append(cv, x, hint, card, mic); document.body.append(el);
+  el.append(cv, x, hint, say, card, type, mic); document.body.append(el);
   nnDeep.el = el; nnDeep.cv = cv; nnDeep.x = cv.getContext("2d");
   const pts = new Map(); let pinch = null;
   const gap = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
@@ -232,6 +237,50 @@ function nnDeepBuild(){
   addEventListener("hashchange", () => { if (nnDeep.on) { nnDeep.on = false; nnDeepHide(); } });
   return el;
 }
+/* conversar lá dentro: ouve, mostra o que ela disse e a resposta, e fala, sem sair do cérebro */
+function nnDeepSay(who, txt){
+  const say = nnDeep.el && nnDeep.el.querySelector(".nd-say"); if (!say) return;
+  if (who == null) { say.hidden = true; return; }
+  say.querySelector(".nd-who").textContent = who; const p = say.querySelector(".nd-txt"); p.textContent = txt || ""; p.hidden = !txt;
+  say.hidden = false; p.scrollTop = p.scrollHeight; const hn = nnDeep.el.querySelector(".nd-hint"); if (hn) hn.hidden = true;
+}
+function nnDeepMic(on){ const m = nnDeep.el && nnDeep.el.querySelector(".nd-mic"); if (m) { m.classList.toggle("on", !!on); m.setAttribute("aria-label", on ? "Parar de ouvir" : "Falar com a ÍRIS"); } }
+function nnDeepTyping(msg){
+  const f = nnDeep.el.querySelector(".nd-type"); f.hidden = false; nnDeep.el.classList.add("typing"); if (msg) nnDeepSay(msg[0], msg[1]);
+  setTimeout(() => { try { f.querySelector(".nd-in").focus(); } catch {} }, 60);
+}
+function nnDeepTalk(){
+  const D = nnDeep;
+  if (D.rec) { try { D.rec.stop(); } catch {} return; }
+  if (busy || coreSpeaking || coreMode === "speak") { try { ctl?.abort(); } catch {} stopSpeaking(); coreSpeaking = false; setCore("idle"); nnDeepSay(null); return; }
+  try { unlockAudio(); stopSpeaking(); } catch {}
+  const SRc = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SRc) { nnDeepTyping(["Este aparelho não me deixa ouvir aqui", "Escreva embaixo, ou use o microfone do teclado. Eu respondo falando."]); return; }
+  let txt = "", r;
+  try { r = new SRc(); } catch { nnDeepTyping(["Não consegui ligar o microfone", "Escreva embaixo que eu respondo falando."]); return; }
+  r.lang = "pt-BR"; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1; D.rec = r;
+  nnDeepMic(true); setCore("listen"); nnDeepSay("Ouvindo…", ""); try { navigator.vibrate && navigator.vibrate(25); } catch {}
+  const timer = setTimeout(() => { try { r.stop(); } catch {} }, 15000);
+  r.onresult = ev => { txt = Array.from(ev.results).map(x => x[0].transcript).join(" "); nnDeepSay("Você", txt); };
+  r.onerror = ev => { const c = ev && ev.error; D.recErr = c;
+    if (c === "not-allowed" || c === "service-not-allowed") nnDeepTyping(["Microfone bloqueado", "Libere o microfone para este site nas configurações, ou escreva embaixo."]); };
+  r.onend = () => {
+    clearTimeout(timer); D.rec = null; nnDeepMic(false); const t = txt.trim(), err = D.recErr; D.recErr = null;
+    if (t) { nnDeepAsk(t); return; }
+    if (coreMode === "listen") setCore("idle");
+    if (err !== "not-allowed" && err !== "service-not-allowed" && err !== "aborted") nnDeepSay("Não ouvi nada", "Toque no microfone e fale logo em seguida.");
+  };
+  try { r.start(); } catch { D.rec = null; nnDeepMic(false); setCore("idle"); nnDeepTyping(["Não consegui ligar o microfone", "Escreva embaixo que eu respondo falando."]); }
+}
+function nnDeepAsk(t){
+  nnDeepSay("Você", t); setCore("think");
+  send(t, { voice: true,
+    onText: s => { nnDeepSay("ÍRIS", s); },
+    onDone: s => { nnDeepSay("ÍRIS", s); },
+    onSpeakStart: () => { coreSpeaking = true; setCore("speak"); },
+    onSpeakEnd: () => { coreSpeaking = false; if (coreMode === "speak" || coreMode === "think") setCore("idle"); },
+    onFail: m => { setCore("idle"); nnDeepSay("ÍRIS", m); } });
+}
 function nnDeepPick(i){
   nnDeep.sel = i; nnSelect(i);
   const k = NN_KEYS[i], card = nnDeep.el.querySelector(".nd-card");
@@ -244,7 +293,7 @@ function nnDeepEnter(){
   if (nnDeep.on || !nn.geo) return;
   const el = nnDeepBuild(); nnDeep.on = true; nnDeep.sel = nn.sel; nnDeep.turn = null;
   nnDeep.ry = nn.geo.areas[nn.sel].phi + Math.PI / 2; nnDeep.rx = 0;
-  nnDeep.c = nnReduce ? 0 : 2.4; nnDeep.target = 0; nnDeep.el.querySelector(".nd-card").hidden = true;
+  nnDeep.c = nnReduce ? 0 : 2.4; nnDeep.target = 0; nnDeep.el.querySelector(".nd-card").hidden = true; nnDeep.el.querySelector(".nd-type").hidden = true; nnDeep.el.classList.remove("typing"); nnDeepSay(null); { const hn = nnDeep.el.querySelector(".nd-hint"); if (hn) { hn.hidden = false; hn.style.animation = "none"; void hn.offsetWidth; hn.style.animation = ""; } }
   el.hidden = false; el.classList.remove("out"); requestAnimationFrame(() => el.classList.add("in"));
   document.documentElement.classList.add("deep-on");
   const box = $("core") && $("core").parentElement; if (box) box.classList.add("diving");
@@ -253,6 +302,7 @@ function nnDeepEnter(){
 }
 function nnDeepExit(){
   if (!nnDeep.on) return; nnDeep.on = false; nnDeep.target = 2.4;
+  if (nnDeep.rec) { try { nnDeep.rec.abort(); } catch {} nnDeep.rec = null; nnDeepMic(false); if (coreMode === "listen") setCore("idle"); }
   nnSetZoom(1); nnSaveZoom();
   if (nnReduce) { nnDeepHide(); return; }
   nnDeep.el.classList.add("out"); nnDeep.el.classList.remove("in");

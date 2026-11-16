@@ -35,8 +35,15 @@ function speechChunks(t){
   return out;
 }
 let speakToken = 0;
+/* celular: depois do microfone o sistema fica em modo gravação; volta para reprodução antes de falar */
+function prepSpeech(){
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {}
+  try { speechSynthesis.resume(); } catch {}
+  ensureAudio();
+}
 function speakNatural(text, { onstart, onend, onboundary, over } = {}){
-  const my = ++speakToken; try { speechSynthesis.cancel(); } catch {}
+  const my = ++speakToken; prepSpeech();
+  let busySynth = false; try { busySynth = speechSynthesis.speaking || speechSynthesis.pending; speechSynthesis.cancel(); } catch {}
   const P = Object.assign({}, prefs, over || {});
   const list = speechChunks(toSpoken(text)); let i = 0, started = false;
   const next = () => {
@@ -53,7 +60,7 @@ function speakNatural(text, { onstart, onend, onboundary, over } = {}){
     u.onerror = () => { if (my === speakToken) { speakToken++; onend && onend(); } };
     try { speechSynthesis.speak(u); } catch { onend && onend(); }
   };
-  next();
+  if (busySynth) setTimeout(next, 80); else next(); // Safari perde a fala se speak vem colado no cancel
   return () => started;
 }
 function stopSpeaking(){ speakToken++; try { speechSynthesis.cancel(); } catch {} if (curSrc) { try { curSrc.stop(); } catch {} curSrc = null; } }
@@ -99,7 +106,7 @@ async function synthChunk(text, P){
 function playBuffer(buf){ return new Promise(res => { const src = actx.createBufferSource(); src.buffer = buf; src.connect(analyser); curSrc = src; src.onended = () => { if (curSrc === src) curSrc = null; res(); }; src.start(); }); }
 async function speakPremium(text, { onstart, onend, over } = {}){
   const my = ++speakToken; try { speechSynthesis.cancel(); } catch {} if (curSrc) { try { curSrc.stop(); } catch {} curSrc = null; }
-  const P = Object.assign({}, prefs, over || {}); ensureAudio();
+  const P = Object.assign({}, prefs, over || {}); prepSpeech();
   const parts = premiumChunks(toSpoken(text)); let started = false;
   try {
     let next = synthChunk(parts[0], P);
@@ -168,12 +175,13 @@ addEventListener("resize", () => { sizeCore(); sizeWaves(); });
 function setCore(m){ coreMode = m; target = m === "think" ? 0.6 : m === "speak" ? 1 : m === "listen" ? 0.8 : 0.18; $("core").classList.toggle("live", m !== "idle"); }
 function drawCore(ts){
   requestAnimationFrame(drawCore);
-  if ($("v-inicio").hidden || document.hidden || nnDeepFull()) return;
-  const W = cv.getBoundingClientRect().width; if (!W) return; if (Math.abs(W - coreW) > 0.5) sizeCore();
-  if (wv) { const r = wv.getBoundingClientRect(); if (Math.abs(r.width - wvW) > 0.5 || Math.abs(r.height - wvH) > 0.5) sizeWaves(); }
+  if (document.hidden) return;
   energy += (target - energy) * 0.05; spike *= 0.9;
   if (coreMode === "speak") { if (curSrc) spike = Math.max(spike, Math.min(1.2, audioLevel()*5)); else if (Math.random() < 0.09) spike = Math.max(spike, 0.5 + Math.random()*0.5); }
   if (coreMode === "listen" && Math.random() < 0.12) spike = Math.max(spike, 0.4 + Math.random()*0.5);
+  if ($("v-inicio").hidden || nnDeepFull()) return; // dentro do cérebro a energia continua viva para a tela de dentro
+  const W = cv.getBoundingClientRect().width; if (!W) return; if (Math.abs(W - coreW) > 0.5) sizeCore();
+  if (wv) { const r = wv.getBoundingClientRect(); if (Math.abs(r.width - wvW) > 0.5 || Math.abs(r.height - wvH) > 0.5) sizeWaves(); }
   const sp = reduceM ? 0 : ts/1000, e = Math.min(1.4, energy + spike*0.45);
   // a esfera neural da ÍRIS (js/telas/esfera.js) reage à energia: ouvir, pensar e falar acendem os sinais
   drawNeural(cx2, W, sp, e, coreMode, spike);
@@ -238,7 +246,7 @@ function listenEnd(msg){ recOn = false; clearTimeout(recTimer); try { rec && rec
 function toggleListen(){
   if (recOn) { const t = recText.trim(); const r = rec; recOn = false; clearTimeout(recTimer); try { r && r.stop(); } catch {} if (!t) listenEnd({ t:"Não ouvi nada", s:"Toque no microfone e fale logo em seguida." }); return; }
   if (!SRx) { listenShow(true, "Este navegador não ouve a voz aqui", "Toque na barra de texto e use o microfone do teclado."); setTimeout(() => listenShow(false), 4200); if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => $("askIn").focus(), 200); return; }
-  try { stopSpeaking(); } catch {}
+  try { stopSpeaking(); } catch {} unlockAudio();
   recText = ""; let sent = false;
   try {
     rec = new SRx(); rec.lang = "pt-BR"; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
@@ -249,7 +257,7 @@ function toggleListen(){
       else if (c === "no-speech") listenEnd({ t:"Não ouvi nada", s:"Toque no microfone e comece a falar logo em seguida." });
       else if (c !== "aborted") listenEnd({ t:"Não consegui ouvir", s:"Tente de novo ou escreva na barra." }); };
     rec.onend = () => { const t = recText.trim(); const wasOn = recOn; recOn = false; clearTimeout(recTimer);
-      if (t && !sent) { sent = true; listenShow(false); $("askIn").value = t; if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => $("askbar").requestSubmit(), 80); }
+      if (t && !sent) { sent = true; listenShow(false); $("askIn").value = ""; location.hash = "#iris"; setTimeout(() => send(t, { voice:true }), 60); }
       else if (wasOn && !t) listenEnd({ t:"Não ouvi nada", s:"Toque no microfone e comece a falar logo em seguida." });
       else listenShow(false); };
     rec.start(); recOn = true; listenShow(true, "Ouvindo…", "Pode falar. Toque no microfone para parar.");
