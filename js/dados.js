@@ -61,6 +61,20 @@ async function txAdd(t){
   if (finCol) { try { const r = finCol.doc(); await r.set(body); return r.id; } catch (e) { toast(e && e.code === "quota_exceeded" ? "O espaço de dados encheu. Apague lançamentos antigos." : "Não consegui salvar o lançamento."); return null; } }
   const id = newId(); fintx.push({ id, ...body }); finLocal.save(); renderFinIfOpen(); return id;
 }
+async function txUpdate(id, patch){
+  const t = fintx.find(x => x.id === id); if (!t) return false;
+  if (finCol) { try { await finCol.doc(id).update(patch); } catch { toast("Não consegui salvar a mudança."); return false; } Object.assign(t, patch); }
+  else { Object.assign(t, patch); finLocal.save(); }
+  return true;
+}
+/* mudar a categoria de um gasto; numa compra parcelada, muda também as outras parcelas já lançadas dela */
+async function txSetCat(id, cat){
+  const t = fintx.find(x => x.id === id); if (!t || t.cat === cat) return;
+  const sib = t.inst && t.inst.n > 1 ? fintx.filter(x => x.id !== id && x.type === t.type && x.inst && x.inst.n === t.inst.n && x.card === t.card && Math.abs(x.amount - t.amount) < 0.06 && normDesc(x.desc) === normDesc(t.desc)) : [];
+  let ok = await txUpdate(id, { cat }); for (const x of sib) ok = (await txUpdate(x.id, { cat })) && ok;
+  if (ok) toast(sib.length ? `Categoria trocada para ${cat}, nesta e nas outras parcelas.` : `Categoria trocada para ${cat}.`);
+  renderFinIfOpen();
+}
 async function txDel(id){
   const t = fintx.find(x => x.id === id); if (!t) return; const { id:_, ...b } = t;
   if (finCol) { try { await finCol.doc(id).delete(); } catch { toast("Não consegui remover."); return; } }

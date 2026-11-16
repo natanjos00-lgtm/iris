@@ -57,9 +57,10 @@ function finOverview(root){
   kp.append(
     kpi("Entradas", brl(c.received || c.renda), c.received ? "registradas no mês" : (c.renda ? "renda planejada" : "—")),
     kpi("Gasto até agora", brl(c.spent), plural(c.out.length, "lançamento", "lançamentos")),
-    kpi(M >= cur ? "Previsto até o fim do mês" : "Total do mês", brl(M >= cur ? c.forecast : c.spent), M >= cur ? `inclui ${brl(c.fixedPendSum)} em contas fixas a pagar e ${brl(c.instSum)} em parcelas` : null),
+    kpi(M >= cur ? "Previsto até o fim do mês" : "Total do mês", brl(M >= cur ? c.forecast : c.spent), M >= cur ? `inclui ${brl(c.fixedPendSum)} em contas fixas a pagar e ${brl(c.instSum + sum(c.out.filter(t => t.inst && t.inst.n > 1), t => t.amount))} em parcelas` : null),
     kpi("Livre para gastar", c.renda ? brl(c.free) : "—", c.renda ? `depois de guardar ${fincfg.savingsPct || 0}% (${brl(c.save)})` : "precisa da renda", true),
-    kpi("Comprometido em parcelas", brl(committedAhead()), "nos próximos meses"),
+    (() => { const ip = c.out.filter(t => t.inst && t.inst.n > 1), v = sum(ip, t => t.amount) + c.instSum, q = ip.length + c.instM.length;
+      return kpi("Parcelas deste mês", brl(v), q ? plural(q, "parcela no crédito", "parcelas no crédito") : "nenhuma parcela"); })(),
     kpi("Reserva", brl(+fincfg.reserve || 0), h0 ? `cobre ${monthsTxt(h0.months)}` : null));
   top.append(kp); root.append(top);
 
@@ -111,7 +112,8 @@ function finOverview(root){
       h("div",{class:"meta"}, h("span",null,`Fatura do mês ${brl(u.used)}`), h("span",null,`Parcelas futuras ${brl(u.fut)}`), u.limit ? h("span",null,`Limite ${brl0(u.limit)}`) : null, +cd.dueDay ? h("span",null,`Vence dia ${cd.dueDay}`) : null))); });
   if ((fincfg.cards || []).length) cardsC.append(h("div",{class:"legend-row"}, h("span",null, h("i",{style:"background:var(--olive)"}), "fatura do mês"), h("span",null, h("i",{style:`background:${SER.parcelas}`}), "parcelas futuras")));
 
-  const instC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Parcelas em andamento")));
+  const ahead = committedAhead();
+  const instC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Parcelas em andamento"), ahead ? h("span",{class:"hint"}, `${brl(ahead)} a pagar nos próximos meses`) : null));
   const groups = {}; instAhead().concat(instTimeline().filter(p => p.month === curYM())).forEach(p => { const k = normDesc(p.desc) + "|" + p.n + "|" + Math.round(p.amount); (groups[k] = groups[k] || { desc:p.desc, n:p.n, amount:p.amount, card:p.card, rest:[] }).rest.push(p); });
   const gl = Object.values(groups).sort((a,b) => b.amount*b.rest.length - a.amount*a.rest.length);
   if (!gl.length) instC.append(h("div",{class:"empty"},"Nenhuma compra parcelada em aberto."));
@@ -232,7 +234,7 @@ function finLanc(root){
   else { const ul = h("ul",{class:"txlist"}); let lastDay = "";
     list.forEach(t => { if (t.date !== lastDay) { lastDay = t.date; ul.append(h("li",{class:"txday"}, prettyDay(t.date))); }
       ul.append(h("li",{class:"tx"},
-        h("div",{style:"min-width:0"}, h("span",{class:"ttl"}, t.desc), h("div",{class:"meta"}, h("span",null,t.cat), h("span",null, METHODS[t.method] || t.method), t.card ? h("span",null,t.card) : null, t.inst && t.inst.n > 1 ? h("span",null,`parcela ${t.inst.k}/${t.inst.n}`) : null, t.source === "fatura" ? h("span",null,"da fatura") : null)),
+        h("div",{style:"min-width:0"}, h("span",{class:"ttl"}, t.desc), h("div",{class:"meta"}, h("select",{class:"catsel","aria-label":"Categoria de " + t.desc,title:"Trocar a categoria",onchange:e => txSetCat(t.id, e.target.value)}, ...((t.type === "entrada" ? INCATS : CATS).includes(t.cat) ? [] : [opt(t.cat, t.cat, true)]), ...(t.type === "entrada" ? INCATS : CATS).map(c => opt(c, c, c === t.cat))), h("span",null, METHODS[t.method] || t.method), t.card ? h("span",null,t.card) : null, t.inst && t.inst.n > 1 ? h("span",null,`parcela ${t.inst.k}/${t.inst.n}`) : null, t.source === "fatura" ? h("span",null,"da fatura") : null)),
         h("b",{class:t.type === "entrada" ? "in" : ""}, (t.type === "entrada" ? "+ " : "") + brl(t.amount)),
         h("button",{class:"ib",type:"button","aria-label":"Remover lançamento",title:"Remover",onclick:()=>txDel(t.id)}, icon("i-trash")))); });
     lc.append(ul); }
