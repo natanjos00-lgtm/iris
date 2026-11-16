@@ -5,7 +5,7 @@
    Cada área é um neurônio na esfera; tocar nele ativa a área. Tocar no centro continua fazendo
    a ÍRIS falar com você. Com "reduzir movimento" ligado no aparelho, tudo fica parado. */
 
-const NN_GOLD = [255, 184, 92], NN_PINK = [255, 79, 163];
+const NN_GOLD = [235,217,204], NN_PINK = [255, 79, 163];
 const nnMix = (a, b, k) => [0, 1, 2].map(i => Math.round(a[i] + (b[i] - a[i]) * k));
 const nnRgba = (c, a) => "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + Math.max(0, Math.min(1, a)).toFixed(3) + ")";
 const nnReduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -75,11 +75,11 @@ function drawNeural(x, W, sp, e, mode, spike){
     const gg = x.createRadialGradient(p[0], p[1], 0, p[0], p[1], r * 5); gg.addColorStop(0, nnRgba(col, 0.55 * dep * grow)); gg.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = gg; x.beginPath(); x.arc(p[0], p[1], r * 5, 0, 7); x.fill();
     x.fillStyle = nnRgba([255, 240, 220], 0.85 * dep * grow); x.beginPath(); x.arc(p[0], p[1], r * 0.7, 0, 7); x.fill();
   }
-  const ra = R * 1.32, ag = x.createLinearGradient(CX - ra, CY, CX + ra, CY); ag.addColorStop(0, "rgba(255,184,92,0.85)"); ag.addColorStop(1, "rgba(255,79,163,0.85)");
+  const ra = R * 1.32, ag = x.createLinearGradient(CX - ra, CY, CX + ra, CY); ag.addColorStop(0, "rgba(235,217,204,0.85)"); ag.addColorStop(1, "rgba(255,79,163,0.85)");
   x.strokeStyle = ag; x.lineWidth = 1.6; x.beginPath(); x.arc(CX, CY, ra, -1.25 + t * 0.05, -1.25 + t * 0.05 + 5.1 * grow); x.stroke();
   const by = CY + R * 1.5;
   for (let k = 0; k < 5; k++) { const ph = nnReduce ? k / 5 : (t * (0.25 + act * 0.3) + k / 5) % 1, ex = R * 0.3 + ph * R * 1.3; x.strokeStyle = nnRgba(k % 2 ? NN_PINK : NN_GOLD, (1 - ph) * 0.7 * grow); x.lineWidth = 1.3; x.beginPath(); x.ellipse(CX, by, ex, ex * 0.16, 0, 0, 7); x.stroke(); }
-  const bg2 = x.createRadialGradient(CX, by, 0, CX, by, R * 0.5); bg2.addColorStop(0, "rgba(255,200,120,0.55)"); bg2.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = bg2; x.beginPath(); x.ellipse(CX, by, R * 0.5, R * 0.1, 0, 0, 7); x.fill();
+  const bg2 = x.createRadialGradient(CX, by, 0, CX, by, R * 0.5); bg2.addColorStop(0, "rgba(245,226,214,0.55)"); bg2.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = bg2; x.beginPath(); x.ellipse(CX, by, R * 0.5, R * 0.1, 0, 0, 7); x.fill();
   const amp = 0.25 + act * 0.75 + (spike || 0) * 0.6, bw = W / 88;
   for (let k = -9; k <= 9; k++) { const hh = (R * 0.03 + R * 0.15 * amp * Math.abs(Math.sin(t * 3 + k * 0.7)) * Math.exp(-k * k / 30)) * grow; x.fillStyle = nnRgba(nnMix(NN_GOLD, NN_PINK, (k + 9) / 18), 0.9); x.fillRect(CX + k * bw * 2.2 - bw / 2, by - R * 0.25 - hh / 2, bw, hh); }
   const AP = G.areas.map((a, i) => proj(rot(a.p.map(v => v * ease((t - 1 - i * 0.05) / 1.2)))));

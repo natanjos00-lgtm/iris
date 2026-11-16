@@ -5,12 +5,12 @@
 :root,:root[data-theme="light"],:root[data-theme="dark"]{
   --paper:#0B0408;--card:#1E0A19;--sand:#2A1222;--sand-2:#5A2A47;--taupe:#BFA4B3;--brown:#FFB3D4;
   --ink:#F7EAF0;--ink-2:#D9C2CE;--olive:#FF6FB0;--olive-soft:rgba(255,79,163,.16);--line:rgba(255,170,205,.14);
-  --gold:#FFB85C;--gold2:#FFD08A;--glass:rgba(34,10,28,.62);--glass-b:rgba(255,150,190,.22);
+  --gold:#EBD9CC;--gold2:#F7EBE1;--glass:rgba(34,10,28,.62);--glass-b:rgba(255,150,190,.22);
   --shadow:0 16px 44px rgba(0,0,0,.45);--neg:#FF8A7A;--pos:#9BE3B0;--side:rgba(18,5,14,.74);
-  --nav-act:linear-gradient(135deg,rgba(255,184,92,.20),rgba(255,79,163,.24));--tile:rgba(40,12,32,.55);--ov:rgba(4,1,4,.72);
-  --lg1:#FFE3B8;--lg2:#FFB85C;--lg3:#FF4FA3;--lg4:#FFD08A;
+  --nav-act:linear-gradient(135deg,rgba(235,217,204,.20),rgba(255,79,163,.24));--tile:rgba(40,12,32,.55);--ov:rgba(4,1,4,.72);
+  --lg1:#FFF6EE;--lg2:#EBD9CC;--lg3:#FF4FA3;--lg4:#F7EBE1;
   --bg:transparent;
-  --grad:linear-gradient(135deg,#FFB85C,#FF4FA3);--on-grad:#2A0A1C;--glow:0 0 22px rgba(255,100,150,.38);
+  --grad:linear-gradient(135deg,#EBD9CC,#FF4FA3);--on-grad:#2A0A1C;--glow:0 0 22px rgba(255,100,150,.38);
   --f-title:"Jost",-apple-system,"Segoe UI",system-ui,sans-serif;
   --f-text:"Jost",-apple-system,"Segoe UI",system-ui,sans-serif;
   --sb-track:rgba(255,255,255,.03);--sb-thumb:#5A2A47;--sb-thumb-h:#7A3A60;
@@ -45,7 +45,7 @@ a{color:var(--brown)}
 .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--glass-b)}
 .btn.ghost:hover{box-shadow:inset 0 0 0 1px #FF8CC0;filter:none}
 .btn:focus-visible,.chip:focus-visible,.nn-chip:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid #FF8CC0;outline-offset:2px}
-.chip{background:rgba(30,10,24,.55);border-color:rgba(255,184,92,.28);color:var(--ink-2);border-radius:999px}
+.chip{background:rgba(30,10,24,.55);border-color:rgba(235,217,204,.28);color:var(--ink-2);border-radius:999px}
 .chip.on{background:rgba(255,79,163,.18);border-color:#FF8CC0;color:#FFE3EF}
 .check{background:transparent;border-color:rgba(255,150,190,.45)}
 .item.done .check,.steps li.ok .check{background:var(--grad);border-color:transparent;color:var(--on-grad)}
@@ -93,14 +93,14 @@ input::placeholder,textarea::placeholder{color:#A88C9C}
 .nn-go:hover{filter:brightness(1.08)}
 .nn-chips{display:flex;gap:8px;width:100%;overflow-x:auto;scrollbar-width:none;padding:2px 0}
 .nn-chips::-webkit-scrollbar{display:none}
-.nn-chip{flex:none;min-height:40px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,184,92,.3);background:rgba(30,10,24,.55);color:#EBD3C2;font:inherit;font-size:14px;cursor:pointer}
+.nn-chip{flex:none;min-height:40px;padding:0 16px;border-radius:999px;border:1px solid rgba(235,217,204,.3);background:rgba(30,10,24,.55);color:#EBD3C2;font:inherit;font-size:14px;cursor:pointer}
 .nn-chip[aria-pressed="true"]{border-color:#FF8CC0;background:rgba(255,79,163,.18);color:#FFE3EF}
 
 /* cartões da tela inicial */
 .dk-h svg.i{color:#FFB3D4}
 .dk-h .plus{background:var(--grad);color:var(--on-grad);border:0}
 .finsum .saldo{background:rgba(255,79,163,.12)}
-.finsum .saldo b{color:#FFD08A}
+.finsum .saldo b{color:#F7EBE1}
 
 /* celular: barra de baixo e topo */
 @media (max-width:760px){
@@ -127,7 +127,7 @@ input::placeholder,textarea::placeholder{color:#A88C9C}
 .nn-line .nn-n{font-weight:400;font-size:17px;color:#FFF3F7}
 .nn-line .nn-go{min-height:32px;padding:0 14px;font-size:13.5px;align-self:center}
 .hbtns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
-.hbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,184,92,.3);background:rgba(30,10,24,.6);color:#EBD3C2;font:inherit;font-size:14.5px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.hbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(235,217,204,.3);background:rgba(30,10,24,.6);color:#EBD3C2;font:inherit;font-size:14.5px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .hbtn svg.i{width:18px;height:18px;color:#FFB3D4}
 .hbtn:hover{border-color:#FF8CC0;color:#FFF3F7}
 .hbtn[aria-expanded="true"]{border-color:#FF8CC0;background:rgba(255,79,163,.18);color:#FFE3EF}
@@ -157,7 +157,7 @@ input::placeholder,textarea::placeholder{color:#A88C9C}
 .nn-deep.out{opacity:0;transition:opacity .5s ease}
 .nn-deep canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
 .nn-deep canvas:active{cursor:grabbing}
-.nd-x{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(34,10,28,.62);border:1px solid rgba(255,184,92,.35);color:var(--ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.nd-x{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(34,10,28,.62);border:1px solid rgba(235,217,204,.35);color:var(--ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .nd-x svg{transform:rotate(45deg);width:20px;height:20px}
 .nd-hint{position:absolute;top:calc(24px + env(safe-area-inset-top));left:16px;right:72px;margin:0;font-size:13px;color:var(--taupe);letter-spacing:.02em;pointer-events:none;animation:ndHint 6s ease forwards}
 @keyframes ndHint{0%,70%{opacity:1}100%{opacity:0}}
@@ -176,7 +176,7 @@ html.deep-on .hero4{overflow:clip}
 .nd-card .nd-go{display:inline-flex;align-items:center;line-height:1;text-decoration:none;min-height:36px;padding:0 18px}
 @media (max-width:760px){.nd-card{gap:2px 10px;padding:10px 14px;bottom:calc(108px + env(safe-area-inset-bottom))}.nd-card .nd-n{font-size:17px}.nd-card .nd-i{font-size:13px}}
 .corebox{touch-action:none}
-.nn-enter{background:transparent;border:1px solid rgba(255,184,92,.55);color:var(--ink);cursor:pointer;font:inherit}
+.nn-enter{background:transparent;border:1px solid rgba(235,217,204,.55);color:var(--ink);cursor:pointer;font:inherit}
 .nn-enter:hover{border-color:var(--olive)}
 .core{border-radius:50%}
 .core:focus{outline:none}
