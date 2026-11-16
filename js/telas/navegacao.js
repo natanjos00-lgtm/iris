@@ -2,7 +2,7 @@
 /* ÍRIS · Interface: rotas, tema, painel v2, app instalável. */
 
 /* ---------- rotas ---------- */
-const ROUTES = ["inicio","pessoal","trabalho","faculdade","casa","metas","projetos","biblioteca","financeiro","iris","aprovacoes"];
+const ROUTES = ["inicio","pessoal","trabalho","faculdade","casa","metas","projetos","biblioteca","financeiro","iris","aprovacoes","entrada"];
 function route(){
   let r = (location.hash || "#inicio").slice(1); if (!ROUTES.includes(r)) r = "inicio";
   for (const k of ROUTES) $("v-"+k).hidden = k !== r;
@@ -10,7 +10,7 @@ function route(){
   current = r; document.body.dataset.route = r; document.body.classList.remove("menu"); renderView(); scrollTo(0,0);
 }
 let current = "inicio";
-function renderView(){ if (current === "inicio") renderHome(); else if (current === "financeiro") renderFin(); else if (current === "aprovacoes") renderApprovals(); else if (AREAS[current]) renderArea(current); }
+function renderView(){ if (current === "inicio") renderHome(); else if (current === "financeiro") renderFin(); else if (current === "aprovacoes") renderApprovals(); else if (current === "entrada") renderEntrada(); else if (AREAS[current]) renderArea(current); }
 function renderAll(){
   // não redesenhar a área enquanto alguém digita nela
   const a = document.activeElement;

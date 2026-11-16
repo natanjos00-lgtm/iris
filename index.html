@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="stylesheet" href="css/iris.css?v=26">
+<link rel="stylesheet" href="css/iris.css?v=27">
 </head><body>
 <title>ÍRIS</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -72,6 +72,7 @@
       <div class="sep" aria-hidden="true"></div>
       <a href="#iris" data-r="iris" title="Conversar com a ÍRIS"><svg class="i"><use href="#i-chat"/></svg>Conversar com a ÍRIS</a>
       <a href="#aprovacoes" data-r="aprovacoes" title="Aprovações"><svg class="i"><use href="#i-check"/></svg><span class="nl">Aprovações</span><i class="ap-n" id="apN" hidden></i></a>
+      <a href="#entrada" data-r="entrada" title="Entrada"><svg class="i"><use href="#i-down"/></svg><span class="nl">Entrada</span><i class="ap-n" id="inN" hidden></i></a>
     </nav>
     <button class="cfg" id="notifBtn" type="button" title="Avisos"><svg class="i"><use href="#i-bell"/></svg><span>Avisos no celular</span></button>
     <button class="cfg" id="installBtn" type="button" title="Instalar o app" hidden><svg class="i"><use href="#i-plus"/></svg><span>Instalar o app</span></button>
@@ -214,6 +215,7 @@
     <section class="view" id="v-biblioteca" hidden></section>
     <section class="view" id="v-financeiro" hidden></section>
     <section class="view" id="v-aprovacoes" hidden></section>
+    <section class="view" id="v-entrada" hidden></section>
 
     <!-- ÍRIS -->
     <section class="view" id="v-iris" hidden aria-labelledby="h-iris">
@@ -271,25 +273,27 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=26"></script>
-<script src="js/privacidade.js?v=26"></script>
-<script src="js/permissoes.js?v=26"></script>
-<script src="adapter.js?v=26"></script>
-<script src="js/base.js?v=26"></script>
-<script src="js/dados.js?v=26"></script>
-<script src="js/integracoes/google.js?v=26"></script>
-<script src="js/integracoes/casa.js?v=26"></script>
-<script src="js/integracoes/avisos.js?v=26"></script>
-<script src="js/voz.js?v=26"></script>
-<script src="js/inteligencia.js?v=26"></script>
-<script src="js/telas/inicio.js?v=26"></script>
-<script src="js/telas/area.js?v=26"></script>
-<script src="js/telas/tempo.js?v=26"></script>
-<script src="js/telas/financeiro.js?v=26"></script>
-<script src="js/telas/esvaziar.js?v=26"></script>
-<script src="js/telas/painel.js?v=26"></script>
-<script src="js/telas/aprovacoes.js?v=26"></script>
-<script src="js/telas/navegacao.js?v=26"></script>
-<script src="js/iniciar.js?v=26"></script>
+<script src="config.js?v=27"></script>
+<script src="js/privacidade.js?v=27"></script>
+<script src="js/permissoes.js?v=27"></script>
+<script src="adapter.js?v=27"></script>
+<script src="js/base.js?v=27"></script>
+<script src="js/dados.js?v=27"></script>
+<script src="js/integracoes/google.js?v=27"></script>
+<script src="js/integracoes/casa.js?v=27"></script>
+<script src="js/integracoes/avisos.js?v=27"></script>
+<script src="js/integracoes/conectores.js?v=27"></script>
+<script src="js/voz.js?v=27"></script>
+<script src="js/inteligencia.js?v=27"></script>
+<script src="js/telas/inicio.js?v=27"></script>
+<script src="js/telas/area.js?v=27"></script>
+<script src="js/telas/tempo.js?v=27"></script>
+<script src="js/telas/financeiro.js?v=27"></script>
+<script src="js/telas/esvaziar.js?v=27"></script>
+<script src="js/telas/painel.js?v=27"></script>
+<script src="js/telas/aprovacoes.js?v=27"></script>
+<script src="js/telas/entrada.js?v=27"></script>
+<script src="js/telas/navegacao.js?v=27"></script>
+<script src="js/iniciar.js?v=27"></script>
 
 </body></html>

@@ -689,3 +689,21 @@ html.side-min .nav a .nl{display:none}
 .item.ap .row-end{gap:8px}
 @media (max-width:560px){.item.ap{grid-template-columns:minmax(0,1fr)}.item.ap .row-end{justify-content:flex-start}}
 html.side-min .nav a{position:relative}
+
+/* ---------- central de entrada ---------- */
+.ent-card{grid-column:1/-1}
+.ent-filtros{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 6px}
+.ent-filtros .chip{padding:6px 13px}
+.ent-filtros .ent-arq{margin-left:auto}
+.item.ent-novo .ttl{font-weight:600}
+.ent-trecho{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ent-alerta{color:var(--brown)}
+.dlg.ent-dlg{max-width:640px}
+.ent-passos{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--ink-2);line-height:1.5}
+.ent-passos a{color:var(--brown)}
+.ent-bloco{margin-top:8px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.ent-bloco-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--taupe)}
+.ent-bloco-h .btn{padding:5px 12px;font-size:13px}
+.ent-code{width:100%;box-sizing:border-box;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;resize:vertical}
+.item.ap .row-end .btn{padding:7px 14px;font-size:13.5px;min-height:0}
+.item.ap a.btn{text-decoration:none;display:inline-flex;align-items:center}

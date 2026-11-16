@@ -30,7 +30,7 @@ O `index.html` só tem a estrutura da página. O resto fica separado por camada:
 | Configuração e perfil da dona | `config.js` (chaves públicas e `PERFIL`) |
 | Permissões e privacidade | `js/privacidade.js` (esconde CPF, cartões e valores antes da IA), `js/permissoes.js` (o que a IA faz sozinha e o que vira proposta) |
 | Memória e banco | `adapter.js` (Supabase), `js/dados.js` |
-| Integrações | `js/integracoes/google.js`, `js/integracoes/casa.js`, `js/integracoes/avisos.js` |
+| Integrações | `js/integracoes/conectores.js` (registro de conectores), `js/integracoes/google.js`, `js/integracoes/casa.js`, `js/integracoes/avisos.js`; `apps-script/` (conector do Google); `supabase/functions/ingest` (recebe o que os conectores leem) |
 | Núcleo de inteligência | `js/inteligencia.js` |
 | Interface | `js/base.js`, `js/voz.js`, `js/telas/*.js`, `css/iris.css` |
 | Inicialização | `js/iniciar.js` |
@@ -40,3 +40,13 @@ Os scripts são carregados em ordem, sem ferramenta de build. Mudanças no banco
 **Google no app instalado:** a permissão do Google volta pela página `oauth.html`. Ela precisa estar em
 "URIs de redirecionamento autorizados" do cliente OAuth no Google Cloud:
 `https://natanjos00-lgtm.github.io/iris/oauth.html`.
+
+## Conectores e central de entrada (fase 1)
+
+O conector do Google roda no Apps Script, na conta da dona, só com permissões de leitura
+(`apps-script/appsscript.json`). A cada 30 minutos ele envia e-mails recentes, compromissos dos
+próximos 14 dias e arquivos alterados no Drive para a função `ingest`, que confere o token e grava em
+`inbox_events`. A tela **Entrada** mostra o que chegou e tem o passo a passo de instalação.
+
+Para um conector novo: uma entrada em `CONECTORES` (`js/integracoes/conectores.js`), uma origem nova
+aceita na função `ingest` e na restrição `source` de `inbox_events`.

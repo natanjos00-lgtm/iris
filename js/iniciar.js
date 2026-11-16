@@ -28,6 +28,6 @@ setInterval(() => { if (current === "inicio") renderHome(); }, 60000);
   if (mcp) { watchCal(); watchMail(); } else if (window.irisSb) { loadIcs(); setInterval(() => { if (!document.hidden) loadIcs(); }, 10*60*1000); mailState = "error"; mailNeedsLink = true; mailMsg = "Ligue o Gmail para ver aqui os e-mails importantes."; renderInbox(); if (store.get("iris.g_gmail", false)) setTimeout(() => loadGmail(false), 1500); setInterval(() => { if (!document.hidden && store.get("iris.g_gmail", false)) loadGmail(false); }, 10*60*1000); } else { calState = "error"; calMsg = "A agenda aparece quando a página é aberta no claude.ai."; mailState = "error"; mailMsg = "Os e-mails aparecem quando a página é aberta no claude.ai."; renderInbox(); }
   if (window.irisCasaRead) setTimeout(() => loadCasa(), 2500); else { casaState = "error"; casaMsg = casaErr("casa_indisponivel"); }
   if (!mcp && window.irisSb) { if (gLoad()) loadGmail(false); setTimeout(resumeGoogle, 600); }
-  refreshApprovalsBadge(); setInterval(() => { if (!document.hidden) refreshApprovalsBadge(); }, 5*60*1000);
+  refreshApprovalsBadge(); refreshEntradaBadge(); setInterval(() => { if (!document.hidden) { refreshApprovalsBadge(); refreshEntradaBadge(); } }, 5*60*1000);
   hello(); renderView();
 })();
