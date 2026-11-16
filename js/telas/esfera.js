@@ -135,17 +135,19 @@ function nnSaveZoom() { try { localStorage.setItem("iris.nnZoom", String(nnZ)); 
   // pinça com dois dedos (ou Ctrl + roda / pinça no trackpad) aumenta e diminui a esfera
   const pts = new Map(); let pinch = null;
   const gap = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
-  core.addEventListener("pointerdown", ev => {
+  const other = ev => { const b = ev.target.closest && ev.target.closest("button,a"); return b && b !== core; };
+  box.addEventListener("pointerdown", ev => {
+    if (other(ev) && !pts.size) return;
     pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
     if (pts.size === 2) { nn.drag = null; nn.suppress = true; pinch = { d: gap(), z: nnZoom() }; return; }
     nn.drag = { x: ev.clientX, y: ev.clientY, ry: nn.ry, rx: nn.rx, id: ev.pointerId }; nn.moved = false;
   });
-  core.addEventListener("pointermove", ev => {
+  box.addEventListener("pointermove", ev => {
     if (pts.has(ev.pointerId)) pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
     if (pinch && pts.size === 2) { const want = pinch.z * gap() / pinch.d; nnSetZoom(want); if (want > NN_ZMAX * 1.18) { pinch = null; pts.clear(); nnSaveZoom(); nnDeepEnter(); } return; }
     const d = nn.drag; if (!d || d.id !== ev.pointerId) return;
     const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
-    if (!nn.moved && Math.hypot(dx, dy) > 6) { nn.moved = true; try { core.setPointerCapture(ev.pointerId); } catch {} }
+    if (!nn.moved && Math.hypot(dx, dy) > 6) { nn.moved = true; try { box.setPointerCapture(ev.pointerId); } catch {} }
     if (nn.moved) { const w = core.getBoundingClientRect().width || 300; nn.ry = d.ry + dx * (3.2 / w); nn.rx = Math.max(-1.2, Math.min(1.2, d.rx + dy * (2.2 / w))); }
   });
   const end = ev => {
@@ -157,7 +159,15 @@ function nnSaveZoom() { try { localStorage.setItem("iris.nnZoom", String(nnZ)); 
     nn.AP.forEach((p, i) => { const dd = Math.hypot(p[0] - px, p[1] - py); if (dd < bd && p[3] > -0.2) { bd = dd; best = i; } });
     if (best >= 0 && best !== nn.sel) { nn.suppress = true; nnSelect(best); } // tocar no neurônio já ativo, ou no centro, faz a ÍRIS falar
   };
-  core.addEventListener("pointerup", end); core.addEventListener("pointercancel", end);
+  box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end);
+  // Safari no iPad/iPhone: o gesto de pinça chega como gesturestart/gesturechange (e impede o zoom da página)
+  let gz = 0;
+  box.addEventListener("gesturestart", ev => { ev.preventDefault(); gz = nnZoom(); }, { passive: false });
+  box.addEventListener("gesturechange", ev => {
+    ev.preventDefault(); if (pinch || !gz || nnDeep.on) return; nn.drag = null; nn.suppress = true;
+    const want = gz * ev.scale; nnSetZoom(want); if (want > NN_ZMAX * 1.18) { gz = 0; nnSaveZoom(); nnDeepEnter(); }
+  }, { passive: false });
+  box.addEventListener("gestureend", ev => { ev.preventDefault(); if (gz) nnSaveZoom(); gz = 0; }, { passive: false });
   let wt = 0;
   let over = 0;
   box.addEventListener("wheel", ev => {
@@ -168,6 +178,7 @@ function nnSaveZoom() { try { localStorage.setItem("iris.nnZoom", String(nnZ)); 
   }, { passive: false });
   core.addEventListener("dblclick", ev => { if (nnZoom() !== 1) { ev.preventDefault(); nnSetZoom(1); nnSaveZoom(); } });
   nnSetZoom(nnZoom());
+  const ent = $("nnEnter"); if (ent) ent.addEventListener("click", () => nnDeepEnter());
   box.addEventListener("click", ev => { if (nn.suppress) { nn.suppress = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
   core.addEventListener("keydown", ev => { if (ev.key === "ArrowLeft") { ev.preventDefault(); nnSelect(nn.sel - 1); } else if (ev.key === "ArrowRight") { ev.preventDefault(); nnSelect(nn.sel + 1); } });
 })();
@@ -214,6 +225,8 @@ function nnDeepBuild(){
     if (best >= 0) nnDeepPick(best);
   };
   cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+  el.addEventListener("gesturestart", ev => ev.preventDefault(), { passive: false });
+  el.addEventListener("gesturechange", ev => { ev.preventDefault(); if (nnDeep.on && ev.scale < 0.7) nnDeepExit(); }, { passive: false });
   cv.addEventListener("wheel", ev => { if (ev.ctrlKey && ev.deltaY > 4) { ev.preventDefault(); nnDeepExit(); } }, { passive: false });
   addEventListener("keydown", ev => { if (nnDeep.on && ev.key === "Escape") { ev.preventDefault(); nnDeepExit(); } });
   addEventListener("hashchange", () => { if (nnDeep.on) { nnDeep.on = false; nnDeepHide(); } });
