@@ -680,3 +680,12 @@ html{scrollbar-color:var(--sb-thumb) var(--sb-track)}
 .side::-webkit-scrollbar{display:none}
 .dk-agenda li.ag-next{display:block;border-top:1px dashed var(--line);margin-top:6px;padding:10px 0 0;font-size:13.5px;color:var(--taupe)}
 .dk-agenda li.ag-next small{font-size:inherit;overflow-wrap:anywhere}
+
+/* ---------- central de aprovações ---------- */
+.nav a .ap-n{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--olive);color:var(--paper);font:600 12px/20px Figtree,system-ui,sans-serif;font-style:normal;text-align:center;font-variant-numeric:tabular-nums}
+html.side-min .nav a .ap-n{position:absolute;margin:0;transform:translate(14px,-10px);min-width:16px;height:16px;padding:0 4px;font-size:10.5px;line-height:16px}
+html.side-min .nav a .nl{display:none}
+.item.ap{grid-template-columns:minmax(0,1fr) auto}
+.item.ap .row-end{gap:8px}
+@media (max-width:560px){.item.ap{grid-template-columns:minmax(0,1fr)}.item.ap .row-end{justify-content:flex-start}}
+html.side-min .nav a{position:relative}

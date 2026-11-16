@@ -159,6 +159,7 @@
   const priv = () => (window.irisPrivacy ? window.irisPrivacy.session() : { maskContents: c => c, maskDeep: v => v, unmask: t => t, unmaskDeep: v => v, mask: t => t });
   const sample = async (messages, opts = {}) => {
     const P = priv();
+    const G = window.irisPermissions ? window.irisPermissions.session(opts.origin) : null;
     const contents = P.maskContents(toContents(messages));
     const tools = Array.isArray(opts.tools) && opts.tools.length ? opts.tools : null;
     for (let step = 0; step < 7; step++) {
@@ -169,7 +170,7 @@
         const parts = [];
         for (const fc of d.functionCalls) {
           const t = tools.find(x => x.name === fc.name); let resp;
-          try { const r = t ? await t.execute(P.unmaskDeep(fc.args || {}), { signal: opts.signal }) : { erro: "ferramenta desconhecida" }; resp = { result: r === undefined ? "ok" : r }; }
+          try { const args = P.unmaskDeep(fc.args || {}); const r = !t ? { erro: "ferramenta desconhecida" } : G ? await window.irisPermissions.run(t, args, G, { signal: opts.signal }) : await t.execute(args, { signal: opts.signal }); resp = { result: r === undefined ? "ok" : r }; }
           catch (e) { resp = { erro: String((e && e.message) || e || "falhou") }; }
           parts.push({ functionResponse: { name: fc.name, response: P.maskDeep(resp) } });
         }

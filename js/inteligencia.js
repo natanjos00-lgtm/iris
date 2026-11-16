@@ -53,12 +53,12 @@ const TOOLS = [
       for (const id of ids) if (items.find(x => x.id === id)) await updateItem(id, { focus:true }); return { ok:true }; } },
   { name:"criar_evento", description:"Cria um evento no Google Agenda depois que ela confirma na tela. data AAAA-MM-DD; inicio e fim HH:MM (omita para dia inteiro). Retorna se foi criado.",
     inputSchema:{ type:"object", properties:{ titulo:{type:"string"}, data:{type:"string"}, inicio:{type:"string"}, fim:{type:"string"}, local:{type:"string"} }, required:["titulo","data"] },
-    async execute(i){
+    async execute(i, ctx){
       const date = String(i.data).slice(0,10); if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("data inválida");
       const tm = x => /^\d{2}:\d{2}$/.test(String(x||"")) ? String(x) : null;
       const start = tm(i.inicio), end = tm(i.fim) || (start ? `${String(Math.min(23, +start.slice(0,2)+1)).padStart(2,"0")}:${start.slice(3)}` : null);
       const allDay = !start; const title = String(i.titulo).slice(0,200);
-      const ok = await askConfirm(`Criar "${title}" no Google Agenda, ${prettyDay(date)}${allDay ? ", dia inteiro" : `, das ${start} às ${end}`}${i.local ? ", em " + String(i.local).slice(0,100) : ""}?`);
+      const ok = ctx && ctx.preapproved ? true : await askConfirm(`Criar "${title}" no Google Agenda, ${prettyDay(date)}${allDay ? ", dia inteiro" : `, das ${start} às ${end}`}${i.local ? ", em " + String(i.local).slice(0,100) : ""}?`);
       if (!ok) return { criado:false, motivo:"Ela preferiu não criar agora." };
       await createEvent({ title, date, start, end, allDay, location:i.local }); return { criado:true }; } },
   { name:"iniciar_temporizador", description:"Inicia um temporizador ou lembrete na tela, que toca um som suave ao terminar. Use para 'me lembra em X minutos' ou foco/pausa.",
