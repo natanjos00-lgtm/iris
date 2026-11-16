@@ -400,7 +400,7 @@ function finPlano(root){
   const basics = h("form",{autocomplete:"off"},
     h("div",{class:"card-h",style:"margin-top:22px"}, h("h2",{class:"t",style:"font-size:21px"},"Renda, metas e reserva")),
     h("div",{class:"lgrid"},
-      h("label",null,"Renda mensal (R$)", h("input",{type:"number",id:"pInc",step:"0.01",min:"0",value:c.income || ""})),
+      (+((c.payslip || {}).liquido) ? h("div",{class:"lfixed"}, h("span",null,"Renda mensal"), h("b",null, brl(c.income || 0)), h("small",null,"vem do líquido do holerite, acima")) : h("label",null,"Renda mensal (R$)", h("input",{type:"number",id:"pInc",step:"0.01",min:"0",value:c.income || ""}))),
       h("label",null,"Quero guardar (% da renda)", h("input",{type:"number",id:"pSave",min:"0",max:"90",value:c.savingsPct ?? 10})),
       h("label",null,"Reserva atual (R$)", h("input",{type:"number",id:"pRes",step:"0.01",min:"0",value:c.reserve || ""})),
       h("label",null,"Meta da reserva (meses de gastos)", h("input",{type:"number",id:"pResG",min:"1",max:"24",value:c.reserveGoalMonths || 6}))),
@@ -408,7 +408,7 @@ function finPlano(root){
     h("div",{class:"lgrid budgets"}, ...CATS.map((k, i) => h("label",null, k, h("input",{type:"number",id:"pb"+i,min:"0",step:"1",placeholder:"—",value:(c.budgets||{})[k] || ""})))),
     h("div",{class:"row-end"}, h("button",{class:"btn",type:"submit"},"Salvar")));
   basics.onsubmit = e => { e.preventDefault(); const budgets = {}; CATS.forEach((k, i) => { const v = +$("pb"+i).value; if (v > 0) budgets[k] = v; });
-    cfgSave({ income:+$("pInc").value || 0, savingsPct:Math.max(0, Math.min(90, +$("pSave").value || 0)), reserve:+$("pRes").value || 0, reserveGoalMonths:Math.max(1, +$("pResG").value || 6), budgets }); };
+    cfgSave({ income: $("pInc") ? (+$("pInc").value || 0) : (+fincfg.income || 0), savingsPct:Math.max(0, Math.min(90, +$("pSave").value || 0)), reserve:+$("pRes").value || 0, reserveGoalMonths:Math.max(1, +$("pResG").value || 6), budgets }); };
 
   const cardsC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Cartões")));
   const ulc = h("ul",{class:"items"}); (c.cards || []).forEach(cd => ulc.append(h("li",{class:"item",style:"grid-template-columns:minmax(0,1fr) auto"},
@@ -494,7 +494,7 @@ function finPlano(root){
     h("label",null,"IRRF (R$)", h("input",{type:"number",id:"hIr",step:"0.01",min:"0",value:ps.irrf || "",placeholder:"0"})),
     h("div",{style:"display:flex;align-items:flex-end"}, h("button",{class:"btn ghost",type:"submit"},"Salvar holerite")));
   hf.onsubmit = e => { e.preventDefault(); const np = Object.assign({}, c.payslip || {}, { mes:$("hMes").value || curYM(), salarioBase:+$("hBase").value || 0, anuenio:+$("hAn").value || 0, inss:+$("hInss").value || 0, vtDesconto:+$("hVt").value || 0, irrf:+$("hIr").value || 0 });
-    np.bruto = np.salarioBase + np.anuenio; np.liquido = Math.round((np.bruto - np.inss - np.vtDesconto - np.irrf) * 100) / 100; cfgSave({ payslip:np }); };
+    np.bruto = np.salarioBase + np.anuenio; np.liquido = Math.round((np.bruto - np.inss - np.vtDesconto - np.irrf) * 100) / 100; cfgSave({ payslip:np, income:np.liquido }); };
   const det = h("details",{class:"hl-edit"}, h("summary",null, bruto ? "Atualizar valores do holerite" : "Preencher holerite"), hf); hlC.append(det);
 
   // 13º salário

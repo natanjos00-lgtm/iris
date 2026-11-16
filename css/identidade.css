@@ -243,3 +243,4 @@ html.deep-on .hero4{overflow:clip}
 .hl-r.sub b,.hl-r.sub span{color:var(--ink-2)}
 .hl-r.tot{border-bottom:0;padding-top:10px}.hl-r.tot span{font-weight:500}.hl-r.tot b{font-size:19px;color:var(--olive)}
 .hl-edit{margin-top:12px}.hl-edit summary{cursor:pointer;color:var(--olive);font-size:14px}
+.lfixed{display:flex;flex-direction:column;gap:2px;font-size:14px;color:var(--ink-2)}.lfixed b{font-size:18px;font-weight:500;color:var(--ink)}.lfixed small{font-size:12px;color:var(--taupe)}
