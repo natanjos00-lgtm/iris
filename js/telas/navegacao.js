@@ -60,8 +60,9 @@ document.querySelectorAll(".sc").forEach(b => b.onclick = () => {
   else if (k === "plano") { location.hash = "#iris"; setTimeout(() => send("Quero criar um plano. Me ajude a começar com duas ou três perguntas curtas."), 120); }
   else if (k === "meta") goFocus("#metas", "#v-metas input[type=text]");
 });
-const toAgenda = () => { if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => { const e = $("dkComp"); if (e) e.scrollIntoView({ block:"center", behavior:"smooth" }); }, 150); };
-$("tBell").onclick = toAgenda; $("bellM").onclick = toAgenda;
+const toAgenda = () => { if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => { const b = document.querySelector('.hbtn[data-p="dkComp"]'); if (b && b.getAttribute("aria-expanded") !== "true") b.click(); else { const e = $("dkComp"); if (e) e.scrollIntoView({ block:"center", behavior:"smooth" }); } }, 150); };
+// o sino abre os avisos (ativar no celular, testar) com atalho para os compromissos de hoje
+$("tBell").onclick = () => openNotif(); $("bellM").onclick = () => openNotif();
 $("tSearch").onclick = () => { if (current !== "inicio") location.hash = "#inicio"; setTimeout(() => $("askIn").focus(), 150); };
 $("tUser").onclick = () => openPrefs();
 $("menuBtn").onclick = () => document.body.classList.toggle("menu");

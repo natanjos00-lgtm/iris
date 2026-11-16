@@ -24,9 +24,9 @@ async function openNotif(){
   const bOn = h("button",{class:"btn",type:"button"},"Ativar avisos neste aparelho"), bTest = h("button",{class:"btn ghost",type:"button"},"Enviar um aviso de teste"), bNow = h("button",{class:"btn ghost",type:"button"},"Ver o resumo de hoje"), bOff = h("button",{class:"btn ghost",type:"button"},"Desativar neste aparelho");
   const f = h("form",{class:"dlg",role:"dialog","aria-modal":"true",autocomplete:"off"},
     h("h2",{class:"t"},"Avisos no celular"),
-    h("p",{class:"muted small",style:"margin:0"},"A ÍRIS manda um resumo às 7h30 (compromissos, atrasos, contas) e avisa cerca de 1 hora antes de cada compromisso do Google Agenda."),
+    h("p",{class:"muted small",style:"margin:0"},"A ÍRIS manda um resumo às 7h30, avisa cerca de 1 hora antes de cada compromisso do Google Agenda e nos horários da sua rotina (como o plano de horas extras)."),
     st, bOn, bTest, bNow, bOff, out,
-    h("div",{class:"row-end"}, h("button",{class:"btn ghost",type:"button",onclick:close},"Fechar")));
+    h("div",{class:"row-end"}, h("button",{class:"btn ghost",type:"button",style:"margin-right:auto",onclick:()=>{ close(); toAgenda(); }},"Compromissos de hoje"), h("button",{class:"btn ghost",type:"button",onclick:close},"Fechar")));
   const ov = h("div",{class:"overlay",onclick:e => { if (e.target === ov) close(); }}, f); slot.append(ov);
   const refresh = async () => { const s = await pushState();
     st.textContent = s === "on" ? "Avisos ativados neste aparelho." : s === "denied" ? "As notificações estão bloqueadas para este app. Libere nas configurações do aparelho." : s === "unsupported" ? "Este navegador não permite avisos. No iPhone, instale o app: Compartilhar > Adicionar à Tela de Início, abra pelo ícone e volte aqui (precisa do iOS 16.4 ou mais novo)." : "Avisos desativados neste aparelho.";
