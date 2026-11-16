@@ -118,11 +118,11 @@ input::placeholder,textarea::placeholder{color:#A88C9C}
 /* tela inicial centrada: a ÍRIS sozinha no meio, o resto em botões que se abrem */
 .hero4{flex-direction:column;justify-content:flex-start;gap:4px;padding-top:0;min-height:0}
 .corewrap{gap:2px}
-.corebox{width:clamp(300px,min(48vh,40vw),520px)}
+.corebox{width:clamp(340px,min(66vh,58vw),760px)}
 .hero-copy{align-items:center;text-align:center;width:100%;max-width:640px;gap:14px}
 .hero-copy h2{font-size:clamp(26px,2.2vw,34px)}
 .core-cap{text-align:center;max-width:none}
-.nn-line{display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:4px 10px;font-size:14px;color:var(--taupe);text-align:center}
+.nn-line{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px 10px;font-size:14px;color:var(--taupe);text-align:center}
 .nn-line .nn-k{font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:#FF8CC0}
 .nn-line .nn-n{font-weight:400;font-size:17px;color:#FFF3F7}
 .nn-line .nn-go{min-height:32px;padding:0 14px;font-size:13.5px;align-self:center}
@@ -137,7 +137,7 @@ input::placeholder,textarea::placeholder{color:#A88C9C}
 @keyframes hpIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 .maisdia{margin-top:22px;animation:hpIn .35s cubic-bezier(.2,.7,.2,1) both}
 @media (max-width:760px){
-  .corebox{width:min(72vw,300px);margin-top:-6px}
+  .corebox{width:min(94vw,400px);margin-top:-10px}
   .hero-copy{gap:10px}
   .hero-copy h2{font-size:21px}
   .core-cap{display:none}

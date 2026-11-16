@@ -42,7 +42,7 @@ function drawNeural(x, W, sp, e, mode, spike){
   const G = nn.geo, now = performance.now() / 1000, dt = Math.min(0.05, nn.last ? now - nn.last : 0.016); nn.last = now;
   if (!nn.drag) { const tr = nnTargetRy(); nn.ry += (tr - nn.ry) * Math.min(1, dt * 2.5); nn.rx += (-0.22 - nn.rx) * Math.min(1, dt * 2.5); }
   const t = nnReduce ? 10 : sp - nn.born;
-  const R = W * 0.27, CX = W / 2, CY = W * 0.45, F = W * 1.6, ry = nn.ry, rx = nn.rx, SEL = nn.sel;
+  const R = W * 0.31, CX = W / 2, CY = W * 0.45, F = W * 1.6, ry = nn.ry, rx = nn.rx, SEL = nn.sel;
   const cy = Math.cos(ry), sy = Math.sin(ry), cr = Math.cos(rx), sr = Math.sin(rx);
   const rot = p => { const X = p[0] * cy + p[2] * sy, Z = -p[0] * sy + p[2] * cy; return [X, p[1] * cr - Z * sr, p[1] * sr + Z * cr]; };
   const proj = v => { const s = F / (F - v[2] * R); return [CX + v[0] * R * s, CY + v[1] * R * s, s, v[2]]; };
