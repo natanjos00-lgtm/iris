@@ -35,7 +35,7 @@ function themeSet(m){ try { localStorage.setItem(THEME_KEY, m); } catch {} theme
 try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (themeMode() === "auto") themeApply(); }); } catch {}
 function sideApply(min){ document.documentElement.classList.toggle("side-min", min); const b = $("sideToggle"); if (b) { b.setAttribute("aria-expanded", String(!min)); const t = min ? "Expandir menu" : "Recolher menu"; b.title = t; b.setAttribute("aria-label", t); b.querySelector("span").textContent = t; } }
 sideApply(document.documentElement.classList.contains("side-min"));
-$("sideToggle").onclick = () => { const min = !document.documentElement.classList.contains("side-min"); try { localStorage.setItem("iris.side", min ? "min" : "open"); } catch {} sideApply(min); setTimeout(() => { try { dispatchEvent(new Event("resize")); } catch {} }, 300); };
+$("sideToggle").onclick = () => { const min = !document.documentElement.classList.contains("side-min"); try { localStorage.setItem("iris.side2", min ? "min" : "open"); } catch {} sideApply(min); setTimeout(() => { try { dispatchEvent(new Event("resize")); } catch {} }, 300); };
 $("themeBtn").onclick = () => themeSet(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 themeApply();
 

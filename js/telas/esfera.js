@@ -111,6 +111,7 @@ function nnRefresh(){
   if (nm) nm.textContent = nnLabel(k);
   if (inf) inf.textContent = nnInfo(k);
   if (go) { go.href = "#" + k; go.setAttribute("aria-label", "Abrir " + nnLabel(k)); }
+  setTimeout(hbRefresh, 0);
   if (ch) {
     if (!ch.childElementCount) NN_KEYS.forEach((key, i) => ch.append(h("button", { type:"button", class:"nn-chip", "data-i":String(i), onclick:() => nnSelect(i) }, nnLabel(key))));
     ch.querySelectorAll(".nn-chip").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.i === nn.sel)));
@@ -163,4 +164,25 @@ function nnRefresh(){
   if (nnReduce) { draw(0); addEventListener("resize", () => draw(0)); return; }
   const loop = ms => { if (!document.hidden) draw(ms); requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
+})();
+
+/* tela inicial: Agenda, Metas, Finanças e Mais do dia são botões compactos; tocar abre o painel (um de cada vez) */
+function hbRefresh(){
+  const set = (id, v) => { const el = $(id); if (el) { el.textContent = v || ""; el.hidden = !v; } };
+  try { const n = calEvents.filter(e => e.day === today()).length; set("hbAg", n ? String(n) : ""); } catch {}
+  try { const n = items.filter(it => it.kind === "meta" && !it.done).length; set("hbMt", n ? String(n) : ""); } catch {}
+  try { const c = finCalc(curYM()); set("hbFn", c.renda ? brl0(c.free) : ""); } catch {}
+  try { const t = ($("alN") && $("alN").textContent || "").trim(); set("hbMais", /^\d+$/.test(t) && t !== "0" ? t : ""); } catch {}
+}
+(function homePanels(){
+  const btns = [...document.querySelectorAll(".hbtn")]; if (!btns.length) return;
+  const close = () => btns.forEach(b => { b.setAttribute("aria-expanded", "false"); const p = $(b.dataset.p); if (p) p.hidden = true; });
+  btns.forEach(b => b.addEventListener("click", () => {
+    const open = b.getAttribute("aria-expanded") === "true"; close();
+    if (open) return;
+    b.setAttribute("aria-expanded", "true"); const p = $(b.dataset.p); if (!p) return;
+    p.hidden = false; setTimeout(() => p.scrollIntoView({ behavior: nnReduce ? "auto" : "smooth", block: "nearest" }), 30);
+  }));
+  addEventListener("keydown", e => { if (e.key === "Escape" && btns.some(b => b.getAttribute("aria-expanded") === "true")) close(); });
+  addEventListener("hashchange", close);
 })();
