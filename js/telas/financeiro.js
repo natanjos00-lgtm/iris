@@ -397,8 +397,8 @@ async function importFaturas(ids){
 /* planejamento */
 function finPlano(root){
   const c = fincfg;
-  const basics = h("form",{class:"card",autocomplete:"off"},
-    h("div",{class:"card-h"}, h("h2",{class:"t"},"Base do mês")),
+  const basics = h("form",{autocomplete:"off"},
+    h("div",{class:"card-h",style:"margin-top:22px"}, h("h2",{class:"t",style:"font-size:21px"},"Renda, metas e reserva")),
     h("div",{class:"lgrid"},
       h("label",null,"Renda mensal (R$)", h("input",{type:"number",id:"pInc",step:"0.01",min:"0",value:c.income || ""})),
       h("label",null,"Quero guardar (% da renda)", h("input",{type:"number",id:"pSave",min:"0",max:"90",value:c.savingsPct ?? 10})),
@@ -476,11 +476,12 @@ function finPlano(root){
   const ps = Object.assign({ salarioBase:0, anuenio:0, inss:0, vtDesconto:0, irrf:0 }, c.payslip || {});
   const bruto = (+ps.salarioBase || 0) + (+ps.anuenio || 0), liq = bruto - (+ps.inss || 0) - (+ps.vtDesconto || 0) - (+ps.irrf || 0);
   const row = (l, v, cls) => h("li",{class:"hl-r" + (cls ? " " + cls : "")}, h("span",null,l), h("b",null,v));
-  const hlC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Holerite"), ps.mes ? h("span",{class:"hint"}, `referência: ${ymLabel(ps.mes)}`) : null));
+  const hlC = h("div",null, h("div",{class:"card-h"}, h("h2",{class:"t",style:"font-size:21px"},"Holerite"), ps.mes ? h("span",{class:"hint"}, `referência: ${ymLabel(ps.mes)}`) : null));
   if (bruto) hlC.append(h("ul",{class:"hl"},
     row("Salário base", brl(ps.salarioBase)), +ps.anuenio ? row("Anuênio", "+ " + brl(ps.anuenio)) : null, row("Bruto", brl(bruto), "sub"),
     row("INSS", "− " + brl(ps.inss || 0)), +ps.vtDesconto ? row("Vale-transporte (sua parte)", "− " + brl(ps.vtDesconto)) : null,
     row("IRRF", +ps.irrf ? "− " + brl(ps.irrf) : "R$ 0,00 · isento até R$ 5 mil"), row("Líquido", brl(liq), "tot"),
+    h("li",{class:"muted small"}, `Valor da hora (${+ps.horas || 220} h no mês): ${brl(bruto / (+ps.horas || 220))} bruto · ${brl(liq / (+ps.horas || 220))} líquido · hora extra 50%: ${brl(bruto / (+ps.horas || 220) * 1.5)}`),
     (+ps.vaEmpresa || +ps.vtEmpresa) ? h("li",{class:"muted small",style:"padding-top:6px"}, `Benefícios pagos pela empresa no mês: ${[+ps.vaEmpresa ? "alimentação " + brl(ps.vaEmpresa) : "", +ps.vtEmpresa ? "transporte " + brl(ps.vtEmpresa) : ""].filter(Boolean).join(" · ")}. Eles entram em "Recebo por dia trabalhado".`) : null,
     Math.abs(liq - (+c.income || 0)) > 0.01 ? h("li",null, h("button",{class:"btn ghost",type:"button",style:"margin-top:8px",onclick:()=>cfgSave({ income: Math.round(liq * 100) / 100 })}, `Usar ${brl(liq)} como renda mensal`)) : h("li",{class:"muted small",style:"padding-top:6px"},"A renda mensal do planejamento usa este líquido.")));
   else hlC.append(h("div",{class:"empty"},"Cadastre os valores do seu contracheque para a ÍRIS calcular o líquido e o 13º."));
@@ -501,7 +502,7 @@ function finPlano(root){
   const avos = adm && adm.getFullYear() === y ? Math.max(0, 12 - adm.getMonth() - (adm.getDate() > 15 ? 1 : 0)) : 12;
   const b13 = bruto * avos / 12, p1 = Math.round(b13 / 2 * 100) / 100, inss13 = avos === 12 ? (+ps.inss || 0) : Math.round((+ps.inss || 0) * avos / 12 * 100) / 100, p2 = Math.round((b13 - p1 - inss13 - 0) * 100) / 100;
   const t13 = fintx.filter(t => t.type === "entrada" && t.cat === "13º salário" && t.month && t.month.startsWith(String(y)));
-  const d13 = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"}, `13º salário de ${y}`), bruto ? h("span",{class:"hint"}, `${avos}/12 avos`) : null));
+  const d13 = h("div",{style:"margin-top:22px"}, h("div",{class:"card-h"}, h("h2",{class:"t",style:"font-size:21px"}, `13º salário de ${y}`), bruto ? h("span",{class:"hint"}, `${avos}/12 avos`) : null));
   if (!bruto) d13.append(h("div",{class:"empty"},"Preencha o holerite para ver o 13º."));
   else { d13.append(h("ul",{class:"hl"}, row("Base (bruto)", brl(b13)),
       row(`1ª parcela · até 30/11`, brl(p1)), h("li",{class:"muted small"},"50% do bruto, sem INSS nem IRRF."),
@@ -510,7 +511,8 @@ function finPlano(root){
     d13.append(t13.length ? h("p",{class:"muted small",style:"margin:10px 0 0"}, `Lançado no Financeiro: ${t13.map(t => `${brl(t.amount)} em ${ymLabel(t.month).split(" ")[0]}`).join(" e ")}.`)
       : h("button",{class:"btn ghost",type:"button",style:"margin-top:10px",onclick:async()=>{ await txAdd({ type:"entrada", amount:p1, desc:"13º salário — 1ª parcela", cat:"13º salário", method:"pix", date:y + "-11-30", month:y + "-11" }); await txAdd({ type:"entrada", amount:p2, desc:"13º salário — 2ª parcela", cat:"13º salário", method:"pix", date:y + "-12-18", month:y + "-12" }); toast("13º lançado em novembro e dezembro."); renderFin(); }}, "Lançar as duas parcelas no Financeiro")); }
 
-  root.append(h("div",{class:"home"}, h("div",{class:"stack"}, basics, hlC, d13, pdC), h("div",{class:"stack"}, cardsC, fxC)));
+  const baseC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Base do mês")), hlC, d13, basics);
+  root.append(h("div",{class:"home"}, h("div",{class:"stack"}, baseC, pdC), h("div",{class:"stack"}, cardsC, fxC)));
 }
 
 /* resumo no início */
