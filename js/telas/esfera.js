@@ -42,7 +42,7 @@ function drawNeural(x, W, sp, e, mode, spike){
   const G = nn.geo, now = performance.now() / 1000, dt = Math.min(0.05, nn.last ? now - nn.last : 0.016); nn.last = now;
   if (!nn.drag) { const tr = nnTargetRy(); nn.ry += (tr - nn.ry) * Math.min(1, dt * 2.5); nn.rx += (-0.22 - nn.rx) * Math.min(1, dt * 2.5); }
   const t = nnReduce ? 10 : sp - nn.born;
-  const R = W * 0.31, CX = W / 2, CY = W * 0.45, F = W * 1.6, ry = nn.ry, rx = nn.rx, SEL = nn.sel;
+  const R = W * 0.31 * Math.max(1, nnZ), CX = W / 2, CY = W * 0.45, F = W * 1.6, ry = nn.ry, rx = nn.rx, SEL = nn.sel;
   const cy = Math.cos(ry), sy = Math.sin(ry), cr = Math.cos(rx), sr = Math.sin(rx);
   const rot = p => { const X = p[0] * cy + p[2] * sy, Z = -p[0] * sy + p[2] * cy; return [X, p[1] * cr - Z * sr, p[1] * sr + Z * cr]; };
   const proj = v => { const s = F / (F - v[2] * R); return [CX + v[0] * R * s, CY + v[1] * R * s, s, v[2]]; };
@@ -118,18 +118,38 @@ function nnRefresh(){
   }
 }
 
+/* tamanho da esfera escolhido com os dedos: abaixo de 1 a caixa encolhe; acima de 1 a rede cresce dentro do anel */
+const NN_ZMIN = 0.6, NN_ZMAX = 1.25;
+let nnZ = (() => { try { const v = parseFloat(localStorage.getItem("iris.nnZoom")); return v >= NN_ZMIN && v <= NN_ZMAX ? v : 1; } catch { return 1; } })();
+function nnZoom() { return nnZ; }
+function nnSetZoom(z) {
+  nnZ = Math.max(NN_ZMIN, Math.min(NN_ZMAX, z || 1)); if (Math.abs(nnZ - 1) < 0.03) nnZ = 1;
+  const b = $("core") && $("core").parentElement; if (b) b.style.setProperty("--nnz", Math.min(1, nnZ).toFixed(3));
+}
+function nnSaveZoom() { try { localStorage.setItem("iris.nnZoom", String(nnZ)); } catch {} }
+
 /* girar com o dedo; tocar num neurônio ativa a área; tocar no centro deixa a ÍRIS falar */
 (function nnInput(){
   const core = $("core"), box = core && core.parentElement; if (!core) return;
   const toCanvas = ev => { const r = $("reactor").getBoundingClientRect(); return [ev.clientX - r.left, ev.clientY - r.top, r.width]; };
-  core.addEventListener("pointerdown", ev => { nn.drag = { x: ev.clientX, y: ev.clientY, ry: nn.ry, rx: nn.rx, id: ev.pointerId }; nn.moved = false; });
+  // pinça com dois dedos (ou Ctrl + roda / pinça no trackpad) aumenta e diminui a esfera
+  const pts = new Map(); let pinch = null;
+  const gap = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+  core.addEventListener("pointerdown", ev => {
+    pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pts.size === 2) { nn.drag = null; nn.suppress = true; pinch = { d: gap(), z: nnZoom() }; return; }
+    nn.drag = { x: ev.clientX, y: ev.clientY, ry: nn.ry, rx: nn.rx, id: ev.pointerId }; nn.moved = false;
+  });
   core.addEventListener("pointermove", ev => {
+    if (pts.has(ev.pointerId)) pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pinch && pts.size === 2) { nnSetZoom(pinch.z * gap() / pinch.d); return; }
     const d = nn.drag; if (!d || d.id !== ev.pointerId) return;
     const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
     if (!nn.moved && Math.hypot(dx, dy) > 6) { nn.moved = true; try { core.setPointerCapture(ev.pointerId); } catch {} }
     if (nn.moved) { const w = core.getBoundingClientRect().width || 300; nn.ry = d.ry + dx * (3.2 / w); nn.rx = Math.max(-1.2, Math.min(1.2, d.rx + dy * (2.2 / w))); }
   });
   const end = ev => {
+    pts.delete(ev.pointerId); if (pinch) { if (pts.size < 2) { pinch = null; nnSaveZoom(); } return; }
     const d = nn.drag; if (!d) return; nn.drag = null;
     if (nn.moved) { nn.suppress = true; let bi = nn.sel, bz = -9; nn.AP.forEach((p, i) => { if (p[3] > bz) { bz = p[3]; bi = i; } }); nnSelect(bi); return; }
     if (ev.type !== "pointerup") return;
@@ -138,6 +158,10 @@ function nnRefresh(){
     if (best >= 0 && best !== nn.sel) { nn.suppress = true; nnSelect(best); } // tocar no neurônio já ativo, ou no centro, faz a ÍRIS falar
   };
   core.addEventListener("pointerup", end); core.addEventListener("pointercancel", end);
+  let wt = 0;
+  box.addEventListener("wheel", ev => { if (!ev.ctrlKey) return; ev.preventDefault(); nnSetZoom(nnZoom() * Math.exp(-ev.deltaY * 0.01)); clearTimeout(wt); wt = setTimeout(nnSaveZoom, 300); }, { passive: false });
+  core.addEventListener("dblclick", ev => { if (nnZoom() !== 1) { ev.preventDefault(); nnSetZoom(1); nnSaveZoom(); } });
+  nnSetZoom(nnZoom());
   box.addEventListener("click", ev => { if (nn.suppress) { nn.suppress = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
   core.addEventListener("keydown", ev => { if (ev.key === "ArrowLeft") { ev.preventDefault(); nnSelect(nn.sel - 1); } else if (ev.key === "ArrowRight") { ev.preventDefault(); nnSelect(nn.sel + 1); } });
 })();

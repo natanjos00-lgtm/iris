@@ -118,7 +118,7 @@ input::placeholder,textarea::placeholder{color:#A88C9C}
 /* tela inicial centrada: a ÍRIS sozinha no meio, o resto em botões que se abrem */
 .hero4{flex-direction:column;justify-content:flex-start;gap:4px;padding-top:0;min-height:0}
 .corewrap{gap:2px}
-.corebox{width:clamp(340px,min(66vh,58vw),760px)}
+.corebox{width:calc(clamp(340px,min(66vh,58vw),760px) * var(--nnz,1));transition:width .12s linear}
 .hero-copy{align-items:center;text-align:center;width:100%;max-width:640px;gap:14px}
 .hero-copy h2{font-size:clamp(26px,2.2vw,34px)}
 .core-cap{text-align:center;max-width:none}
@@ -137,7 +137,7 @@ input::placeholder,textarea::placeholder{color:#A88C9C}
 @keyframes hpIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 .maisdia{margin-top:22px;animation:hpIn .35s cubic-bezier(.2,.7,.2,1) both}
 @media (max-width:760px){
-  .corebox{width:min(94vw,400px);margin-top:-10px}
+  .corebox{width:calc(min(94vw,400px) * var(--nnz,1));margin-top:-10px}
   .hero-copy{gap:10px}
   .hero-copy h2{font-size:21px}
   .core-cap{display:none}
