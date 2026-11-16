@@ -183,7 +183,7 @@ async function genAnalysis(M, out, btn){
   if (!sample) { out.textContent = "A leitura precisa do Claude, disponível ao abrir a página no claude.ai."; return; }
   btn.disabled = true; const prev = out.textContent; out.textContent = "A ÍRIS está lendo seus números…";
   const data = finSummary(); const c = finCalc(M);
-  const prompt = `Você é a ÍRIS, assistente pessoal de ${userName || "uma estudante de Psicologia"} em Salvador, inspirada no J.A.R.V.I.S., mas acolhedora e sincera. Ela valoriza segurança financeira e autonomia, tem orçamento limitado e tende a se cobrar demais.
+  const prompt = `Você é a ÍRIS, assistente pessoal de ${userName || "uma pessoa"}, ${PERFIL.descricao}, inspirada no J.A.R.V.I.S., mas acolhedora e sincera. Ela valoriza segurança financeira e autonomia, tem orçamento limitado e tende a se cobrar demais.
 Faça uma leitura financeira de ${ymLabel(M)} em português do Brasil, em texto simples (sem markdown, sem asteriscos), com três partes curtas separadas por linha em branco:
 1) Como você está: 2 a 3 frases honestas, sem alarmismo e sem elogio vazio.
 2) O que chama atenção: 2 a 4 observações concretas com números (categorias que cresceram, parcelas que pesam, limites, reserva, padrões como muitos gastos pequenos).

@@ -3,7 +3,7 @@
 
 /* ---------- PREFERÊNCIAS DA ÍRIS (nome e voz) ---------- */
 let prefs = Object.assign({ name:"", voiceURI:"", rate:1, pitch:1, engine:"device", gemVoice:"Kore" }, store.get("iris.prefs", {}));
-function applyName(){ userName = (prefs.name || "Natália").trim(); }
+function applyName(){ userName = (prefs.name || PERFIL.nome || "").trim(); }
 applyName();
 function scoreVoice(v){ let s = 0; if (/pt-BR/i.test(v.lang)) s += 20; else if (/^pt/i.test(v.lang)) s += 8;
   if (/natural|neural|online|premium|enhanced|aprimorad/i.test(v.name)) s += 8; if (/google/i.test(v.name)) s += 5;
@@ -134,7 +134,7 @@ function openPrefs(){
     h("h2",{class:"t",id:"prT"},"Configurações"),
     h("div",null, h("div",{class:"muted small",style:"margin-bottom:6px"},"Tema da interface"),
       h("div",{class:"themeopt",id:"themeOpt"}, [["light","Claro","i-sun"],["dark","Escuro","i-moon"],["auto","Dispositivo","i-contrast"]].map(([k,l,ic]) => h("button",{type:"button","aria-pressed":String(themeMode() === k),onclick:e => { themeSet(k); document.querySelectorAll("#themeOpt button").forEach(b => b.setAttribute("aria-pressed","false")); e.currentTarget.setAttribute("aria-pressed","true"); }}, icon(ic), l)))),
-    h("label",null,"Como ela te chama", h("input",{type:"text",id:"pName",value:userName,placeholder:"Natália"})),
+    h("label",null,"Como ela te chama", h("input",{type:"text",id:"pName",value:userName,placeholder:PERFIL.nome || "Seu nome"})),
     h("p",{class:"muted small",style:"margin:-6px 0 0"},"Escreva do jeito que você quer ouvir. Nomes muito curtos, como Nat, às vezes são soletrados pela voz do aparelho; nesse caso, prefira o nome completo."),
     h("div",{class:"muted small",style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap"}, h("button",{class:"btn ghost",type:"button",id:"pTest",style:"padding:6px 12px;font-size:12.5px"},"Testar o Gemini"), h("span",{id:"pTestOut"})),
     h("label",null,"Tipo de voz", h("select",{id:"pEngine"}, opt("device","Voz do aparelho (grátis, sem internet)", prefs.engine !== "gemini"), opt("gemini","Voz natural do Gemini (usa sua chave)", prefs.engine === "gemini"))),
@@ -144,7 +144,7 @@ function openPrefs(){
     h("label",null, h("span",null,"Velocidade ", rateOut), h("input",{type:"range",id:"pRate",min:"0.8",max:"1.25",step:"0.05",value:prefs.rate || 1})),
     h("label",null, h("span",null,"Tom ", pitchOut), h("input",{type:"range",id:"pPitch",min:"0.8",max:"1.2",step:"0.05",value:prefs.pitch || 1})),
     h("div",{class:"row-end",style:"margin-top:4px"},
-      h("button",{class:"btn ghost",type:"button",style:"margin-right:auto",onclick:()=>{ const nm = $("pName").value.trim() || "Natália";
+      h("button",{class:"btn ghost",type:"button",style:"margin-right:auto",onclick:()=>{ const nm = $("pName").value.trim() || PERFIL.nome || "";
         ensureAudio(); speakAny(`Oi, ${nm}. Tudo bem? Então, é assim que eu vou falar com você. Se não gostar, a gente ajusta junto, tá?`, { over:{ engine:$("pEngine").value, gemVoice:$("pGem").value, voiceURI:$("pVoice").value, rate:+$("pRate").value, pitch:+$("pPitch").value } }); }},"Ouvir exemplo"),
       h("button",{class:"btn ghost",type:"button",onclick:close},"Cancelar"),
       h("button",{class:"btn olive",type:"submit"},"Salvar")));
@@ -271,7 +271,7 @@ $("core").addEventListener("click", coreTalk);
 
 
 
-/* ---------- ouvir a Natália (microfone com estado claro) ---------- */
+/* ---------- ouvir a dona da ÍRIS (microfone com estado claro) ---------- */
 const SRx = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null, recOn = false, recText = "", recTimer = null;
 function listenShow(on, t, sub){ const el = $("listen"); if (!el) return; el.hidden = !on; if (t) $("lnT").textContent = t; $("lnS").textContent = sub || ""; document.querySelectorAll("#tabMic,#askMic,#orbMic").forEach(b => b.classList.toggle("on", !!on && recOn));

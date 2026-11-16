@@ -48,7 +48,7 @@ function openMind(){
     go.disabled = true; go.textContent = "Organizando…";
     out.append(h("div",{class:"muted small",style:"margin-top:14px"},"Lendo com calma…"));
     try {
-      const res = await sample.json(`Você é a ÍRIS, assistente pessoal acolhedora e sincera de ${userName}, estudante de Psicologia em Salvador. Ela acabou de esvaziar a mente no texto abaixo.
+      const res = await sample.json(`Você é a ÍRIS, assistente pessoal acolhedora e sincera de ${userName}, ${PERFIL.descricao}. Ela acabou de esvaziar a mente no texto abaixo.
 1) "acolhimento": 1 ou 2 frases curtas e naturais reconhecendo o que ela trouxe (se houver preocupação ou cansaço, reconheça sem minimizar e sem frase motivacional genérica).
 2) "itens": transforme o que é ação em itens claros e curtos. Para cada item: area (pessoal|trabalho|faculdade) e tipo: ritual, compromisso ou objetivo (pessoal); tarefa, projeto ou reuniao (trabalho); estudo, atividade ou prova (faculdade). Data AAAA-MM-DD se houver (hoje é ${today()}), senão null. Títulos de até 10 palavras, começando por verbo quando for ação. Junte duplicados. Não transforme desabafo em tarefa. Máximo 12.
 3) "comecar": o índice do item que faz mais sentido fazer primeiro (o que tem prazo mais perto ou destrava os outros), ou null.

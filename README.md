@@ -20,3 +20,23 @@ Assistente pessoal (Pessoal, Trabalho, Faculdade e Financeiro). Página estátic
 
 - Gmail e Google Agenda (dependiam do Claude). Exigem login do Google próprio.
 - Chat com IA e leitura de faturas (dependiam do Claude). Previsto: função do Supabase guardando a chave do Gemini como segredo.
+
+## Estrutura do código (fase 0, nov/2026)
+
+O `index.html` só tem a estrutura da página. O resto fica separado por camada:
+
+| Camada | Arquivos |
+| --- | --- |
+| Configuração e perfil da dona | `config.js` (chaves públicas e `PERFIL`) |
+| Permissões e privacidade | `js/privacidade.js` (esconde CPF, cartões e valores antes da IA), `js/permissoes.js` (o que a IA faz sozinha e o que vira proposta) |
+| Memória e banco | `adapter.js` (Supabase), `js/dados.js` |
+| Integrações | `js/integracoes/google.js`, `js/integracoes/casa.js`, `js/integracoes/avisos.js` |
+| Núcleo de inteligência | `js/inteligencia.js` |
+| Interface | `js/base.js`, `js/voz.js`, `js/telas/*.js`, `css/iris.css` |
+| Inicialização | `js/iniciar.js` |
+
+Os scripts são carregados em ordem, sem ferramenta de build. Mudanças no banco ficam em `supabase/migrations/`.
+
+**Google no app instalado:** a permissão do Google volta pela página `oauth.html`. Ela precisa estar em
+"URIs de redirecionamento autorizados" do cliente OAuth no Google Cloud:
+`https://natanjos00-lgtm.github.io/iris/oauth.html`.

@@ -3,6 +3,8 @@
 
 const $ = id => document.getElementById(id);
 const TZ = "America/Sao_Paulo";
+/* perfil da dona desta ÍRIS (config.js) */
+const PERFIL = Object.assign({ nome:"", descricao:"", sobre:"" }, (window.IRIS_CONFIG && window.IRIS_CONFIG.PERFIL) || {});
 
 /* ---------- utilidades ---------- */
 function h(tag, attrs, ...kids){
@@ -59,7 +61,7 @@ const AREAS = {
     secs:[ {kind:"tarefa", label:"Tarefas", intro:"O que precisa sair do papel.", dated:true, ph:"Nova tarefa"},
            {kind:"projeto", label:"Projetos", intro:"Coisas maiores, feitas de etapas.", steps:true, ph:"Novo projeto"},
            {kind:"reuniao", label:"Reuniões e retornos", intro:"Encontros, entrevistas e quem você está esperando responder.", dated:true, ph:"Nova reunião ou retorno"} ] },
-  faculdade: { label:"Faculdade", icon:"i-book", color:"#9A8A79", intro:"Estudos, atividades, provas e trabalhos da graduação em Psicologia.",
+  faculdade: { label:"Faculdade", icon:"i-book", color:"#9A8A79", intro:"Estudos, atividades, provas e trabalhos da graduação.",
     secs:[ {kind:"estudo", label:"Estudos", intro:"Leituras e revisões, sem maratona.", ph:"Novo estudo (ex.: ler cap. 3 de Psicopatologia)"},
            {kind:"atividade", label:"Atividades e trabalhos", intro:"Entregas e trabalhos acadêmicos.", dated:true, steps:true, ph:"Nova atividade ou trabalho"},
            {kind:"prova", label:"Provas", intro:"Datas e o que revisar para cada uma.", dated:true, steps:true, ph:"Nova prova"} ] },

@@ -2,7 +2,7 @@
   "id": "/iris/?app=iris2",
   "name": "ÍRIS",
   "short_name": "ÍRIS",
-  "description": "Assistente pessoal da Natália",
+  "description": "Assistente pessoal",
   "lang": "pt-BR",
   "start_url": "/iris/?source=app",
   "scope": "/iris/",
