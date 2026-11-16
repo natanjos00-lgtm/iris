@@ -55,7 +55,7 @@ function finOverview(root){
   const kp = h("div",{class:"card kpis"});
   const kpi = (l, v, sub, strong) => h("div",{class:"kpi"+(strong?" strong":"")}, h("span",null,l), h("b",null,v), sub ? h("small",null,sub) : null);
   kp.append(
-    kpi("Entradas", brl(c.received || c.renda), c.received ? "registradas no mês" : (c.renda ? "renda planejada" : "—")),
+    kpi("Entradas", brl(c.received || c.renda), c.received ? "registradas no mês" : (c.benef ? `salário + ${brl(c.benef)} de benefícios (${plural(workInfo(M).worked, "dia trabalhado", "dias trabalhados")})` : (c.renda ? "renda planejada" : "—"))),
     kpi("Gasto até agora", brl(c.spent), plural(c.out.length, "lançamento", "lançamentos")),
     kpi(M >= cur ? "Previsto até o fim do mês" : "Total do mês", brl(M >= cur ? c.forecast : c.spent), M >= cur ? `inclui ${brl(c.fixedPendSum)} em contas fixas a pagar e ${brl(c.instSum + sum(c.out.filter(t => t.inst && t.inst.n > 1), t => t.amount))} em parcelas` : null),
     kpi("Livre para gastar", c.renda ? brl(c.free) : "—", c.renda ? `depois de guardar ${fincfg.savingsPct || 0}% (${brl(c.save)})` : "precisa da renda", true),
@@ -441,7 +441,35 @@ function finPlano(root){
     cfgSave({ fixed:[...(fincfg.fixed||[]), { id:newId(), desc:desc.slice(0,60), amount:val, day:+$("xDay").value || null, cat:$("xCat").value }] }, true); };
   fxC.append(ff);
 
-  root.append(h("div",{class:"home"}, h("div",{class:"stack"}, basics), h("div",{class:"stack"}, cardsC, fxC)));
+  // recebo por dia trabalhado
+  const M = finMonth, wi = workInfo(M), pd = c.perDay || [], tot = perDayTotal();
+  const DOW = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"], wd = c.workDays || [1,2,3,4,5];
+  const pdC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Recebo por dia trabalhado"), tot ? h("span",{class:"hint"}, `${brl(tot)} por dia`) : null));
+  const ulp = h("ul",{class:"items"}); pd.forEach(b => ulp.append(h("li",{class:"item",style:"grid-template-columns:minmax(0,1fr) auto auto"},
+    h("div",null, h("span",{class:"ttl"}, b.desc)), h("b",{style:"font-weight:500"}, brl(b.amount) + " / dia"),
+    h("button",{class:"ib",type:"button","aria-label":"Remover "+b.desc,onclick:()=>cfgSave({ perDay:(fincfg.perDay||[]).filter(x => x.id !== b.id) }, true)}, icon("i-trash")))));
+  pdC.append(pd.length ? ulp : h("div",{class:"empty"},"Vale-transporte, alimentação ou outro valor que você recebe por dia de trabalho."));
+  if (pd.length) {
+    const setOff = v => cfgSave({ daysOff:Object.assign({}, fincfg.daysOff || {}, { [M]: Math.max(0, Math.min(wi.util, v)) }) }, true);
+    pdC.append(h("div",{class:"workm"},
+      h("div",{class:"wm-h"}, h("b",null, ymLabel(M)), h("span",{class:"muted small"}, `${wi.util} dias úteis`)),
+      wi.feriados.length ? h("div",{class:"muted small"}, `Feriados em dia de trabalho: ${wi.feriados.map(f => `${f.date.slice(8)}/${f.date.slice(5,7)} ${f.name}`).join(" · ")}`) : h("div",{class:"muted small"},"Nenhum feriado em dia de trabalho."),
+      h("div",{class:"wm-off"}, h("span",null,"Faltas ou folgas"),
+        h("button",{class:"ib step",type:"button","aria-label":"Menos uma falta",onclick:()=>setOff(wi.off - 1),disabled:!wi.off},"−"),
+        h("b",{"aria-live":"polite"}, String(wi.off)),
+        h("button",{class:"ib step",type:"button","aria-label":"Mais uma falta",onclick:()=>setOff(wi.off + 1)},"+")),
+      h("div",{class:"wm-tot"}, h("span",null, `${plural(wi.worked, "dia trabalhado", "dias trabalhados")} × ${brl(tot)}`), h("b",null, brl(perDayIncome(M))))));
+  }
+  const pf = h("form",{class:"lgrid",style:"margin-top:12px",autocomplete:"off"},
+    h("label",{class:"wide"},"O que é", h("input",{type:"text",id:"dDesc",placeholder:"Ex.: transporte, alimentação"})),
+    h("label",null,"Valor por dia (R$)", h("input",{type:"number",id:"dVal",min:"0",step:"0.01"})),
+    h("div",{style:"display:flex;align-items:flex-end"}, h("button",{class:"btn ghost",type:"submit"},"Adicionar")));
+  pf.onsubmit = e => { e.preventDefault(); const desc = $("dDesc").value.trim(), val = +$("dVal").value; if (!desc || !val) { (desc ? $("dVal") : $("dDesc")).focus(); return; }
+    cfgSave({ perDay:[...(fincfg.perDay||[]), { id:newId(), desc:desc.slice(0,60), amount:val }] }, true); };
+  pdC.append(pf, h("div",{class:"wdays",role:"group","aria-label":"Dias da semana em que você trabalha"}, h("span",{class:"muted small"},"Trabalho em:"),
+    ...[1,2,3,4,5,6,0].map(d => h("button",{type:"button",class:"chip"+(wd.includes(d)?" on":""),"aria-pressed":String(wd.includes(d)),onclick:()=>cfgSave({ workDays: wd.includes(d) ? wd.filter(x => x !== d) : [...wd, d].sort() }, true)}, DOW[d]))));
+
+  root.append(h("div",{class:"home"}, h("div",{class:"stack"}, basics, pdC), h("div",{class:"stack"}, cardsC, fxC)));
 }
 
 /* resumo no início */

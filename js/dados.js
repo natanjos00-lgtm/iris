@@ -108,6 +108,24 @@ function instTimeline(){
   }
   return out;
 }
+/* benefícios por dia trabalhado (ex.: transporte e alimentação): calculados mês a mês,
+   com dias úteis, feriados (nacionais, da Bahia e de Salvador) e as faltas ou folgas que ela marcar */
+function easterDate(y){ const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), hh = (19*a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2*e + 2*i - hh - k) % 7, m = Math.floor((a + 11*hh + 22*l) / 451), mo = Math.floor((hh + l - 7*m + 114) / 31), da = ((hh + l - 7*m + 114) % 31) + 1; return Date.UTC(y, mo - 1, da); }
+const HOLIDAY_NAMES = { "01-01":"Confraternização", "04-21":"Tiradentes", "05-01":"Dia do Trabalho", "06-24":"São João (Salvador)", "07-02":"Independência da Bahia", "09-07":"Independência", "10-12":"Nossa Senhora Aparecida", "11-02":"Finados", "11-15":"Proclamação da República", "11-20":"Consciência Negra", "12-08":"Nossa Senhora da Conceição (Salvador)", "12-25":"Natal" };
+function holidaysOf(y){
+  const out = {}; for (const [md, nm] of Object.entries(HOLIDAY_NAMES)) out[y + "-" + md] = nm;
+  const gf = new Date(easterDate(y) - 2*864e5).toISOString().slice(0,10); out[gf] = "Sexta-feira Santa";
+  return out;
+}
+function workInfo(M){
+  const y = +M.slice(0,4), mo = +M.slice(5,7), dim = new Date(Date.UTC(y, mo, 0)).getUTCDate(), wd = fincfg.workDays || [1,2,3,4,5], hol = holidaysOf(y);
+  let util = 0; const feriados = [];
+  for (let d = 1; d <= dim; d++) { const dt = new Date(Date.UTC(y, mo - 1, d)), iso = dt.toISOString().slice(0,10); if (!wd.includes(dt.getUTCDay())) continue; util++; if (hol[iso]) feriados.push({ date:iso, name:hol[iso] }); }
+  const off = Math.max(0, +((fincfg.daysOff || {})[M]) || 0), worked = Math.max(0, util - feriados.length - off);
+  return { util, feriados, off, worked };
+}
+function perDayTotal(){ return sum(fincfg.perDay || [], b => +b.amount || 0); }
+function perDayIncome(M){ const t = perDayTotal(); return t ? Math.round(t * workInfo(M).worked * 100) / 100 : 0; }
 /* parcelas que ainda vão cair: as projetadas e as já lançadas em meses à frente (ex.: lidas de uma fatura) */
 function instAhead(){
   const cur = curYM();
@@ -116,7 +134,7 @@ function instAhead(){
 }
 function outAhead(m){ return sum(fintx.filter(t => t.type === "saida" && t.month === m && !t.fixedId && !(t.inst && t.inst.n > 1)), t => t.amount); }
 function finCalc(M){
-  const cur = curYM(), inc = +fincfg.income || 0;
+  const cur = curYM(), benef = perDayIncome(M), inc = (+fincfg.income || 0) + benef;
   const txM = fintx.filter(t => t.month === M);
   const out = txM.filter(t => t.type === "saida"), inn = txM.filter(t => t.type === "entrada");
   const spent = sum(out, t => t.amount), received = sum(inn, t => t.amount);
@@ -130,7 +148,7 @@ function finCalc(M){
   const free = renda - forecast - save;
   const byCat = {}; for (const t of out) byCat[t.cat] = (byCat[t.cat] || 0) + t.amount;
   for (const p of instM) byCat[p.cat || "Compras"] = (byCat[p.cat || "Compras"] || 0) + p.amount;
-  return { M, renda, received, inc, spent, fixedPend, fixedPendSum, instM, instSum, forecast, save, free, byCat, out, inn };
+  return { M, renda, received, inc, benef, spent, fixedPend, fixedPendSum, instM, instSum, forecast, save, free, byCat, out, inn };
 }
 function varOf(m){ return sum(fintx.filter(t => t.month === m && t.type === "saida" && !t.fixedId && !(t.inst && t.inst.n > 1)), t => t.amount); }
 function varAvg(){
@@ -142,7 +160,7 @@ function varAvg(){
 function projection(n){
   const cur = curYM(), tl = instTimeline(), fx = sum(fincfg.fixed || [], f => +f.amount || 0), va = varAvg();
   const ah = instAhead();
-  return Array.from({ length:n }, (_, i) => { const m = addM(cur, i+1); return { m, fixas:fx, parcelas:sum(ah.filter(x => x.month === m), x => x.amount), variavel:Math.max(va, outAhead(m)), renda:+fincfg.income || 0 }; });
+  return Array.from({ length:n }, (_, i) => { const m = addM(cur, i+1); return { m, fixas:fx, parcelas:sum(ah.filter(x => x.month === m), x => x.amount), variavel:Math.max(va, outAhead(m)), renda:(+fincfg.income || 0) + perDayIncome(m) }; });
 }
 function committedAhead(){ return sum(instAhead(), p => p.amount); }
 function avgMonthlyExpense(){
