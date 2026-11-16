@@ -126,6 +126,11 @@ function workInfo(M){
 }
 function perDayTotal(){ return sum(fincfg.perDay || [], b => +b.amount || 0); }
 function perDayIncome(M){ const t = perDayTotal(); return t ? Math.round(t * workInfo(M).worked * 100) / 100 : 0; }
+/* contas fixas mensais ou semanais (ex.: terapia toda quarta): o valor do mês depende de quantas vezes o dia cai nele */
+const DOW_PT = ["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
+function weekdayCount(M, wd){ const y = +M.slice(0,4), mo = +M.slice(5,7), dim = new Date(Date.UTC(y, mo, 0)).getUTCDate(); let n = 0; for (let d = 1; d <= dim; d++) if (new Date(Date.UTC(y, mo - 1, d)).getUTCDay() === wd) n++; return n; }
+function fixedAmt(f, M){ return f.freq === "semanal" ? (+f.amount || 0) * weekdayCount(M, +f.weekday) : (+f.amount || 0); }
+function fixedWhen(f, M){ return f.freq === "semanal" ? `toda ${DOW_PT[+f.weekday]}${M ? ` · ${weekdayCount(M, +f.weekday)}× ${brl(f.amount)}` : ` · ${brl(f.amount)} por semana`}` : (+f.day ? "dia " + f.day : ""); }
 /* parcelas que ainda vão cair: as projetadas e as já lançadas em meses à frente (ex.: lidas de uma fatura) */
 function instAhead(){
   const cur = curYM();
@@ -142,7 +147,7 @@ function finCalc(M){
   const fixed = fincfg.fixed || [];
   const fixedPend = M >= cur ? fixed.filter(f => !txM.some(t => t.fixedId === f.id)) : [];
   const instM = M >= cur ? instTimeline().filter(p => p.month === M) : [];
-  const fixedPendSum = sum(fixedPend, f => +f.amount || 0), instSum = sum(instM, p => p.amount);
+  const fixedPendSum = sum(fixedPend, f => fixedAmt(f, M)), instSum = sum(instM, p => p.amount);
   const forecast = spent + fixedPendSum + instSum;
   const save = renda * (+fincfg.savingsPct || 0) / 100;
   const free = renda - forecast - save;
@@ -158,16 +163,16 @@ function varAvg(){
   return day >= 5 ? varOf(cur) / day * dim : varOf(cur);
 }
 function projection(n){
-  const cur = curYM(), tl = instTimeline(), fx = sum(fincfg.fixed || [], f => +f.amount || 0), va = varAvg();
+  const cur = curYM(), tl = instTimeline(), va = varAvg();
   const ah = instAhead();
-  return Array.from({ length:n }, (_, i) => { const m = addM(cur, i+1); return { m, fixas:fx, parcelas:sum(ah.filter(x => x.month === m), x => x.amount), variavel:Math.max(va, outAhead(m)), renda:(+fincfg.income || 0) + perDayIncome(m) }; });
+  return Array.from({ length:n }, (_, i) => { const m = addM(cur, i+1); return { m, fixas:sum(fincfg.fixed || [], f => fixedAmt(f, m)), parcelas:sum(ah.filter(x => x.month === m), x => x.amount), variavel:Math.max(va, outAhead(m)), renda:(+fincfg.income || 0) + perDayIncome(m) }; });
 }
 function committedAhead(){ return sum(instAhead(), p => p.amount); }
 function avgMonthlyExpense(){
   const cur = curYM(); const ms = [1,2,3].map(n => addM(cur,-n)).filter(m => fintx.some(t => t.month === m && t.type === "saida"));
   const vals = ms.map(m => sum(fintx.filter(t => t.month === m && t.type === "saida"), t => t.amount));
   const base = vals.length ? sum(vals) / vals.length : finCalc(cur).forecast;
-  return Math.max(base, sum(fincfg.fixed || [], f => +f.amount || 0));
+  return Math.max(base, sum(fincfg.fixed || [], f => fixedAmt(f, cur)));
 }
 function health(){
   const c = finCalc(curYM()); if (!c.renda) return null;
@@ -207,7 +212,7 @@ function finAlerts(){
     if (u.limit && u.total / u.limit >= 0.7) A.push({ k:u.total > u.limit ? "warn" : "soft", t:`Cartão ${card.name}: ${pct(u.total/u.limit)} do limite ocupado, contando parcelas futuras.` });
     if (+card.dueDay) { const d = daysUntilDay(+card.dueDay); if (d <= 5) A.push({ k:"soft", t:`A fatura do ${card.name} vence ${inDays(d)}.` }); }
   }
-  for (const f of c.fixedPend) if (+f.day) { const d = daysUntilDay(+f.day); if (d <= 3 && +f.day >= +today().slice(8)) A.push({ k:"soft", t:`${f.desc} (${brl(f.amount)}) vence ${inDays(d)}.` }); }
+  for (const f of c.fixedPend) if (+f.day && f.freq !== "semanal") { const d = daysUntilDay(+f.day); if (d <= 3 && +f.day >= +today().slice(8)) A.push({ k:"soft", t:`${f.desc} (${brl(f.amount)}) vence ${inDays(d)}.` }); }
   if (c.renda && c.free < 0) A.push({ k:"warn", t:`No ritmo atual, ${ymLabel(c.M).split(" ")[0]} fecha ${brl(-c.free)} abaixo do planejado, já contando a meta de guardar ${fincfg.savingsPct || 0}%.` });
   const nx = projection(1)[0];
   if (c.renda && (nx.fixas + nx.parcelas) / c.renda > 0.5) A.push({ k:"soft", t:`Mais da metade da renda de ${ymLabel(nx.m).split(" ")[0]} já está comprometida com contas fixas e parcelas (${brl(nx.fixas + nx.parcelas)}).` });
@@ -218,7 +223,7 @@ function finAlerts(){
 function finSummary(){
   const M = curYM(), c = finCalc(M), h = health();
   return { mes:M, renda:c.renda, gastoRealizado:Math.round(c.spent), previstoAteFimDoMes:Math.round(c.forecast), livreParaGastar:Math.round(c.free), metaGuardarPct:fincfg.savingsPct,
-    contasFixasPendentes:c.fixedPend.map(f => ({ desc:f.desc, valor:f.amount, dia:f.day })), parcelasNoMes:Math.round(c.instSum), comprometidoFuturoEmParcelas:Math.round(committedAhead()),
+    contasFixasPendentes:c.fixedPend.map(f => ({ desc:f.desc, valor:fixedAmt(f, c.M), quando:fixedWhen(f, c.M) })), parcelasNoMes:Math.round(c.instSum), comprometidoFuturoEmParcelas:Math.round(committedAhead()),
     reserva:+fincfg.reserve || 0, saude:h ? { nota:h.score, rotulo:h.label, reservaEmMeses:Math.round(h.months*10)/10 } : null,
     porCategoria:Object.fromEntries(Object.entries(c.byCat).map(([k,v]) => [k, Math.round(v)])), limites:fincfg.budgets,
     cartoes:(fincfg.cards || []).map(cd => { const u = cardUse(cd); return { nome:cd.name, limite:u.limit, usadoNoMes:Math.round(u.used), parcelasFuturas:Math.round(u.fut), vencimento:cd.dueDay }; }),

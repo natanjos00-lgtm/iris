@@ -127,9 +127,9 @@ function finOverview(root){
   if (!fixed.length) fxC.append(h("div",{class:"empty"},"Cadastre aluguel, internet, plano de celular e outras contas em Planejamento."));
   else { const ul = h("ul",{class:"items"}); fixed.slice().sort((a,b) => (+a.day||99) - (+b.day||99)).forEach(f => { const paid = fintx.some(t => t.month === M && t.fixedId === f.id);
     ul.append(h("li",{class:"item"+(paid?" done":"")},
-      checkBtn(paid, (paid?"Desmarcar pagamento: ":"Marcar como paga: ")+f.desc, async () => { if (paid) { const t = fintx.find(t => t.month === M && t.fixedId === f.id); if (t) txDel(t.id); } else await txAdd({ type:"saida", amount:f.amount, desc:f.desc, cat:f.cat || "Contas da casa", method:"pix", date: M === cur ? today() : M+"-"+String(Math.min(28, +f.day||1)).padStart(2,"0"), month:M, fixedId:f.id }); }),
-      h("div",null, h("span",{class:"ttl"}, f.desc), h("div",{class:"meta"}, +f.day ? h("span",null,"dia "+f.day) : null, h("span",null, f.cat || "Contas da casa"))),
-      h("b",{style:"font-weight:500"}, brl(f.amount)))); });
+      checkBtn(paid, (paid?"Desmarcar pagamento: ":"Marcar como paga: ")+f.desc, async () => { if (paid) { const t = fintx.find(t => t.month === M && t.fixedId === f.id); if (t) txDel(t.id); } else await txAdd({ type:"saida", amount:fixedAmt(f, M), desc:f.desc, cat:f.cat || "Contas da casa", method:"pix", date: M === cur ? today() : M+"-"+String(Math.min(28, +f.day||1)).padStart(2,"0"), month:M, fixedId:f.id }); }),
+      h("div",null, h("span",{class:"ttl"}, f.desc), h("div",{class:"meta"}, fixedWhen(f, M) ? h("span",null, fixedWhen(f, M)) : null, h("span",null, f.cat || "Contas da casa"))),
+      h("b",{style:"font-weight:500"}, brl(fixedAmt(f, M))))); });
     fxC.append(ul); }
 
   side.append(cardsC, fxC, instC);
@@ -425,20 +425,23 @@ function finPlano(root){
     cfgSave({ cards:[...(fincfg.cards||[]), { id:newId(), name:name.slice(0,40), limit:+$("cLim").value || 0, closingDay:+$("cClose").value || null, dueDay:+$("cDue").value || null }] }, true); };
   cardsC.append(cf);
 
-  const fxC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Contas fixas"), h("span",{class:"hint"}, `${brl(sum(c.fixed||[], f => +f.amount||0))} por mês`)));
+  const fxC = h("div",{class:"card"}, h("div",{class:"card-h"}, h("h2",{class:"t"},"Contas fixas"), h("span",{class:"hint"}, `${brl(sum(c.fixed||[], f => fixedAmt(f, finMonth)))} em ${ymLabel(finMonth).split(" ")[0]}`)));
   const ulf = h("ul",{class:"items"}); (c.fixed || []).forEach(f => ulf.append(h("li",{class:"item",style:"grid-template-columns:minmax(0,1fr) auto auto"},
-    h("div",null, h("span",{class:"ttl"}, f.desc), h("div",{class:"meta"}, h("span",null, f.cat), f.day ? h("span",null,"dia "+f.day) : null)),
-    h("b",{style:"font-weight:500"}, brl(f.amount)),
+    h("div",null, h("span",{class:"ttl"}, f.desc), h("div",{class:"meta"}, h("span",null, f.cat), fixedWhen(f) ? h("span",null, fixedWhen(f)) : null)),
+    h("b",{style:"font-weight:500"}, brl(f.amount) + (f.freq === "semanal" ? " / sem." : "")),
     h("button",{class:"ib",type:"button","aria-label":"Remover conta",onclick:()=>cfgSave({ fixed:(fincfg.fixed||[]).filter(x => x.id !== f.id) }, true)}, icon("i-trash")))));
   fxC.append((c.fixed||[]).length ? ulf : h("div",{class:"empty"},"Nenhuma conta fixa ainda."));
   const ff = h("form",{class:"lgrid",style:"margin-top:12px",autocomplete:"off"},
     h("label",{class:"wide"},"Conta", h("input",{type:"text",id:"xDesc",placeholder:"Ex.: aluguel, internet, plano do celular"})),
-    h("label",null,"Valor (R$)", h("input",{type:"number",id:"xVal",min:"0",step:"0.01"})),
-    h("label",null,"Dia do vencimento", h("input",{type:"number",id:"xDay",min:"1",max:"31"})),
+    h("label",null,"Valor (R$, por vez)", h("input",{type:"number",id:"xVal",min:"0",step:"0.01"})),
+    h("label",null,"Repete", h("select",{id:"xFreq",onchange:e=>{ const w = e.target.value === "semanal"; $("wXDay").hidden = w; $("wXWd").hidden = !w; }}, opt("mensal","Todo mês",true), opt("semanal","Toda semana"))),
+    h("label",{id:"wXDay"},"Dia do vencimento", h("input",{type:"number",id:"xDay",min:"1",max:"31"})),
+    h("label",{id:"wXWd",hidden:true},"Dia da semana", h("select",{id:"xWd"}, ...[1,2,3,4,5,6,0].map(d => opt(String(d), DOW_PT[d].replace(/^./, c => c.toUpperCase()), d === 1)))),
     h("label",null,"Categoria", h("select",{id:"xCat"}, ...CATS.map(k => opt(k,k,k==="Contas da casa")))),
     h("div",{style:"display:flex;align-items:flex-end"}, h("button",{class:"btn ghost",type:"submit"},"Adicionar conta")));
   ff.onsubmit = e => { e.preventDefault(); const desc = $("xDesc").value.trim(), val = +$("xVal").value; if (!desc || !val) { (desc ? $("xVal") : $("xDesc")).focus(); return; }
-    cfgSave({ fixed:[...(fincfg.fixed||[]), { id:newId(), desc:desc.slice(0,60), amount:val, day:+$("xDay").value || null, cat:$("xCat").value }] }, true); };
+    const wk = $("xFreq").value === "semanal";
+    cfgSave({ fixed:[...(fincfg.fixed||[]), wk ? { id:newId(), desc:desc.slice(0,60), amount:val, freq:"semanal", weekday:+$("xWd").value, cat:$("xCat").value } : { id:newId(), desc:desc.slice(0,60), amount:val, day:+$("xDay").value || null, cat:$("xCat").value }] }, true); };
   fxC.append(ff);
 
   // recebo por dia trabalhado
