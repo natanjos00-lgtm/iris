@@ -59,16 +59,31 @@ h1.t,h2.t,.dk-h h2,.hero-copy h2,.hello h1,.hello-m h1{font-family:var(--f-title
 
 /* botões e controles: cortes em diagonal */
 .btn,.btn.olive,.nn-go,.hbtn,.chip,.nn-chip,.askbar,.catsel{border-radius:3px}
-.btn,.btn.olive,.nn-go,.askbar button[type=submit],.dk-h .plus{clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px)}
+.btn,.btn.olive,.nn-go,.dk-h .plus{clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px)}
 .btn.ghost,.nn-go.nn-enter{clip-path:none}
 .nn-go.nn-enter{border-radius:3px;border:1px solid var(--glass-b);background:var(--tile)}
 .hbtn,.nn-chip,.chip{background:var(--tile);border:1px solid var(--glass-b);color:var(--ink-2)}
 .hbtn[aria-expanded="true"],.chip.on,.nn-chip[aria-pressed="true"]{background:var(--olive-soft);border-color:var(--hud1);color:var(--ink)}
 .hb-n{border-radius:2px;font-size:10.5px}
-.askbar{background:var(--glass);border:1px solid var(--glass-b);clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.askbar{border-radius:4px;border:1px solid var(--glass-b);background:
+    linear-gradient(var(--hb),var(--hb)) left top/14px 1.5px no-repeat,
+    linear-gradient(var(--hb),var(--hb)) left top/1.5px 14px no-repeat,
+    linear-gradient(var(--hb),var(--hb)) right bottom/14px 1.5px no-repeat,
+    linear-gradient(var(--hb),var(--hb)) right bottom/1.5px 14px no-repeat,var(--glass)}
+:root[data-theme="light"] .askbar{background:
+    linear-gradient(var(--hb),var(--hb)) left top/14px 1.5px no-repeat,
+    linear-gradient(var(--hb),var(--hb)) left top/1.5px 14px no-repeat,
+    linear-gradient(var(--hb),var(--hb)) right bottom/14px 1.5px no-repeat,
+    linear-gradient(var(--hb),var(--hb)) right bottom/1.5px 14px no-repeat,#FFFFFF}
+.askbar{box-sizing:border-box}
+.askbar button{border-radius:3px}
+.askbar button[type=submit]{width:44px;height:44px;padding:0;border-radius:0;box-shadow:none;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
 .askbar input{font-family:var(--f-text)}
-.orbmic,.nd-mic,.tabbar .fab{border-radius:0!important;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);background:var(--grad);color:var(--on-grad)}
-.tabbar .fab{box-shadow:none}
+.orbmic,.nd-mic{border-radius:0!important;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);background:var(--grad);color:var(--on-grad)}
+/* hexágono da barra de baixo desenhado por trás, para não cortar o selo do microfone */
+.tabbar .fab,:root[data-theme="light"] .tabbar .fab{background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;clip-path:none;isolation:isolate;color:var(--on-grad)}
+.tabbar .fab::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--grad);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.tabbar .fab i{right:-4px;bottom:6px;background:var(--hud2);border-radius:3px;box-shadow:0 0 0 2px var(--paper)}
 .nav a{border-radius:3px}
 .nav a[aria-current="page"]{background:var(--nav-act);box-shadow:inset 2px 0 0 var(--hud1);color:var(--ink)}
 :root[data-theme="light"] .nav a[aria-current="page"]{color:var(--ink);box-shadow:inset 2px 0 0 var(--hud1)}
@@ -81,6 +96,7 @@ input[type=text],input[type=number],input[type=date],input[type=time],select,tex
 @media (max-width:760px){
   .tabbar{background:var(--side);border-radius:6px!important;border:1px solid var(--glass-b)}
   .tabbar .fab{transform:scale(.86)}
+  body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(96px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--paper) 40%);pointer-events:none;z-index:49}
   :root[data-theme="light"] .tabbar{background:rgba(252,250,251,.94)}
   :root[data-theme="light"] .tabbar .fab{background:var(--grad);color:#FFFFFF;box-shadow:none}
   :root[data-theme="light"] .tabbar a[aria-current="page"]{color:var(--hud1)}
