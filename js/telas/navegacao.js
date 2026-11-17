@@ -28,7 +28,10 @@ function themeMode(){ try { return localStorage.getItem(THEME_KEY) || "auto"; } 
 function themeApply(){
   const m = themeMode(); const dark = m === "dark" || (m === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
   const r = document.documentElement; r.setAttribute("data-theme", dark ? "dark" : "light"); r.setAttribute("data-theme-mode", m);
-  const tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = dark ? "#18120E" : "#F4EBDD";
+  // no claro a esfera é desenhada e depois invertida: este tom vira ameixa depois da inversão
+  try { const g = dark ? [235,217,204] : [225,140,195]; NN_GOLD[0] = g[0]; NN_GOLD[1] = g[1]; NN_GOLD[2] = g[2]; } catch {}
+  const tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = dark ? "#0B0408" : "#FBF3F6";
+  const ts = $("themeSide"); if (ts) { ts.querySelector("use").setAttribute("href", dark ? "#i-sun" : "#i-moon"); ts.querySelector("span").textContent = dark ? "Modo claro" : "Modo escuro"; ts.title = ts.querySelector("span").textContent; }
   const tb = $("themeBtn"); if (tb) { tb.querySelector("use").setAttribute("href", dark ? "#i-sun" : "#i-moon"); tb.setAttribute("aria-label", dark ? "Mudar para o tema claro" : "Mudar para o tema escuro"); }
 }
 function themeSet(m){ try { localStorage.setItem(THEME_KEY, m); } catch {} themeApply(); }
@@ -37,6 +40,7 @@ function sideApply(min){ document.documentElement.classList.toggle("side-min", m
 sideApply(document.documentElement.classList.contains("side-min"));
 $("sideToggle").onclick = () => { const min = !document.documentElement.classList.contains("side-min"); try { localStorage.setItem("iris.side2", min ? "min" : "open"); } catch {} sideApply(min); setTimeout(() => { try { dispatchEvent(new Event("resize")); } catch {} }, 300); };
 $("themeBtn").onclick = () => themeSet(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+$("themeSide").onclick = () => themeSet(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 themeApply();
 
 /* ---------- painel v2: só apresentação (atalhos, marca, sino, menu) ---------- */

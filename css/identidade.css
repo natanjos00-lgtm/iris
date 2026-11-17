@@ -2,7 +2,7 @@
    letras finas (Jost), cartões de vidro. É a última camada: sobrepõe css/iris.css nos dois temas,
    então o app tem um visual só. */
 
-:root,:root[data-theme="light"],:root[data-theme="dark"]{
+:root,:root[data-theme="dark"]{
   --paper:#0B0408;--card:#1E0A19;--sand:#2A1222;--sand-2:#5A2A47;--taupe:#BFA4B3;--brown:#FFB3D4;
   --ink:#F7EAF0;--ink-2:#D9C2CE;--olive:#FF6FB0;--olive-soft:rgba(255,79,163,.16);--line:rgba(255,170,205,.14);
   --gold:#EBD9CC;--gold2:#F7EBE1;--glass:rgba(34,10,28,.62);--glass-b:rgba(255,150,190,.22);
@@ -65,7 +65,6 @@ input::placeholder,textarea::placeholder{color:#A88C9C}
 .tools button{background:var(--glass);border-color:var(--glass-b);color:var(--ink-2)}
 .tools button:hover{border-color:#FF8CC0;color:var(--ink)}
 .tools #tUser,:root[data-theme="light"] .tools #tUser,:root[data-theme="dark"] .tools #tUser{background:var(--grad);color:var(--on-grad)}
-#themeBtn{display:none}
 .dot-n{background:#FF4FA3;box-shadow:0 0 8px #FF4FA3}
 
 /* tela inicial: esfera neural */
@@ -247,3 +246,42 @@ html.deep-on .hero4{overflow:clip}
 .goal-v{display:flex;align-items:baseline;gap:8px;margin:4px 0 8px}.goal-v b{font-size:26px;font-weight:500;color:var(--olive)}.goal-v span{color:var(--taupe);font-size:14px}
 .core,.core:focus-visible{border-radius:50%!important}
 @media (hover:none),(pointer:coarse){.core:focus,.core:focus-visible{outline:none!important}}
+
+/* ---------- modo claro: pérola rosado, texto ameixa, destaques no mesmo rosa ---------- */
+:root[data-theme="light"]{
+  --paper:#FBF3F6;--card:#FFFFFF;--sand:#F4E4EC;--sand-2:#E3C7D6;--taupe:#7E5F70;--brown:#B0306F;
+  --ink:#2A0A1C;--ink-2:#4E2A3F;--olive:#D2307E;--olive-soft:rgba(214,51,127,.12);--line:rgba(122,34,92,.14);
+  --gold:#9A5A7A;--gold2:#7A3A5C;--glass:rgba(255,255,255,.74);--glass-b:rgba(176,48,111,.18);
+  --shadow:0 14px 36px rgba(90,20,60,.10);--neg:#C8402E;--pos:#1E8A4C;--side:rgba(255,250,252,.86);
+  --nav-act:linear-gradient(135deg,rgba(242,201,184,.55),rgba(255,79,163,.20));--tile:rgba(255,255,255,.62);--ov:rgba(40,10,30,.32);
+  --lg1:#8E2A66;--lg2:#B0306F;--lg3:#FF4FA3;--lg4:#C8578F;
+  --grad:linear-gradient(135deg,#F4C7B4,#FF4FA3);--on-grad:#2A0A1C;--glow:0 6px 20px rgba(255,79,163,.28);
+  --sb-track:rgba(122,34,92,.05);--sb-thumb:#E3C7D6;--sb-thumb-h:#D2A9BF;
+  --f-title:"Jost",-apple-system,"Segoe UI",system-ui,sans-serif;--f-text:"Jost",-apple-system,"Segoe UI",system-ui,sans-serif;--bg:transparent;
+  color-scheme:light;
+}
+:root[data-theme="light"] html,html[data-theme="light"]{background:#FBF3F6}
+:root[data-theme="light"] body{background:radial-gradient(70% 46% at 50% 12%,rgba(255,170,205,.38),transparent 70%),radial-gradient(50% 40% at 100% 100%,rgba(244,199,180,.40),transparent 70%),linear-gradient(170deg,#FFF7FA,#F7EAF0 72%);background-attachment:fixed;background-color:#FBF3F6}
+/* a esfera e o fundo animado são desenhados com luz; no claro viram tinta (cores invertidas, rosa mantido) */
+:root[data-theme="light"] #reactor{filter:invert(1) hue-rotate(180deg) saturate(1.3)}
+:root[data-theme="light"] #bgfx{filter:invert(1) hue-rotate(180deg);opacity:.45}
+:root[data-theme="light"] .brand b,:root[data-theme="light"] .wordmark{color:#2A0A1C;text-shadow:none}
+:root[data-theme="light"] .eyebrow,:root[data-theme="light"] .nn-k,:root[data-theme="light"] .nn-line .nn-k{color:#C2286F}
+:root[data-theme="light"] .chip,:root[data-theme="light"] .nn-chip,:root[data-theme="light"] .hbtn{background:rgba(255,255,255,.72);border-color:rgba(122,34,92,.20);color:#4E2A3F}
+:root[data-theme="light"] .chip.on,:root[data-theme="light"] .nn-chip[aria-pressed="true"],:root[data-theme="light"] .hbtn[aria-expanded="true"]{background:rgba(255,79,163,.14);border-color:#E0559A;color:#8E1F5A}
+:root[data-theme="light"] .hbtn:hover{color:#2A0A1C}
+:root[data-theme="light"] .hbtn svg.i,:root[data-theme="light"] .dk-h svg.i,:root[data-theme="light"] .askbar button,:root[data-theme="light"] .nav a[aria-current="page"] svg{color:#C2286F}
+:root[data-theme="light"] input::placeholder,:root[data-theme="light"] textarea::placeholder{color:#9A7A8B}
+:root[data-theme="light"] .toast{background:rgba(255,255,255,.96)}
+:root[data-theme="light"] .nav a[aria-current="page"]{color:#2A0A1C;box-shadow:inset 0 0 0 1px rgba(214,51,127,.30)}
+:root[data-theme="light"] .hero-copy h2,:root[data-theme="light"] .nn-n,:root[data-theme="light"] .nn-line .nn-n,:root[data-theme="light"] .finsum .saldo b{color:#2A0A1C}
+:root[data-theme="light"] .askbar,:root[data-theme="light"] .nn-sel{background:rgba(255,255,255,.78)}
+:root[data-theme="light"] .btn.ghost:hover{box-shadow:inset 0 0 0 1px #E0559A}
+@media (max-width:760px){
+  :root[data-theme="light"] .tabbar{background:rgba(255,250,252,.90)}
+  :root[data-theme="light"] .tabbar a[aria-current="page"]{color:#8E1F5A}
+  :root[data-theme="light"] .tabbar .fab{background:radial-gradient(circle,#FFFFFF 55%,#FBE3EE);color:#C2286F;box-shadow:0 0 0 1.5px #E0559A,var(--glow)}
+}
+/* dentro do cérebro continua noite, em qualquer tema */
+:root[data-theme="light"] .nn-deep{--ink:#F7EAF0;--ink-2:#D9C2CE;--taupe:#BFA4B3;--glass:rgba(34,10,28,.62);--glass-b:rgba(255,150,190,.22);--line:rgba(255,170,205,.14);color:#F7EAF0}
+:root[data-theme="light"] .nn-deep #reactor{filter:none}
