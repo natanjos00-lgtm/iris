@@ -29,8 +29,8 @@ function themeApply(){
   const m = themeMode(); const dark = m === "dark" || (m === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
   const r = document.documentElement; r.setAttribute("data-theme", dark ? "dark" : "light"); r.setAttribute("data-theme-mode", m);
   // no claro a esfera é desenhada e depois invertida: este tom vira ameixa depois da inversão
-  try { const g = dark ? [235,217,204] : [225,140,195]; NN_GOLD[0] = g[0]; NN_GOLD[1] = g[1]; NN_GOLD[2] = g[2]; } catch {}
-  const tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = dark ? "#0B0408" : "#FBF3F6";
+  try { const g = dark ? [235,217,204] : [205,150,170]; NN_GOLD[0] = g[0]; NN_GOLD[1] = g[1]; NN_GOLD[2] = g[2]; } catch {}
+  const tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = dark ? "#0C0510" : "#F6F2F3";
   const ts = $("themeSide"); if (ts) { ts.querySelector("use").setAttribute("href", dark ? "#i-sun" : "#i-moon"); ts.querySelector("span").textContent = dark ? "Modo claro" : "Modo escuro"; ts.title = ts.querySelector("span").textContent; }
   const tb = $("themeBtn"); if (tb) { tb.querySelector("use").setAttribute("href", dark ? "#i-sun" : "#i-moon"); tb.setAttribute("aria-label", dark ? "Mudar para o tema claro" : "Mudar para o tema escuro"); }
 }
