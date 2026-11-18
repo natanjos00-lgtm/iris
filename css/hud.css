@@ -267,3 +267,27 @@ html.booting body{overflow:hidden}
 .gx-pl.back .gx-name{opacity:0}
 .gx-planets.on .gx-pl{pointer-events:auto}
 .gx-hint{position:absolute;left:0;right:0;bottom:2%;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--taupe);z-index:6;pointer-events:none;transition:opacity .4s}
+
+/* ---------- dentro de Andrômeda ---------- */
+#cosmos{position:fixed;inset:0;z-index:9000;background:#040208;opacity:0;transition:opacity .45s ease;color:#F6EEF4;overscroll-behavior:none}
+#cosmos.in{opacity:1}
+html.cx-lock,html.cx-lock body{overflow:hidden}
+.cx-c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.cx-labels{position:absolute;inset:0;pointer-events:none}
+.cx-lab{position:absolute;left:0;top:0;transform-origin:0 0;margin:-22px 0 0 -40px;width:80px;text-align:center;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(246,238,244,.85);text-shadow:0 1px 8px #000;transition:opacity .3s;white-space:nowrap}
+.cx-top{position:absolute;left:0;right:0;top:0;padding:calc(14px + env(safe-area-inset-top)) 16px 0;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.cx-t{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:rgba(246,238,244,.7)}
+.cx-x{pointer-events:auto;width:44px;height:44px;border-radius:50%;border:1px solid rgba(236,206,232,.3);background:rgba(20,12,26,.5);color:#F6EEF4;font-size:22px;line-height:1;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.cx-hint{position:absolute;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));margin:0;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(246,238,244,.55);pointer-events:none;transition:opacity .3s}
+.cx-list{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));display:flex;gap:6px;overflow-x:auto;padding:0 16px;scrollbar-width:none;transition:opacity .3s}
+.cx-list::-webkit-scrollbar{display:none}
+.cx-list button{flex:none;min-height:38px;padding:0 14px;border-radius:19px;border:1px solid rgba(236,206,232,.25);background:rgba(20,12,26,.55);color:#F6EEF4;font:inherit;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#cosmos.focused .cx-hint,#cosmos.focused .cx-list{opacity:0;pointer-events:none}
+.cx-info{position:absolute;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:420px;padding:16px 18px;border-radius:14px;border:1px solid rgba(236,206,232,.22);background:rgba(18,10,24,.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:cxUp .5s .9s both}
+.cx-info small{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#F2C6DE}
+.cx-info h2{margin:4px 0 2px;font-weight:300;font-size:28px;letter-spacing:.02em}
+.cx-sub{margin:0;font-size:14px;color:rgba(246,238,244,.75)}
+.cx-st{margin:6px 0 12px;font-size:15px;color:#F6EEF4}
+.cx-btns{display:flex;gap:8px}
+@keyframes cxUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#cosmos{transition:none}.cx-info{animation:none}}

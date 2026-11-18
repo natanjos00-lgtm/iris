@@ -1,5 +1,5 @@
-/* ÍRIS · galáxia perolada em movimento (referência: Andrômeda), com as áreas do app como planetas em órbita.
-   A galáxia reage à ÍRIS: o núcleo pulsa quando ela ouve, pensa ou fala. Arrastar gira o sistema; tocar num planeta abre a área. */
+/* ÍRIS · galáxia perolada em movimento (referência: Andrômeda).
+   O núcleo pulsa quando ela ouve, pensa ou fala. Arrastar gira; a pinça aproxima e, passando do limite, entra em Andrômeda (cosmos.js). */
 (function () {
   const box = document.querySelector(".corebox"); if (!box) return;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -76,13 +76,7 @@
     const sg = new T.BufferGeometry(); sg.setAttribute("position", new T.BufferAttribute(sp, 3));
     const stars = new T.Points(sg, new T.PointsMaterial({ color: 0xffffff, size: 0.026, transparent: true, opacity: 0.85, depthWrite: false })); scene.add(stars);
 
-    // ---- órbitas e planetas (botões de verdade, acessíveis) ----
-    const orbitLines = [];
-    [1.18, 1.5].forEach(rad => { const pts = []; for (let i = 0; i <= 128; i++) { const a = i / 128 * 6.283; pts.push(new T.Vector3(Math.cos(a) * rad, 0, Math.sin(a) * rad)); } const L = new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 })); orbitLines.push(L); sys.add(L); });
-    const layer = document.createElement("div"); layer.className = "gx-planets"; layer.setAttribute("role", "navigation"); layer.setAttribute("aria-label", "Áreas da ÍRIS");
-    layer.innerHTML = PLANETS.map((p, i) => `<a class="gx-pl${p.ring ? " ring" : ""}" href="#${p.r}" data-i="${i}" style="--c1:${p.c[0]};--c2:${p.c[1]};--c3:${p.c[2]};--s:${p.s}"><span class="gx-orb" aria-hidden="true"></span><span class="gx-name">${p.n}</span></a>`).join("");
-    box.append(cv, layer); box.classList.add("gx-on");
-    const pl = [...layer.children];
+    box.append(cv); box.classList.add("gx-on");
 
     let baseZ = 4.2; try { nnSetZoom(1); } catch {}
     const size = () => { const r = cv.getBoundingClientRect(); if (!r.width) return; R.setSize(r.width, r.height, false); cam.aspect = r.width / r.height; baseZ = Math.max(3.6, 1.62 * 1.08 / (Math.tan(19 * Math.PI / 180) * cam.aspect)); cam.updateProjectionMatrix(); };
@@ -90,11 +84,11 @@
 
     // arrastar gira o sistema
     let drag = false, lx = 0, ly = 0, yaw = 0, vy = 0, tilt = 0;
-    box.addEventListener("pointerdown", e => { if (e.target.closest(".gx-pl")) return; drag = true; lx = e.clientX; ly = e.clientY; });
+    box.addEventListener("pointerdown", e => { drag = true; lx = e.clientX; ly = e.clientY; });
     addEventListener("pointermove", e => { if (!drag) return; const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; vy = dx * 0.006; yaw += vy; tilt = Math.max(-0.35, Math.min(0.35, tilt + dy * 0.004)); }, { passive: true });
     addEventListener("pointerup", () => { drag = false; });
 
-    let rv = 0, spin = 0, pulse = 0.2, last = performance.now(); const v3 = new T.Vector3(), wp = new T.Vector3();
+    let spin = 0, pulse = 0.2, last = performance.now();
     (function loop(now){
       requestAnimationFrame(loop);
       if (document.hidden || (typeof current !== "undefined" && current !== "inicio") || box.classList.contains("diving")) { last = now; return; }
@@ -108,19 +102,8 @@
       glow.scale.setScalar(0.5 + pulse * 0.35); glowM.opacity = 0.75 + pulse * 0.2;
       stars.rotation.y = t * 0.004;
       let zz = 1; try { zz = nnZoom(); } catch {}
-      const reveal = Math.max(0, Math.min(1, (zz - 1.03) / 0.15)); rv += (reveal - rv) * Math.min(1, dt * 6);
-      cam.position.z = baseZ * (1.18 - rv * 0.18) / Math.max(0.7, Math.min(1, zz));
-      orbitLines.forEach(L => L.material.opacity = rv * 0.22); layer.style.opacity = rv.toFixed(3); layer.style.pointerEvents = rv > 0.6 ? "" : "none"; layer.classList.toggle("on", rv > 0.6);
+      cam.position.z = baseZ * 1.12 / Math.max(0.7, Math.min(1.3, zz));
       R.render(scene, cam);
-      const W = cv.clientWidth, H = cv.clientHeight, ox = cv.offsetLeft, oy = cv.offsetTop;
-      PLANETS.forEach((p, i) => {
-        const a = p.o + (reduce ? 0 : t * p.sp) + yaw;
-        v3.set(Math.cos(a) * p.rad, 0, Math.sin(a) * p.rad); wp.copy(v3); sys.localToWorld(wp);
-        const depth = wp.z; v3.copy(wp).project(cam);
-        const x = ox + (v3.x * 0.5 + 0.5) * W, y = oy + (-v3.y * 0.5 + 0.5) * H, k = 0.78 + 0.22 * Math.max(-1, Math.min(1, depth / 1.4));
-        const el = pl[i]; el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${(k * p.s).toFixed(3)})`;
-        el.style.zIndex = depth > 0 ? 6 : 2; el.classList.toggle("back", depth < -0.2); el.style.opacity = (0.55 + 0.45 * (k - 0.56) / 0.44).toFixed(2); el.tabIndex = rv > 0.6 ? 0 : -1;
-      });
     })(last);
   })();
 })();
