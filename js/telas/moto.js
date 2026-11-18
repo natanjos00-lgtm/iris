@@ -105,15 +105,15 @@ function renderMoto(){
       <div class="mt-head"><p class="eyebrow">Garagem</p><h1 class="t" id="h-moto">Honda Lead 110</h1><p class="lede">Rosa Ágata · scooter 108 cc</p></div>
       <div class="mt-wrap">
         <div class="mt-stage" id="mtStage">
-          <canvas id="mt360" class="mt-360" role="img" aria-label="Sua Lead 110 Rosa Ágata em 360 graus. Arraste para girar, use a pinça para aproximar; bem de perto ela mostra as peças internas."></canvas>
+          <canvas id="mt360" class="mt-360" role="img" aria-label="Sua Lead 110 Rosa Ágata em 360 graus, a partir das imagens de referência. Arraste para girar e use a pinça para aproximar."></canvas>
           <canvas id="mtCanvas" class="mt-3d" aria-hidden="true"></canvas>
           <div class="mt-hot" id="mtHot" aria-hidden="true"></div>
           <div class="mt-load" id="mtLoad">Carregando a moto…</div>
           <div class="mt-ctl" role="group" aria-label="Vista da moto">
             <button class="chip" type="button" data-v="lado">Lado</button><button class="chip" type="button" data-v="frente">Frente</button><button class="chip" type="button" data-v="tras">Traseira</button>
-            <button class="chip" type="button" data-v="xray" aria-pressed="false">Raio-X</button><button class="chip" type="button" data-v="giro" aria-pressed="true">Girar</button>
+            <button class="chip" type="button" data-v="giro" aria-pressed="true">Girar</button>
           </div>
-          <p class="mt-hint" id="mtHint">Arraste para girar · pinça para aproximar e ver por dentro</p>
+          <p class="mt-hint" id="mtHint">Arraste para girar · pinça para aproximar</p>
         </div>
         <div class="mt-side">
           <div class="mt-specs">${MOTO_SPECS.map(s => `<div class="acard mt-spec"><span>${s[0]}</span><b>${s[1]}</b>${s[2] ? `<small>${s[2]}</small>` : ""}</div>`).join("")}</div>
@@ -215,11 +215,11 @@ function moto360Start(){
     cv.addEventListener("pointermove", e => {
       if (!ptrs.has(e.pointerId)) return; const prev = ptrs.get(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); P3.idle = 0;
       if (ptrs.size === 1) { const dx = e.clientX - prev[0]; if (P3.zoom > 1.15) P3.pan += dx; else { P3.v = -dx * 0.45; P3.A += P3.v; } }
-      else if (ptrs.size === 2 && pinch0) { const [a, b] = [...ptrs.values()]; P3.zoom = Math.max(1, Math.min(2.4, z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0)); if (P3.zoom >= 2.3) { ptrs.clear(); motoXrayOn(); } }
+      else if (ptrs.size === 2 && pinch0) { const [a, b] = [...ptrs.values()]; P3.zoom = Math.max(1, Math.min(2.4, z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0)); }
     });
     const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch0 = 0; };
     cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
-    cv.addEventListener("wheel", e => { e.preventDefault(); P3.zoom = Math.max(1, Math.min(2.4, P3.zoom * (1 - e.deltaY * 0.0015))); P3.idle = 0; if (P3.zoom >= 2.3) motoXrayOn(); }, { passive: false });
+    cv.addEventListener("wheel", e => { e.preventDefault(); P3.zoom = Math.max(1, Math.min(2.4, P3.zoom * (1 - e.deltaY * 0.0015))); P3.idle = 0; }, { passive: false });
   }
   if (!P3.run) { P3.run = true; P3.last = performance.now(); requestAnimationFrame(moto360Loop); }
 }
