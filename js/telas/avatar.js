@@ -14,7 +14,7 @@
   let g = 0.25, last = performance.now();
   (function loop(now){
     requestAnimationFrame(loop);
-    if (document.hidden) return;
+    if (document.hidden || box.classList.contains("av-3d")) return;
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     let mode = "idle", en = 0.18, sp = 0; try { mode = coreMode; en = energy; sp = spike; } catch {}
     const tg = mode === "idle" ? 0.25 : Math.min(1.2, 0.5 + en * 0.4 + sp * 0.35);

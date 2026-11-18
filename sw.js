@@ -2,7 +2,11 @@
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
 /* Páginas e scripts do próprio app sempre vêm frescos (sem usar a cópia guardada pelo navegador), para as atualizações chegarem na hora. */
-self.addEventListener("fetch", e => { if (e.request.method !== "GET") return; const same = new URL(e.request.url).origin === self.location.origin;
+/* modelos 3D, imagens e bibliotecas pesadas: guardados no aparelho (versão no nome do arquivo) */
+const HEAVY = /\/(assets|js\/vendor)\//;
+self.addEventListener("fetch", e => { if (e.request.method !== "GET") return; const u = new URL(e.request.url);
+  if (u.origin === self.location.origin && HEAVY.test(u.pathname)) { e.respondWith(caches.open("iris-heavy-v1").then(async c => { const hit = await c.match(e.request); if (hit) return hit; const r = await fetch(e.request); if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => fetch(e.request))); return; }
+  const same = new URL(e.request.url).origin === self.location.origin;
   e.respondWith((same ? fetch(e.request, { cache: "no-store" }) : fetch(e.request)).catch(() => new Response("Sem conexão.", { status: 503 }))); });
 self.addEventListener("push", e => {
   let d = {}; try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }

@@ -50,3 +50,8 @@ próximos 14 dias e arquivos alterados no Drive para a função `ingest`, que co
 
 Para um conector novo: uma entrada em `CONECTORES` (`js/integracoes/conectores.js`), uma origem nova
 aceita na função `ingest` e na restrição `source` de `inbox_events`.
+
+
+## Créditos
+- Avatar 3D da ÍRIS: modelo de exemplo "brunette.glb" do projeto [TalkingHead](https://github.com/met4citizen/TalkingHead), criado no Ready Player Me, licença [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) (uso pessoal, não comercial).
+- three.js r128 (MIT).

@@ -240,3 +240,8 @@ html.booting body{overflow:hidden}
 .corebox::after{opacity:calc(.6 + var(--pulse,.25) * .5)}
 .corebox.diving .av-ring,.corebox.diving .av-dust{opacity:0;transition:opacity .4s}
 @media (prefers-reduced-motion:reduce){.iris-av,.av-spin,.av-dust i{animation:none}}
+
+/* avatar 3D */
+.iris-3d{position:absolute;left:-6%;right:-6%;width:112%;top:-2%;height:96%;z-index:2;pointer-events:none;display:block}
+.av-3d .iris-av{visibility:hidden}
+.corebox.diving .iris-3d{opacity:0;transition:opacity .4s}
