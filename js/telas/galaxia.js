@@ -21,31 +21,31 @@
     let R; try { R = new T.WebGLRenderer({ canvas: cv, antialias: false, alpha: true, powerPreference: "low-power" }); } catch { return; }
     R.setPixelRatio(Math.min(2, devicePixelRatio || 1));
     const scene = new T.Scene(), cam = new T.PerspectiveCamera(38, 1, 0.1, 50); cam.position.set(0, 0, 4.2);
-    const sys = new T.Group(); sys.rotation.set(1.2, 0, -0.5); scene.add(sys);
-    const gal = new T.Group(); sys.add(gal);
+    const sys = new T.Group(); sys.rotation.set(1.3, 0, -0.55); scene.add(sys);
+    const gal = new T.Group(); gal.scale.setScalar(1.95); gal.rotation.x = -1.02; sys.add(gal);
 
-    // ---- galáxia: braços em espiral, bojo, poeira e satélites ----
-    const N = innerWidth < 700 ? 34000 : 52000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), siz = new Float32Array(N), ph = new Float32Array(N), rr = new Float32Array(N);
+    // ---- galáxia como na foto (Andrômeda): disco liso bem inclinado, faixas de poeira, bojo e duas satélites; cor pérola branca ----
+    const N = innerWidth < 700 ? 42000 : 64000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), siz = new Float32Array(N), ph = new Float32Array(N), rr = new Float32Array(N);
     const g = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
-    const pal = [[1, .97, .95], [1, .86, .92], [.95, .74, .87], [.86, .76, .96], [.74, .78, .98], [1, .93, .86]];
-    const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-    for (let i = 0; i < N; i++) {
-      let x, y, z, c, s, r;
-      const k = Math.random();
-      if (k < 0.18) { // bojo
-        r = Math.abs(g()) * 0.12; const a = Math.random() * 6.283, el = g() * 0.5;
-        x = Math.cos(a) * r; z = Math.sin(a) * r; y = el * r * 0.7; c = mix(pal[0], pal[5], Math.random() * 0.6); s = 1.6 + Math.random() * 2.2;
-      } else if (k < 0.93) { // disco e braços
-        r = 0.08 + Math.pow(Math.random(), 0.75) * 0.95; const arm = Math.random() < 0.5 ? 0 : Math.PI;
-        const th = arm + Math.log(r / 0.06) / 0.32 + g() * (0.28 + 0.25 * (1 - r));
-        x = Math.cos(th) * r + g() * 0.035 * r; z = Math.sin(th) * r + g() * 0.035 * r; y = g() * 0.022 * (1.2 - r);
-        const t = Math.min(1, r / 1.0); c = t < 0.3 ? mix(pal[0], pal[1], t / 0.3) : t < 0.6 ? mix(pal[1], pal[2], (t - 0.3) / 0.3) : mix(pal[3], pal[4], (t - 0.6) / 0.4);
-        if (Math.random() < 0.08) c = pal[0]; s = 0.8 + Math.random() * 1.6 * (1 - r * 0.5);
-      } else { // satélites (como as galáxias anãs ao lado de Andrômeda)
-        const sat = Math.random() < 0.6 ? [0.55, 0.0, -0.95, 0.07] : [-0.25, 0.05, 0.62, 0.05];
-        x = sat[0] + g() * sat[3]; y = sat[1] + g() * sat[3] * 0.6; z = sat[2] + g() * sat[3]; r = 1.2; c = mix(pal[5], pal[1], Math.random() * 0.5); s = 1.0 + Math.random() * 1.2;
+    const PEARL = [1, .985, .975], P_PINK = [1, .93, .95], P_LIL = [.95, .93, 1], P_BLUE = [.9, .95, 1], P_WARM = [1, .97, .92];
+    const tint = r => { const k = Math.random(); return k < .5 ? PEARL : k < .68 ? P_PINK : k < .84 ? P_LIL : r > .55 ? P_BLUE : P_WARM; };
+    const lane = r => { // faixas de poeira: menos estrelas nesses anéis
+      const a = Math.exp(-Math.pow((r - 0.42) / 0.035, 2)) * 0.75, b = Math.exp(-Math.pow((r - 0.6) / 0.04, 2)) * 0.6, c = Math.exp(-Math.pow((r - 0.78) / 0.05, 2)) * 0.45; return 1 - Math.max(a, b, c); };
+    let i = 0;
+    while (i < N) {
+      let x, y, z, c, s, r; const k = Math.random();
+      if (k < 0.2) { r = Math.abs(g()) * 0.09; const a = Math.random() * 6.283; x = Math.cos(a) * r; z = Math.sin(a) * r; y = g() * r * 0.55; c = Math.random() < .7 ? PEARL : P_WARM; s = 1.4 + Math.random() * 2; }
+      else if (k < 0.95) {
+        r = Math.min(1.05, -Math.log(1 - Math.random() * 0.93) * 0.36 + 0.03);
+        if (Math.random() > lane(r)) continue;
+        const a = Math.random() * 6.283 + Math.sin(r * 9) * 0.25; x = Math.cos(a) * r; z = Math.sin(a) * r * 1.0; y = g() * 0.012 * (1.1 - r);
+        c = tint(r); s = 0.7 + Math.random() * 1.3 * (1.05 - r * 0.6);
+      } else {
+        const m32 = Math.random() < 0.45, sat = m32 ? [0.05, 0.12, -0.42, 0.03] : [-0.75, -0.1, 0.62, 0.06];
+        r = 1.2; const d = Math.abs(g()) * sat[3], a = Math.random() * 6.283; x = sat[0] + Math.cos(a) * d * (m32 ? 1 : 0.55); z = sat[2] + Math.sin(a) * d; y = sat[1] + g() * sat[3] * 0.3;
+        c = PEARL; s = 1.0 + Math.random() * 1.1;
       }
-      pos.set([x, y, z], i * 3); col.set(c, i * 3); siz[i] = s; ph[i] = Math.random() * 6.283; rr[i] = Math.hypot(x, z);
+      pos.set([x, y, z], i * 3); col.set(c, i * 3); siz[i] = s; ph[i] = Math.random() * 6.283; rr[i] = Math.hypot(x, z); i++;
     }
     const geo = new T.BufferGeometry();
     geo.setAttribute("position", new T.BufferAttribute(pos, 3)); geo.setAttribute("color", new T.BufferAttribute(col, 3));
@@ -54,31 +54,38 @@
     const mat = new T.ShaderMaterial({
       uniforms: U, transparent: true, depthWrite: false, blending: T.AdditiveBlending, vertexColors: true,
       vertexShader: `attribute float size;attribute float phase;attribute float rad;uniform float uT,uPx,uPulse,uSpin;varying vec3 vC;varying float vA;
-        void main(){ vec3 p=position; float a=uSpin*(0.55/(rad+0.25)); float ca=cos(a),sa=sin(a); if(rad<1.15) p.xz=mat2(ca,-sa,sa,ca)*p.xz;
-          vec4 mv=modelViewMatrix*vec4(p,1.); float tw=.75+.25*sin(uT*1.7+phase*3.);
-          float core=smoothstep(.35,0.,rad); gl_PointSize=size*uPx*(1.+core*uPulse*1.6)*(3.4/-mv.z);
-          vC=color*(tw*1.25+core*uPulse*.9); vA=.55+.45*tw; gl_Position=projectionMatrix*mv; }`,
+        void main(){ vec3 p=position; float a=uSpin*(0.35/(rad+0.3)); float ca=cos(a),sa=sin(a); if(rad<1.1) p.xz=mat2(ca,-sa,sa,ca)*p.xz;
+          vec4 mv=modelViewMatrix*vec4(p,1.); float tw=.8+.2*sin(uT*1.6+phase*3.);
+          float core=smoothstep(.3,0.,rad); gl_PointSize=size*uPx*(1.+core*uPulse*1.4)*(3.0/-mv.z);
+          vC=color*(tw*.95+core*uPulse*.8); vA=.45+.4*tw; gl_Position=projectionMatrix*mv; }`,
       fragmentShader: `varying vec3 vC;varying float vA;void main(){ vec2 d=gl_PointCoord-.5; float r=dot(d,d); if(r>.25) discard; float a=exp(-r*14.)*vA; gl_FragColor=vec4(vC*a,a); }`
     });
     gal.add(new T.Points(geo, mat));
-    // brilho do núcleo
-    const glowTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d"); const gr = x.createRadialGradient(128, 128, 0, 128, 128, 128); gr.addColorStop(0, "rgba(255,250,248,1)"); gr.addColorStop(0.15, "rgba(255,226,238,.75)"); gr.addColorStop(0.45, "rgba(236,170,210,.22)"); gr.addColorStop(1, "rgba(200,150,220,0)"); x.fillStyle = gr; x.fillRect(0, 0, 256, 256); return new T.CanvasTexture(c); })();
+    // luz difusa do disco (o brilho leitoso da foto), no plano da galáxia
+    const discTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 512; const x = c.getContext("2d"); const gr = x.createRadialGradient(256, 256, 0, 256, 256, 256);
+      gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.08, "rgba(255,250,250,.85)"); gr.addColorStop(0.25, "rgba(246,240,250,.32)"); gr.addColorStop(0.42, "rgba(220,214,236,.10)"); gr.addColorStop(0.47, "rgba(120,110,140,.02)"); gr.addColorStop(0.62, "rgba(214,214,240,.07)"); gr.addColorStop(0.75, "rgba(200,206,236,.03)"); gr.addColorStop(1, "rgba(200,200,230,0)");
+      x.fillStyle = gr; x.fillRect(0, 0, 512, 512); return new T.CanvasTexture(c); })();
+    const disc = new T.Mesh(new T.PlaneGeometry(2.3, 2.3), new T.MeshBasicMaterial({ map: discTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: 1, side: T.DoubleSide }));
+    disc.rotation.x = -Math.PI / 2; gal.add(disc);
+    const glowTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d"); const gr = x.createRadialGradient(128, 128, 0, 128, 128, 128); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.18, "rgba(255,252,250,.7)"); gr.addColorStop(0.5, "rgba(240,236,248,.16)"); gr.addColorStop(1, "rgba(230,230,245,0)"); x.fillStyle = gr; x.fillRect(0, 0, 256, 256); return new T.CanvasTexture(c); })();
     const glowM = new T.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: 0.9 });
-    const glow = new T.Sprite(glowM); glow.scale.set(1.1, 1.1, 1); gal.add(glow);
-    const halo = new T.Sprite(new T.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: 0.18 })); halo.scale.set(3.2, 3.2, 1); gal.add(halo);
+    const glow = new T.Sprite(glowM); glow.scale.set(0.55, 0.55, 1); gal.add(glow);
+    const halo = new T.Sprite(new T.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: 0.08 })); halo.scale.set(2.6, 2.6, 1); gal.add(halo);
     // estrelas de fundo
-    const SN = 900, sp = new Float32Array(SN * 3); for (let i = 0; i < SN; i++) { const a = Math.random() * 6.283, b = Math.acos(2 * Math.random() - 1), d = 6 + Math.random() * 8; sp.set([Math.sin(b) * Math.cos(a) * d, Math.sin(b) * Math.sin(a) * d, Math.cos(b) * d - 4], i * 3); }
+    const SN = 1600, sp = new Float32Array(SN * 3); for (let i = 0; i < SN; i++) { const a = Math.random() * 6.283, b = Math.acos(2 * Math.random() - 1), d = 6 + Math.random() * 8; sp.set([Math.sin(b) * Math.cos(a) * d, Math.sin(b) * Math.sin(a) * d, Math.cos(b) * d - 4], i * 3); }
     const sg = new T.BufferGeometry(); sg.setAttribute("position", new T.BufferAttribute(sp, 3));
-    const stars = new T.Points(sg, new T.PointsMaterial({ color: 0xf6eaf4, size: 0.028, transparent: true, opacity: 0.8, depthWrite: false })); scene.add(stars);
+    const stars = new T.Points(sg, new T.PointsMaterial({ color: 0xffffff, size: 0.026, transparent: true, opacity: 0.85, depthWrite: false })); scene.add(stars);
 
     // ---- órbitas e planetas (botões de verdade, acessíveis) ----
-    [1.18, 1.5].forEach(rad => { const pts = []; for (let i = 0; i <= 128; i++) { const a = i / 128 * 6.283; pts.push(new T.Vector3(Math.cos(a) * rad, 0, Math.sin(a) * rad)); } sys.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: 0xf2d7e6, transparent: true, opacity: 0.22 }))); });
+    const orbitLines = [];
+    [1.18, 1.5].forEach(rad => { const pts = []; for (let i = 0; i <= 128; i++) { const a = i / 128 * 6.283; pts.push(new T.Vector3(Math.cos(a) * rad, 0, Math.sin(a) * rad)); } const L = new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 })); orbitLines.push(L); sys.add(L); });
     const layer = document.createElement("div"); layer.className = "gx-planets"; layer.setAttribute("role", "navigation"); layer.setAttribute("aria-label", "Áreas da ÍRIS");
     layer.innerHTML = PLANETS.map((p, i) => `<a class="gx-pl${p.ring ? " ring" : ""}" href="#${p.r}" data-i="${i}" style="--c1:${p.c[0]};--c2:${p.c[1]};--c3:${p.c[2]};--s:${p.s}"><span class="gx-orb" aria-hidden="true"></span><span class="gx-name">${p.n}</span></a>`).join("");
     box.append(cv, layer); box.classList.add("gx-on");
     const pl = [...layer.children];
 
-    const size = () => { const r = cv.getBoundingClientRect(); if (!r.width) return; R.setSize(r.width, r.height, false); cam.aspect = r.width / r.height; cam.position.z = Math.max(3.6, 1.62 * 1.08 / (Math.tan(19 * Math.PI / 180) * cam.aspect)); cam.updateProjectionMatrix(); };
+    let baseZ = 4.2; try { nnSetZoom(1); } catch {}
+    const size = () => { const r = cv.getBoundingClientRect(); if (!r.width) return; R.setSize(r.width, r.height, false); cam.aspect = r.width / r.height; baseZ = Math.max(3.6, 1.62 * 1.08 / (Math.tan(19 * Math.PI / 180) * cam.aspect)); cam.updateProjectionMatrix(); };
     addEventListener("resize", size); size();
 
     // arrastar gira o sistema
@@ -87,7 +94,7 @@
     addEventListener("pointermove", e => { if (!drag) return; const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; vy = dx * 0.006; yaw += vy; tilt = Math.max(-0.35, Math.min(0.35, tilt + dy * 0.004)); }, { passive: true });
     addEventListener("pointerup", () => { drag = false; });
 
-    let spin = 0, pulse = 0.2, last = performance.now(); const v3 = new T.Vector3(), wp = new T.Vector3();
+    let rv = 0, spin = 0, pulse = 0.2, last = performance.now(); const v3 = new T.Vector3(), wp = new T.Vector3();
     (function loop(now){
       requestAnimationFrame(loop);
       if (document.hidden || (typeof current !== "undefined" && current !== "inicio") || box.classList.contains("diving")) { last = now; return; }
@@ -97,9 +104,13 @@
       const speed = reduce ? 0 : (mode === "listen" ? 0.5 : mode === "think" ? 0.8 : 0.16);
       spin += dt * speed; U.uT.value = t; U.uSpin.value = spin; U.uPulse.value = pulse;
       if (!drag) { vy *= 0.94; yaw += vy; tilt *= 0.97; }
-      sys.rotation.set(1.2 + tilt, yaw * 0.25, -0.5); gal.rotation.y = yaw;
-      glow.scale.setScalar(0.9 + pulse * 0.6); glowM.opacity = 0.75 + pulse * 0.2;
+      sys.rotation.set(1.3 + tilt, yaw * 0.15, -0.55); gal.rotation.set(-1.02 + tilt * 0.3, yaw * 0.4, 0);
+      glow.scale.setScalar(0.5 + pulse * 0.35); glowM.opacity = 0.75 + pulse * 0.2;
       stars.rotation.y = t * 0.004;
+      let zz = 1; try { zz = nnZoom(); } catch {}
+      const reveal = Math.max(0, Math.min(1, (zz - 1.03) / 0.15)); rv += (reveal - rv) * Math.min(1, dt * 6);
+      cam.position.z = baseZ * (1.18 - rv * 0.18) / Math.max(0.7, Math.min(1, zz));
+      orbitLines.forEach(L => L.material.opacity = rv * 0.22); layer.style.opacity = rv.toFixed(3); layer.style.pointerEvents = rv > 0.6 ? "" : "none"; layer.classList.toggle("on", rv > 0.6);
       R.render(scene, cam);
       const W = cv.clientWidth, H = cv.clientHeight, ox = cv.offsetLeft, oy = cv.offsetTop;
       PLANETS.forEach((p, i) => {
@@ -108,7 +119,7 @@
         const depth = wp.z; v3.copy(wp).project(cam);
         const x = ox + (v3.x * 0.5 + 0.5) * W, y = oy + (-v3.y * 0.5 + 0.5) * H, k = 0.78 + 0.22 * Math.max(-1, Math.min(1, depth / 1.4));
         const el = pl[i]; el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${(k * p.s).toFixed(3)})`;
-        el.style.zIndex = depth > 0 ? 6 : 2; el.classList.toggle("back", depth < -0.2); el.style.opacity = (0.55 + 0.45 * (k - 0.56) / 0.44).toFixed(2);
+        el.style.zIndex = depth > 0 ? 6 : 2; el.classList.toggle("back", depth < -0.2); el.style.opacity = (0.55 + 0.45 * (k - 0.56) / 0.44).toFixed(2); el.tabIndex = rv > 0.6 ? 0 : -1;
       });
     })(last);
   })();
