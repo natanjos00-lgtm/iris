@@ -5,7 +5,7 @@
    Cada área é um neurônio na esfera; tocar nele ativa a área. Tocar no centro continua fazendo
    a ÍRIS falar com você. Com "reduzir movimento" ligado no aparelho, tudo fica parado. */
 
-const NN_GOLD = [232,242,250], NN_PINK = [110,185,255], NN_HOT = [255,154,60];
+const NN_GOLD = [255,236,210], NN_PINK = [255,166,72], NN_HOT = [255,138,61];
 const nnMix = (a, b, k) => [0, 1, 2].map(i => Math.round(a[i] + (b[i] - a[i]) * k));
 const nnRgba = (c, a) => "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + Math.max(0, Math.min(1, a)).toFixed(3) + ")";
 const nnReduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
