@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icon-512.png?v=2">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2">
-<link rel="stylesheet" href="css/iris.css?v=57">
-<link rel="stylesheet" href="css/identidade.css?v=57">
-<link rel="stylesheet" href="css/hud.css?v=57">
+<link rel="stylesheet" href="css/iris.css?v=58">
+<link rel="stylesheet" href="css/identidade.css?v=58">
+<link rel="stylesheet" href="css/hud.css?v=58">
 </head><body>
 <div id="boot" aria-hidden="true">
   <div class="bt-grid"></div><div class="bt-strip"></div>
@@ -35,11 +35,11 @@
     <line class="scanline" x1="50" y1="100" x2="150" y2="100" stroke="#FFFFFF" stroke-width=".8"/>
     <path class="hot" d="M86 100l9 9 18-20" stroke="#FF9A3C" stroke-width="0" fill="none"/>
   </svg></div>
-  <div class="bt-scan"><span class="s1">ESCANEANDO ÍRIS</span><span class="s2">ÍRIS RECONHECIDA</span></div>
+  <div class="bt-scan"><span class="s1">ESCANEANDO ÍRIS</span><span class="s2">ÍRIS RECONHECIDA</span><span class="s3" hidden>TOQUE PARA CONFIRMAR</span></div><div class="bt-touch"></div>
   <ul class="bt-log"><li>NÚCLEO NEURAL<b>OK</b></li><li>MEMÓRIA<b>SINC</b></li><li>AGENDA<b>SINC</b></li><li>FINANÇAS<b>OK</b></li><li>VOZ<b>PRONTA</b></li></ul>
   <div class="bt-bars"><i style="--h:29px;--d:-0.38s"></i><i style="--h:10px;--d:-0.28s"></i><i style="--h:26px;--d:-0.58s"></i><i style="--h:31px;--d:-0.40s"></i><i style="--h:27px;--d:-0.13s"></i><i style="--h:21px;--d:-0.09s"></i><i style="--h:29px;--d:-0.60s"></i><i style="--h:23px;--d:-0.35s"></i><i style="--h:28px;--d:-0.37s"></i><i style="--h:9px;--d:-0.14s"></i><i style="--h:17px;--d:-0.15s"></i><i style="--h:28px;--d:-0.68s"></i></div>
   <div class="bt-id"><small>ACESSO CONCEDIDO</small><p id="btHello">Bem-vinda de volta.</p></div>
-  <span class="bt-skip">TOQUE PARA PULAR</span>
+  <span class="bt-skip" id="btSkip">TOQUE PARA PULAR</span>
 </div>
 <canvas id="bgfx" aria-hidden="true"></canvas>
 <title>ÍRIS</title>
@@ -315,31 +315,31 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="config.js?v=57"></script>
-<script src="js/privacidade.js?v=57"></script>
-<script src="js/permissoes.js?v=57"></script>
-<script src="adapter.js?v=57"></script>
-<script src="js/base.js?v=57"></script>
-<script src="js/dados.js?v=57"></script>
-<script src="js/integracoes/google.js?v=57"></script>
-<script src="js/integracoes/casa.js?v=57"></script>
-<script src="js/integracoes/avisos.js?v=57"></script>
-<script src="js/integracoes/conectores.js?v=57"></script>
-<script src="js/telas/esfera.js?v=57"></script>
-<script src="js/telas/hud.js?v=57"></script>
-<script src="js/telas/boot.js?v=57"></script>
-<script src="js/voz.js?v=57"></script>
-<script src="js/inteligencia.js?v=57"></script>
-<script src="js/telas/inicio.js?v=57"></script>
-<script src="js/telas/area.js?v=57"></script>
-<script src="js/telas/tempo.js?v=57"></script>
-<script src="js/telas/financeiro.js?v=57"></script>
-<script src="js/telas/relatorio.js?v=57"></script>
-<script src="js/telas/esvaziar.js?v=57"></script>
-<script src="js/telas/painel.js?v=57"></script>
-<script src="js/telas/aprovacoes.js?v=57"></script>
-<script src="js/telas/entrada.js?v=57"></script>
-<script src="js/telas/navegacao.js?v=57"></script>
-<script src="js/iniciar.js?v=57"></script>
+<script src="config.js?v=58"></script>
+<script src="js/privacidade.js?v=58"></script>
+<script src="js/permissoes.js?v=58"></script>
+<script src="adapter.js?v=58"></script>
+<script src="js/base.js?v=58"></script>
+<script src="js/dados.js?v=58"></script>
+<script src="js/integracoes/google.js?v=58"></script>
+<script src="js/integracoes/casa.js?v=58"></script>
+<script src="js/integracoes/avisos.js?v=58"></script>
+<script src="js/integracoes/conectores.js?v=58"></script>
+<script src="js/telas/esfera.js?v=58"></script>
+<script src="js/telas/hud.js?v=58"></script>
+<script src="js/telas/boot.js?v=58"></script>
+<script src="js/voz.js?v=58"></script>
+<script src="js/inteligencia.js?v=58"></script>
+<script src="js/telas/inicio.js?v=58"></script>
+<script src="js/telas/area.js?v=58"></script>
+<script src="js/telas/tempo.js?v=58"></script>
+<script src="js/telas/financeiro.js?v=58"></script>
+<script src="js/telas/relatorio.js?v=58"></script>
+<script src="js/telas/esvaziar.js?v=58"></script>
+<script src="js/telas/painel.js?v=58"></script>
+<script src="js/telas/aprovacoes.js?v=58"></script>
+<script src="js/telas/entrada.js?v=58"></script>
+<script src="js/telas/navegacao.js?v=58"></script>
+<script src="js/iniciar.js?v=58"></script>
 
 </body></html>
