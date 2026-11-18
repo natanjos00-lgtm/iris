@@ -207,14 +207,20 @@ html.booting body{overflow:hidden}
   .boot-in .corebox,.boot-in .hello-m,.boot-in .hero-copy,.boot-in .nn-line{animation:none;opacity:1;transform:none}
 }
 
-/* ---------- a ÍRIS em pessoa: retrato holográfico no centro dos anéis ---------- */
-.iris-av{position:absolute;left:50%;top:45%;width:66%;height:auto;transform:translate(-50%,-50%);z-index:1;pointer-events:none;user-select:none;-webkit-user-select:none;
-  filter:drop-shadow(0 0 28px rgba(255,170,80,.28));animation:avBreath 7s ease-in-out infinite}
-@keyframes avBreath{50%{transform:translate(-50%,-50.7%) scale(1.012)}}
-.corebox #reactor{opacity:.5;mix-blend-mode:screen}
-:root[data-theme="light"] .corebox #reactor{opacity:.35;mix-blend-mode:multiply}
+/* ---------- a ÍRIS em pessoa, sem círculo: busto sobre uma plataforma de luz ---------- */
+.corebox .hudring{display:none}
+.corebox #reactor{opacity:0}
 .corebox .corename{display:none}
-.corebox.diving .iris-av{opacity:0;transition:opacity .4s}
+.iris-av{position:absolute;left:50%;bottom:9%;width:96%;height:auto;transform:translateX(-50%);z-index:2;pointer-events:none;user-select:none;-webkit-user-select:none;
+  filter:drop-shadow(0 18px 30px rgba(0,0,0,.35)) drop-shadow(0 0 22px rgba(255,170,80,.18));animation:avBreath 7s ease-in-out infinite}
+@keyframes avBreath{50%{transform:translateX(-50%) translateY(-.6%) scale(1.01)}}
+.corebox::before,.corebox::after{content:"";position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;pointer-events:none;z-index:1}
+.corebox::before{bottom:4%;width:104%;height:22%;border:1px solid rgba(255,194,122,.35);box-shadow:0 0 30px rgba(255,170,80,.18),inset 0 0 40px rgba(255,170,80,.12);
+  background:radial-gradient(closest-side,rgba(255,196,120,.42),rgba(255,170,80,.12) 55%,transparent 75%)}
+.corebox::after{bottom:9%;width:70%;height:12%;border:1.5px solid rgba(255,214,160,.75);box-shadow:0 0 18px rgba(255,190,110,.6),inset 0 0 14px rgba(255,190,110,.35)}
+:root[data-theme="light"] .corebox::before{border-color:rgba(184,115,44,.35);background:radial-gradient(closest-side,rgba(235,180,110,.45),rgba(235,180,110,.12) 55%,transparent 75%)}
+:root[data-theme="light"] .corebox::after{border-color:rgba(184,115,44,.6);box-shadow:0 0 14px rgba(200,130,50,.35)}
+.corebox.diving .iris-av,.corebox.diving::before,.corebox.diving::after{opacity:0;transition:opacity .4s}
 @media (prefers-reduced-motion:reduce){.iris-av{animation:none}}
 /* atalhos como painéis de vidro, como na referência */
 .hbtn{justify-content:flex-start;gap:12px;padding:0 16px;background:linear-gradient(100deg,rgba(255,214,160,.10),rgba(255,214,160,.02));border:1px solid var(--glass-b);color:var(--ink);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
