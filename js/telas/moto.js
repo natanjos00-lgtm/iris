@@ -24,6 +24,7 @@ const MOTO_PLAN = [
   ["Pneus (frios)", "dianteiro 25 psi · traseiro 29 psi", "33 psi atrás com garupa"]
 ];
 const TANK = 6.5;
+const MOTO_DET = [["painel", "Painel", "velocímetro, combustível e temperatura"], ["abastecimento", "Abastecimento", "portinhola na base do banco"], ["portaluvas", "Porta-luvas", "na frente, atrás do escudo"], ["bau", "Baú", "sob o banco · até 10 kg"], ["motor", "Motor e transmissão", "lado esquerdo"], ["lado", "Lado direito", "carenagem lisa"]];
 let moto = { km: 0, oilKm: 0, oilEvery: 4000, licenca: "", fuel: [] };
 try { moto = Object.assign(moto, JSON.parse(localStorage.getItem("iris.moto") || "{}")); } catch {}
 if (!Array.isArray(moto.fuel)) moto.fuel = [];
@@ -104,19 +105,21 @@ function renderMoto(){
       <div class="mt-head"><p class="eyebrow">Garagem</p><h1 class="t" id="h-moto">Honda Lead 110</h1><p class="lede">Rosa Ágata · scooter 108 cc</p></div>
       <div class="mt-wrap">
         <div class="mt-stage" id="mtStage">
-          <canvas id="mtCanvas" aria-label="Moto em 3D. Arraste para girar, use a pinça para aproximar; de perto ela mostra as peças internas." role="img"></canvas>
+          <canvas id="mt360" class="mt-360" role="img" aria-label="Sua Lead 110 Rosa Ágata em 360 graus. Arraste para girar, use a pinça para aproximar; bem de perto ela mostra as peças internas."></canvas>
+          <canvas id="mtCanvas" class="mt-3d" aria-hidden="true"></canvas>
           <div class="mt-hot" id="mtHot" aria-hidden="true"></div>
-          <div class="mt-load" id="mtLoad">Montando a moto…</div>
+          <div class="mt-load" id="mtLoad">Carregando a moto…</div>
           <div class="mt-ctl" role="group" aria-label="Vista da moto">
             <button class="chip" type="button" data-v="lado">Lado</button><button class="chip" type="button" data-v="frente">Frente</button><button class="chip" type="button" data-v="tras">Traseira</button>
             <button class="chip" type="button" data-v="xray" aria-pressed="false">Raio-X</button><button class="chip" type="button" data-v="giro" aria-pressed="true">Girar</button>
           </div>
-          <p class="mt-hint" id="mtHint">Arraste para girar · aproxime para ver por dentro</p>
+          <p class="mt-hint" id="mtHint">Arraste para girar · pinça para aproximar e ver por dentro</p>
         </div>
         <div class="mt-side">
           <div class="mt-specs">${MOTO_SPECS.map(s => `<div class="acard mt-spec"><span>${s[0]}</span><b>${s[1]}</b>${s[2] ? `<small>${s[2]}</small>` : ""}</div>`).join("")}</div>
         </div>
       </div>
+      <section class="mt-det" aria-label="Detalhes da moto">${MOTO_DET.map(d => `<figure class="acard"><img src="assets/moto/d-${d[0]}.webp?v=1" alt="${d[1]}" loading="lazy"><figcaption><b>${d[1]}</b><span>${d[2]}</span></figcaption></figure>`).join("")}</section>
       <section class="card mt-mine" aria-labelledby="h-mt-fuel">
         <h2 class="t" id="h-mt-fuel">Gasolina</h2>
         <div id="mtFuel"></div>
@@ -150,7 +153,7 @@ function renderMoto(){
   }
   $("mtKm").value = moto.km || ""; $("mtOil").value = moto.oilKm || ""; $("mtEvery").value = moto.oilEvery || 4000; $("mtLic").value = moto.licenca || "";
   if (!$("mfD").value) $("mfD").value = today();
-  motoPanel(); motoFuelPanel(); moto3dStart();
+  motoPanel(); motoFuelPanel(); moto360Start();
 }
 function motoPanel(){
   const p = $("mtPanel"); if (!p) return;
@@ -170,6 +173,7 @@ function motoLoad3(){
   return new Promise((res, rej) => { if (window.THREE) return res(); const s = document.createElement("script"); s.src = "js/vendor/three.r128.min.js"; s.onload = () => res(); s.onerror = rej; document.head.appendChild(s); });
 }
 async function moto3dStart(){
+  if (!$("mtStage").classList.contains("x")) return;
   if (M3.ready) { M3.resize(); if (!M3.run) { M3.run = true; M3.last = performance.now(); requestAnimationFrame(M3.loop); } return; }
   if (M3.loading) return; M3.loading = true;
   try { await motoLoad3(); } catch { const l = $("mtLoad"); if (l) l.textContent = "Não consegui carregar o 3D."; M3.loading = false; return; }
@@ -177,11 +181,80 @@ async function moto3dStart(){
 }
 function motoTankLevel(){ if (M3.ready && M3.setFuel) M3.setFuel(motoFuel().level); }
 function motoView(v, btn){
-  if (!M3.ready) return;
-  if (v === "giro") { M3.auto = !M3.auto; btn.setAttribute("aria-pressed", M3.auto ? "true" : "false"); M3.idle = 99; return; }
-  if (v === "xray") { M3.xrayForced = !M3.xray; M3.setXray(!M3.xray); if (M3.xray && M3.dist > 3.2) { M3.goDist = 2.9; M3.goYaw = M3.yaw; M3.goPitch = M3.pitch; } return; }
-  M3.xrayForced = false;
-  const yaw = { lado: 0, frente: Math.PI / 2, tras: -Math.PI / 2 }[v]; M3.goYaw = yaw; M3.goPitch = 0.16; M3.goDist = 3.9;
+  const st = $("mtStage"), inX = st.classList.contains("x");
+  if (v === "giro") { P3.auto = !P3.auto; btn.setAttribute("aria-pressed", P3.auto ? "true" : "false"); P3.idle = 99; return; }
+  if (v === "xray") { inX ? motoXrayOff() : motoXrayOn(); return; }
+  if (inX) motoXrayOff();
+  P3.goA = { lado: 270, frente: 0, tras: 180 }[v]; P3.zoom = 1; P3.pan = 0;
+}
+async function motoXrayOn(){
+  const st = $("mtStage"); st.classList.add("x"); P3.zoom = 1; P3.pan = 0;
+  const xb = document.querySelector('.mt-ctl [data-v="xray"]'); if (xb) xb.setAttribute("aria-pressed", "true");
+  const l = $("mtLoad"); if (!M3.ready && l) { l.hidden = false; l.textContent = "Abrindo por dentro…"; }
+  await moto3dStart(); if (!M3.ready) return;
+  M3.yaw = Math.PI / 2 + P3.A * Math.PI / 180; M3.pitch = 0.22; M3.dist = 2.4; M3.goYaw = null; M3.xrayForced = true; M3.setXray(true); M3.resize();
+  M3.onFar = () => motoXrayOff();
+}
+function motoXrayOff(){
+  const st = $("mtStage"); if (!st.classList.contains("x")) return; st.classList.remove("x");
+  if (M3.ready) { P3.A = ((((M3.yaw - Math.PI / 2) * 180 / Math.PI) % 360) + 360) % 360; M3.setXray(false); M3.xrayForced = false; }
+  const xb = document.querySelector('.mt-ctl [data-v="xray"]'); if (xb) xb.setAttribute("aria-pressed", "false");
+  const h = $("mtHint"); if (h) h.textContent = "Arraste para girar · pinça para aproximar e ver por dentro";
+}
+
+/* ---------- 360° com fotos (referência da sua moto) ---------- */
+const P3 = { A: 300, v: 0, auto: true, idle: 0, zoom: 1, pan: 0, goA: null, frames: [], cur: -1, prev: -1, fade: 1, run: false, ready: false };
+const P3_ANG = [0, 30, 60, 90, 135, 180, 225, 270, 300, 330];
+function moto360Start(){
+  const cv = $("mt360"), st = $("mtStage"); if (!cv) return;
+  if (!P3.ready) {
+    P3.ready = true;
+    P3.frames = P3_ANG.map(a => { const im = new Image(); im.decoding = "async"; im.src = `assets/moto/a${String(a).padStart(3, "0")}.webp?v=1`; im.onload = () => { const l = $("mtLoad"); if (l && !st.classList.contains("x")) l.hidden = true; }; return im; });
+    const ptrs = new Map(); let pinch0 = 0, z0 = 1, lastTap = 0;
+    cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); P3.idle = 0; P3.goA = null; if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); z0 = P3.zoom; } const n = performance.now(); if (n - lastTap < 300 && ptrs.size === 1) { P3.zoom = 1; P3.pan = 0; } lastTap = n; });
+    cv.addEventListener("pointermove", e => {
+      if (!ptrs.has(e.pointerId)) return; const prev = ptrs.get(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); P3.idle = 0;
+      if (ptrs.size === 1) { const dx = e.clientX - prev[0]; if (P3.zoom > 1.15) P3.pan += dx; else { P3.v = -dx * 0.45; P3.A += P3.v; } }
+      else if (ptrs.size === 2 && pinch0) { const [a, b] = [...ptrs.values()]; P3.zoom = Math.max(1, Math.min(2.4, z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0)); if (P3.zoom >= 2.3) { ptrs.clear(); motoXrayOn(); } }
+    });
+    const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch0 = 0; };
+    cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+    cv.addEventListener("wheel", e => { e.preventDefault(); P3.zoom = Math.max(1, Math.min(2.4, P3.zoom * (1 - e.deltaY * 0.0015))); P3.idle = 0; if (P3.zoom >= 2.3) motoXrayOn(); }, { passive: false });
+  }
+  if (!P3.run) { P3.run = true; P3.last = performance.now(); requestAnimationFrame(moto360Loop); }
+}
+function moto360Loop(now){
+  const cv = $("mt360"), st = $("mtStage");
+  if (current !== "moto" || document.hidden || !cv) { P3.run = false; return; }
+  requestAnimationFrame(moto360Loop);
+  const dt = Math.min(0.05, (now - P3.last) / 1000); P3.last = now; P3.idle += dt;
+  if (st.classList.contains("x")) return;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (P3.goA != null) { let d = ((P3.goA - P3.A + 540) % 360) - 180; P3.A += d * Math.min(1, dt * 6); if (Math.abs(d) < 0.5) { P3.A = P3.goA; P3.goA = null; } }
+  else { P3.v *= 0.9; if (Math.abs(P3.v) > 0.05) P3.A += P3.v; else if (P3.auto && !reduce && P3.idle > 3 && P3.zoom < 1.05) P3.A += dt * 16; }
+  P3.A = ((P3.A % 360) + 360) % 360; P3.pan *= P3.zoom > 1.15 ? 1 : 0.85;
+  // quadro mais próximo do ângulo, com transição curta
+  let best = 0, bd = 999; P3_ANG.forEach((a, i) => { const d = Math.abs(((P3.A - a + 540) % 360) - 180); if (d < bd) { bd = d; best = i; } });
+  if (best !== P3.cur) { P3.prev = P3.cur; P3.cur = best; P3.fade = 0; }
+  P3.fade = Math.min(1, P3.fade + dt / 0.14);
+  const dpr = Math.min(2, devicePixelRatio || 1), W = st.clientWidth, H = st.clientHeight;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
+  const cs = getComputedStyle(document.documentElement), hud = cs.getPropertyValue("--hud1").trim() || "#FFC27A";
+  const Z = P3.zoom, floorY = H * 0.8, cx = W / 2 + P3.pan;
+  x.save(); x.translate(cx, floorY); x.scale(Z, Z);
+  // plataforma de luz
+  const pr = Math.min(W * 0.46, H * 0.62);
+  const g = x.createRadialGradient(0, 0, 0, 0, 0, pr); g.addColorStop(0, "rgba(255,190,110,.28)"); g.addColorStop(0.7, "rgba(255,170,80,.08)"); g.addColorStop(1, "rgba(255,170,80,0)");
+  x.save(); x.scale(1, 0.2); x.fillStyle = g; x.beginPath(); x.arc(0, 0, pr, 0, 7); x.fill();
+  x.strokeStyle = hud; x.globalAlpha = 0.8; x.lineWidth = 1.5 / 0.2 * 0.2; x.beginPath(); x.arc(0, 0, pr * 0.92, 0, 7); x.stroke();
+  x.globalAlpha = 0.35; x.beginPath(); x.arc(0, 0, pr * 0.7, 0, 7); x.stroke(); x.restore(); x.globalAlpha = 1;
+  // sombra de contato
+  const bikeH = Math.min(H * 0.6, W * 0.9 / 1.51), frame = P3.frames[P3.cur], fw = frame && frame.naturalWidth ? frame.naturalWidth / frame.naturalHeight * bikeH : bikeH;
+  x.save(); x.scale(1, 0.12); const sg = x.createRadialGradient(0, 0, 0, 0, 0, fw * 0.55); sg.addColorStop(0, "rgba(0,0,0,.55)"); sg.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = sg; x.beginPath(); x.arc(0, 0, fw * 0.55, 0, 7); x.fill(); x.restore();
+  const draw = (i, a) => { const im = P3.frames[i]; if (!im || !im.complete || !im.naturalWidth || a <= 0) return; const w = im.naturalWidth / im.naturalHeight * bikeH; x.globalAlpha = a; x.drawImage(im, -w / 2, -bikeH * 0.985, w, bikeH); };
+  if (P3.prev >= 0 && P3.fade < 1) draw(P3.prev, 1 - P3.fade);
+  draw(P3.cur, P3.fade); x.globalAlpha = 1; x.restore();
 }
 
 function motoBuild(){
@@ -351,7 +424,7 @@ function motoBuild(){
     M3.xray = on; inner.visible = on;
     shell.forEach(m => { m.material = on ? ghostM : m.userData.solid; m.castShadow = !on; m.userData.edge.visible = on; });
     const b = document.querySelector('.mt-ctl [data-v="xray"]'); if (b) b.setAttribute("aria-pressed", on ? "true" : "false");
-    const h = $("mtHint"); if (h) h.textContent = on ? "Raio-X ligado · afaste para voltar à pintura" : "Arraste para girar · aproxime para ver por dentro";
+    const h = $("mtHint"); if (h) h.textContent = on ? "Raio-X · afaste com a pinça para voltar às fotos" : "Arraste para girar · aproxime para ver por dentro";
     pins.forEach(p => p.classList.toggle("in", p.dataset.k === (on ? "in" : "out")));
   };
 
@@ -403,12 +476,13 @@ function motoBuild(){
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, tgt = new T.Vector3(0, 0.52, 0), v3 = new T.Vector3(), nv = new T.Vector3(), camDir = new T.Vector3();
   M3.last = performance.now(); let crankA = 0; const SPARK = lin(0x66aaff), NOSPARK = new T.Color(0);
   M3.loop = now => {
-    if (current !== "moto" || document.hidden) { M3.run = false; return; }
+    if (current !== "moto" || document.hidden || !stage.classList.contains("x")) { M3.run = false; return; }
     const dt = Math.min(0.05, (now - M3.last) / 1000); M3.last = now; M3.idle += dt;
     if (M3.goYaw != null) { let d = M3.goYaw - M3.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); const k = Math.min(1, dt * 5); M3.yaw += d * k; M3.pitch += (M3.goPitch - M3.pitch) * k; M3.dist += (M3.goDist - M3.dist) * k; if (Math.abs(d) < 0.002 && Math.abs(M3.goDist - M3.dist) < 0.01) M3.goYaw = null; }
     else if (!ptrs.size) { M3.vy *= 0.92; M3.yaw += M3.vy; if (M3.auto && !reduce && M3.idle > 3 && !M3.xray) M3.yaw += dt * 0.22; }
     const D = M3.dist * Math.max(1, 1.05 / cam.aspect);
     const near = M3.dist < 2.75; if (!M3.xrayForced && near !== M3.xray) M3.setXray(near);
+    if (M3.dist > 3.4 && M3.onFar && !ptrs.size) M3.onFar();
     tgt.y = M3.xray ? 0.42 : 0.52;
     cam.position.set(Math.sin(M3.yaw) * Math.cos(M3.pitch) * D, tgt.y + Math.sin(M3.pitch) * D, Math.cos(M3.yaw) * Math.cos(M3.pitch) * D); cam.lookAt(tgt);
     // motor girando no raio-X: virabrequim, biela, pistão, polias
