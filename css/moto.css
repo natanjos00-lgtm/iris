@@ -82,3 +82,5 @@
 .mt-det img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
 .mt-det figcaption{display:flex;flex-direction:column;gap:1px;padding:8px 10px}
 .mt-det b{font-weight:500;font-size:13.5px}.mt-det span{font-size:12px;color:var(--taupe)}
+.mt-note{display:none;position:absolute;left:12px;right:12px;top:58px;margin:0;padding:8px 10px;border-radius:4px;background:var(--glass);border:1px solid var(--glass-b);font-size:12px;line-height:1.35;color:var(--ink-2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:3}
+.mt-stage.x .mt-note{display:block}

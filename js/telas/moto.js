@@ -111,9 +111,10 @@ function renderMoto(){
           <div class="mt-load" id="mtLoad">Carregando a moto…</div>
           <div class="mt-ctl" role="group" aria-label="Vista da moto">
             <button class="chip" type="button" data-v="lado">Lado</button><button class="chip" type="button" data-v="frente">Frente</button><button class="chip" type="button" data-v="tras">Traseira</button>
-            <button class="chip" type="button" data-v="giro" aria-pressed="true">Girar</button>
+            <button class="chip" type="button" data-v="xray" aria-pressed="false">Por dentro</button><button class="chip" type="button" data-v="giro" aria-pressed="true">Girar</button>
           </div>
-          <p class="mt-hint" id="mtHint">Arraste para girar · pinça para aproximar</p>
+          <p class="mt-note" id="mtNote">Ilustração: as posições das peças vêm do manual da Lead 110, mas as formas são aproximadas.</p>
+          <p class="mt-hint" id="mtHint">Arraste para girar · pinça para aproximar e ver por dentro</p>
         </div>
         <div class="mt-side">
           <div class="mt-specs">${MOTO_SPECS.map(s => `<div class="acard mt-spec"><span>${s[0]}</span><b>${s[1]}</b>${s[2] ? `<small>${s[2]}</small>` : ""}</div>`).join("")}</div>
@@ -192,7 +193,7 @@ async function motoXrayOn(){
   const xb = document.querySelector('.mt-ctl [data-v="xray"]'); if (xb) xb.setAttribute("aria-pressed", "true");
   const l = $("mtLoad"); if (!M3.ready && l) { l.hidden = false; l.textContent = "Abrindo por dentro…"; }
   await moto3dStart(); if (!M3.ready) return;
-  M3.yaw = Math.PI / 2 + P3.A * Math.PI / 180; M3.pitch = 0.22; M3.dist = 2.4; M3.goYaw = null; M3.xrayForced = true; M3.setXray(true); M3.resize();
+  M3.yaw = Math.PI / 2 + P3.A * Math.PI / 180; M3.pitch = 0.22; M3.dist = 2.7; M3.goYaw = null; M3.xrayForced = true; M3.setXray(true); M3.resize();
   M3.onFar = () => motoXrayOff();
 }
 function motoXrayOff(){
@@ -215,11 +216,11 @@ function moto360Start(){
     cv.addEventListener("pointermove", e => {
       if (!ptrs.has(e.pointerId)) return; const prev = ptrs.get(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); P3.idle = 0;
       if (ptrs.size === 1) { const dx = e.clientX - prev[0]; if (P3.zoom > 1.15) P3.pan += dx; else { P3.v = -dx * 0.45; P3.A += P3.v; } }
-      else if (ptrs.size === 2 && pinch0) { const [a, b] = [...ptrs.values()]; P3.zoom = Math.max(1, Math.min(2.4, z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0)); }
+      else if (ptrs.size === 2 && pinch0) { const [a, b] = [...ptrs.values()]; P3.zoom = Math.max(1, Math.min(2.4, z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0)); if (P3.zoom >= 2.3) { ptrs.clear(); motoXrayOn(); } }
     });
     const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch0 = 0; };
     cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
-    cv.addEventListener("wheel", e => { e.preventDefault(); P3.zoom = Math.max(1, Math.min(2.4, P3.zoom * (1 - e.deltaY * 0.0015))); P3.idle = 0; }, { passive: false });
+    cv.addEventListener("wheel", e => { e.preventDefault(); P3.zoom = Math.max(1, Math.min(2.4, P3.zoom * (1 - e.deltaY * 0.0015))); P3.idle = 0; if (P3.zoom >= 2.3) motoXrayOn(); }, { passive: false });
   }
   if (!P3.run) { P3.run = true; P3.last = performance.now(); requestAnimationFrame(moto360Loop); }
 }
@@ -345,7 +346,6 @@ function motoBuild(){
   [-0.065, 0.065].forEach(z => { add(new T.CylinderGeometry(0.02, 0.02, fl, 16), chrome, (fTop.x + fBot.x) / 2, (fTop.y + fBot.y) / 2, z, 0, 0, -fang); add(new T.CylinderGeometry(0.026, 0.026, fl * 0.45, 16), alu, fBot.x + (fTop.x - fBot.x) * 0.22, fBot.y + (fTop.y - fBot.y) * 0.22, z, 0, 0, -fang); });
   // guidão, manoplas, retrovisores
   const hb = P(600, 176);
-  add(new T.CylinderGeometry(0.012, 0.012, 0.6, 12), plastic, hb.x, hb.y, 0, Math.PI / 2);
   [-1, 1].forEach(sd => {
     add(new T.CylinderGeometry(0.018, 0.018, 0.11, 16), rubber, hb.x, hb.y, sd * 0.29, Math.PI / 2);
     add(new T.BoxGeometry(0.11, 0.008, 0.018), alu, hb.x + 0.05, hb.y + 0.01, sd * 0.25, 0, sd * 0.25, 0.05);
@@ -424,7 +424,7 @@ function motoBuild(){
     M3.xray = on; inner.visible = on;
     shell.forEach(m => { m.material = on ? ghostM : m.userData.solid; m.castShadow = !on; m.userData.edge.visible = on; });
     const b = document.querySelector('.mt-ctl [data-v="xray"]'); if (b) b.setAttribute("aria-pressed", on ? "true" : "false");
-    const h = $("mtHint"); if (h) h.textContent = on ? "Raio-X · afaste com a pinça para voltar às fotos" : "Arraste para girar · aproxime para ver por dentro";
+    const h = $("mtHint"); if (h) h.textContent = on ? "Por dentro · afaste com a pinça ou toque em Por dentro para voltar às fotos" : "Arraste para girar · aproxime para ver por dentro";
     pins.forEach(p => p.classList.toggle("in", p.dataset.k === (on ? "in" : "out")));
   };
 
