@@ -291,3 +291,4 @@ html.cx-lock,html.cx-lock body{overflow:hidden}
 .cx-btns{display:flex;gap:8px}
 @keyframes cxUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#cosmos{transition:none}.cx-info{animation:none}}
+.cx-btns .btn.ghost{color:#F6EEF4;border:1px solid rgba(236,206,232,.35);background:rgba(255,255,255,.04)}

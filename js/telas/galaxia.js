@@ -19,13 +19,13 @@
     try { if (!window.THREE) await load("js/vendor/three.r128.min.js"); } catch { return; }
     const T = THREE, cv = document.createElement("canvas"); cv.className = "gx-canvas"; cv.setAttribute("aria-hidden", "true");
     let R; try { R = new T.WebGLRenderer({ canvas: cv, antialias: false, alpha: true, powerPreference: "low-power" }); } catch { return; }
-    R.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+    R.setPixelRatio(Math.min(1.5, devicePixelRatio || 1)); document.body.classList.add("gx-active");
     const scene = new T.Scene(), cam = new T.PerspectiveCamera(38, 1, 0.1, 50); cam.position.set(0, 0, 4.2);
     const sys = new T.Group(); sys.rotation.set(1.3, 0, -0.55); scene.add(sys);
     const gal = new T.Group(); gal.scale.setScalar(1.95); gal.rotation.x = -1.02; sys.add(gal);
 
     // ---- galáxia como na foto (Andrômeda): disco liso bem inclinado, faixas de poeira, bojo e duas satélites; cor pérola branca ----
-    const N = innerWidth < 700 ? 42000 : 64000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), siz = new Float32Array(N), ph = new Float32Array(N), rr = new Float32Array(N);
+    const N = innerWidth < 700 ? 24000 : 48000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), siz = new Float32Array(N), ph = new Float32Array(N), rr = new Float32Array(N);
     const g = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
     const PEARL = [1, .985, .975], P_PINK = [1, .93, .95], P_LIL = [.95, .93, 1], P_BLUE = [.9, .95, 1], P_WARM = [1, .97, .92];
     const tint = r => { const k = Math.random(); return k < .5 ? PEARL : k < .68 ? P_PINK : k < .84 ? P_LIL : r > .55 ? P_BLUE : P_WARM; };
@@ -88,10 +88,10 @@
     addEventListener("pointermove", e => { if (!drag) return; const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; vy = dx * 0.006; yaw += vy; tilt = Math.max(-0.35, Math.min(0.35, tilt + dy * 0.004)); }, { passive: true });
     addEventListener("pointerup", () => { drag = false; });
 
-    let spin = 0, pulse = 0.2, last = performance.now();
+    let spin = 0, pulse = 0.2, last = performance.now(), fa = 0.016, fc = 0;
     (function loop(now){
       requestAnimationFrame(loop);
-      if (document.hidden || (typeof current !== "undefined" && current !== "inicio") || box.classList.contains("diving")) { last = now; return; }
+      if (document.hidden || (window.CX && CX.open) || (typeof current !== "undefined" && current !== "inicio") || box.classList.contains("diving")) { last = now; return; }
       const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000;
       let mode = "idle", en = 0.18, spk = 0; try { mode = coreMode; en = energy; spk = spike; } catch {}
       const tp = mode === "idle" ? 0.2 : Math.min(1.4, 0.55 + en * 0.5 + spk * 0.6); pulse += (tp - pulse) * Math.min(1, dt * 6);
@@ -104,6 +104,7 @@
       let zz = 1; try { zz = nnZoom(); } catch {}
       cam.position.z = baseZ * 1.12 / Math.max(0.7, Math.min(1.3, zz));
       R.render(scene, cam);
+      fa = fa * 0.95 + dt * 0.05; if (++fc % 30 === 0 && fa > 0.026 && R.getPixelRatio() > 1) { R.setPixelRatio(Math.max(1, R.getPixelRatio() - 0.25)); U.uPx.value = R.getPixelRatio(); size(); }
     })(last);
   })();
 })();

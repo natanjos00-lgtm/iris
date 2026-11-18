@@ -178,6 +178,7 @@ function drawCore(ts){
   requestAnimationFrame(drawCore);
   if (document.hidden) return;
   energy += (target - energy) * 0.05; spike *= 0.9;
+  if (document.body.classList.contains("gx-active")) return; // a galáxia desenha o núcleo; a esfera antiga não precisa
   if (coreMode === "speak") { if (curSrc) spike = Math.max(spike, Math.min(1.2, audioLevel()*5)); else if (Math.random() < 0.09) spike = Math.max(spike, 0.5 + Math.random()*0.5); }
   if (coreMode === "listen" && Math.random() < 0.12) spike = Math.max(spike, 0.4 + Math.random()*0.5);
   if ($("v-inicio").hidden || nnDeepFull()) return; // dentro do cérebro a energia continua viva para a tela de dentro

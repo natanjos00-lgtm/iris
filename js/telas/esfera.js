@@ -415,7 +415,7 @@ function nnDeepFrame(ts){
     x.globalCompositeOperation = "source-over";
   };
   if (nnReduce) { draw(0); addEventListener("resize", () => draw(0)); return; }
-  const loop = ms => { if (!document.hidden) draw(ms); requestAnimationFrame(loop); };
+  let lastBg = 0; const loop = ms => { requestAnimationFrame(loop); if (document.hidden || (window.CX && CX.open) || ms - lastBg < 33) return; lastBg = ms; draw(ms); };
   requestAnimationFrame(loop);
 })();
 

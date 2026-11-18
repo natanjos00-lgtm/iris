@@ -37,12 +37,12 @@ function cosmosBuild(){
   document.body.appendChild(el);
   const cv = el.querySelector(".cx-c"), labels = el.querySelector(".cx-labels"), info = el.querySelector(".cx-info");
   const R = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: false, powerPreference: "high-performance" });
-  R.setPixelRatio(Math.min(2.5, devicePixelRatio || 1)); R.setClearColor(0x040208, 1); R.outputEncoding = T.sRGBEncoding;
+  R.setPixelRatio(Math.min(innerWidth < 700 ? 1.6 : 2, devicePixelRatio || 1)); R.setClearColor(0x040208, 1); R.outputEncoding = T.sRGBEncoding;
   const scene = new T.Scene(), cam = new T.PerspectiveCamera(55, 1, 0.02, 600);
   const g = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
 
   // ---- Andrômeda por dentro: disco de estrelas (a câmera fica dentro dele), bojo, faixas de poeira ----
-  const N = innerWidth < 700 ? 70000 : 110000, P = new Float32Array(N * 3), C = new Float32Array(N * 3), S = new Float32Array(N), PH = new Float32Array(N);
+  const N = innerWidth < 700 ? 26000 : 60000, P = new Float32Array(N * 3), C = new Float32Array(N * 3), S = new Float32Array(N), PH = new Float32Array(N);
   const tints = [[1, .985, .975], [1, .93, .95], [.95, .93, 1], [.9, .95, 1], [1, .97, .92]];
   let i = 0;
   while (i < N) {
@@ -60,7 +60,7 @@ function cosmosBuild(){
   const sg = new T.BufferGeometry(); sg.setAttribute("position", new T.BufferAttribute(P, 3)); sg.setAttribute("color", new T.BufferAttribute(C, 3)); sg.setAttribute("size", new T.BufferAttribute(S, 1)); sg.setAttribute("phase", new T.BufferAttribute(PH, 1));
   const UT = { value: 0 }, UPX = { value: R.getPixelRatio() };
   const starM = new T.ShaderMaterial({ uniforms: { uT: UT, uPx: UPX }, transparent: true, depthWrite: false, blending: T.AdditiveBlending, vertexColors: true,
-    vertexShader: `attribute float size;attribute float phase;uniform float uT,uPx;varying vec3 vC;varying float vA;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);float tw=.78+.22*sin(uT*1.5+phase*3.);gl_PointSize=clamp(size*uPx*(26./-mv.z),.6,size*uPx*5.);vC=color*tw;vA=clamp(18./-mv.z,.25,1.);gl_Position=projectionMatrix*mv;}`,
+    vertexShader: `attribute float size;attribute float phase;uniform float uT,uPx;varying vec3 vC;varying float vA;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);float tw=.78+.22*sin(uT*1.5+phase*3.);gl_PointSize=clamp(size*uPx*(26./-mv.z),.6,uPx*4.);vC=color*tw;vA=clamp(18./-mv.z,.25,1.);gl_Position=projectionMatrix*mv;}`,
     fragmentShader: `varying vec3 vC;varying float vA;void main(){vec2 d=gl_PointCoord-.5;float r=dot(d,d);if(r>.25)discard;float a=exp(-r*16.)*vA;gl_FragColor=vec4(vC*a,a);}` });
   scene.add(new T.Points(sg, starM));
   // céu distante
@@ -71,10 +71,10 @@ function cosmosBuild(){
   const soft = (stops, n = 256) => { const c = document.createElement("canvas"); c.width = c.height = n; const x = c.getContext("2d"); const gr = x.createRadialGradient(n / 2, n / 2, 0, n / 2, n / 2, n / 2); stops.forEach(s => gr.addColorStop(s[0], s[1])); x.fillStyle = gr; x.fillRect(0, 0, n, n); return new T.CanvasTexture(c); };
   const coreTex = soft([[0, "rgba(255,255,255,1)"], [.12, "rgba(255,250,248,.8)"], [.4, "rgba(240,232,248,.2)"], [1, "rgba(230,225,245,0)"]]);
   const core = new T.Sprite(new T.SpriteMaterial({ map: coreTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending })); core.scale.set(26, 26, 1); scene.add(core);
-  const coreH = new T.Sprite(new T.SpriteMaterial({ map: coreTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: .25 })); coreH.scale.set(90, 90, 1); scene.add(coreH);
+  const coreH = new T.Sprite(new T.SpriteMaterial({ map: coreTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: .25 })); coreH.scale.set(90, 90, 1); /* halo grande removido: pesava na tela inteira */
   const nebTex = (() => { const n = 256, c = document.createElement("canvas"); c.width = c.height = n; const x = c.getContext("2d"); for (let j = 0; j < 40; j++) { const px = n / 2 + g() * n * .14, py = n / 2 + g() * n * .14, rr = n * (.08 + Math.random() * .2), gr = x.createRadialGradient(px, py, 0, px, py, rr); gr.addColorStop(0, "rgba(255,255,255,.10)"); gr.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = gr; x.fillRect(0, 0, n, n); } return new T.CanvasTexture(c); })();
   const nebC = [0xf6d8ea, 0xdcd2f6, 0xd6e4fa, 0xfff0f4];
-  for (let j = 0; j < 22; j++) { const a = Math.random() * 6.283, r = 40 + Math.random() * 50; const s = new T.Sprite(new T.SpriteMaterial({ map: nebTex, color: nebC[j % 4], transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: .12 + Math.random() * .14 })); s.position.set(Math.cos(a) * r, g() * 3, Math.sin(a) * r); const sc = 30 + Math.random() * 40; s.scale.set(sc, sc * .6, 1); scene.add(s); }
+  for (let j = 0; j < 10; j++) { const a = Math.random() * 6.283, r = 40 + Math.random() * 50; const s = new T.Sprite(new T.SpriteMaterial({ map: nebTex, color: nebC[j % 4], transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: .12 + Math.random() * .14 })); s.position.set(Math.cos(a) * r, g() * 3, Math.sin(a) * r); const sc = 30 + Math.random() * 40; s.scale.set(sc, sc * .6, 1); scene.add(s); }
 
   // ---- planetas procedurais ----
   const NOISE = `vec3 m289(vec3 x){return x-floor(x*(1./289.))*289.;}vec4 m289(vec4 x){return x-floor(x*(1./289.))*289.;}vec4 perm(vec4 x){return m289(((x*34.)+1.)*x);}vec4 tis(vec4 r){return 1.79284291400159-.85373472095314*r;}
@@ -85,39 +85,48 @@ function cosmosBuild(){
   float fbm(vec3 p,int o){float a=.5,s=0.;for(int i=0;i<9;i++){if(i>=o)break;s+=a*sn(p);p=p*2.03+vec3(1.7,9.2,3.1);a*=.5;}return s;}
   float ridged(vec3 p,int o){float a=.5,s=0.;for(int i=0;i<8;i++){if(i>=o)break;s+=a*(1.-abs(sn(p)));p=p*2.1+vec3(4.3,1.1,7.7);a*=.5;}return s;}`;
   const planetVS = `varying vec3 vN;varying vec3 vP;void main(){vN=normal;vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
-  const planetFS = `precision highp float;uniform int uType;uniform vec3 c0,c1,c2,c3,uAtm,uL,uV;uniform float uSeed,uT,uStorm,uDetail;varying vec3 vN;varying vec3 vP;${NOISE}
-  float H(vec3 n){int o=int(uDetail);
+  /* textura procedural "assada" uma vez por planeta (cor, relevo/rugosidade, nuvens); por quadro só se lê a textura */
+  const bakeVS = `varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`;
+  const bakeFS = `precision highp float;uniform int uType,uMode;uniform vec3 c0,c1,c2,c3;uniform float uSeed,uStorm;varying vec2 vUv;${NOISE}
+  float H(vec3 n){int o=8;
     if(uType==0){return 0.;}
     if(uType==1){float h=fbm(n*2.2+uSeed,o);float cr=0.;for(int k=0;k<3;k++){float s=pow(2.,float(k));float c=sn(n*(3.5*s)+uSeed*7.+float(k)*3.);cr+=smoothstep(.55,.75,c)*(.6/s)-smoothstep(.75,.95,c)*(.9/s);}return h*.6+cr*.35;}
     if(uType==2){return fbm(n*1.6+uSeed,o);}
-    return ridged(n*2.6+uSeed,o)*.5;}
-  vec3 albedo(vec3 n,float h,out float spec){spec=0.;
-    if(uType==0){float lat=n.y;float w=fbm(n*vec3(2.,7.,2.)+uSeed+vec3(uT*.004,0.,0.),int(uDetail));float b=sin(lat*14.+w*3.2+uSeed);float b2=sin(lat*37.+w*5.);
-      vec3 col=mix(c0,c1,smoothstep(-1.,1.,b));col=mix(col,c2,smoothstep(.2,1.,b2)*.55);col=mix(col,c3,smoothstep(.6,1.,b)*.35);
-      if(uStorm>0.){vec3 sc=normalize(vec3(.75,-.28,.6));float d=distance(n,sc);float sw=fbm(n*9.+uSeed,5);col=mix(col,mix(c1,c3,.6),smoothstep(.2,.05,d+sw*.06)*.85);}
+    return ridged(n*2.6+uSeed,7)*.5;}
+  vec3 albedo(vec3 n,float h){
+    if(uType==0){float lat=n.y;float w=fbm(n*vec3(2.,7.,2.)+uSeed,8);float b=sin(lat*14.+w*3.2+uSeed);float b2=sin(lat*37.+w*5.);float b3=fbm(n*vec3(3.,30.,3.)+uSeed*2.,6);
+      vec3 col=mix(c0,c1,smoothstep(-1.,1.,b));col=mix(col,c2,smoothstep(.2,1.,b2)*.55);col=mix(col,c3,smoothstep(.6,1.,b)*.35);col*=.92+.16*b3;
+      if(uStorm>0.){vec3 sc=normalize(vec3(.75,-.28,.6));float d=distance(n,sc);float sw=fbm(n*9.+uSeed,6);col=mix(col,mix(c1,c3,.6),smoothstep(.2,.05,d+sw*.06)*.85);}
       return col;}
     if(uType==1){vec3 col=mix(c0,c1,smoothstep(-.4,.3,h));col=mix(col,c2,smoothstep(.2,.6,h));col=mix(col,c3,smoothstep(.55,.8,h)*.6);return col*(.85+.15*sn(n*40.+uSeed));}
-    if(uType==2){float land=smoothstep(.03,.08,h);vec3 sea=mix(c0,c1,smoothstep(-.5,.05,h));vec3 ld=mix(c2,c3,smoothstep(.1,.5,h));ld=mix(ld,vec3(1.),smoothstep(.75,.9,abs(n.y)));spec=(1.-land)*.9;return mix(sea,ld,land);}
-    float cr=smoothstep(.42,.5,h);vec3 col=mix(c2,c3,smoothstep(.2,.45,h));col=mix(col,c0,cr*.7);col=mix(col,c1,smoothstep(.0,.25,sn(n*5.+uSeed))*.3);spec=.35;return col;}
-  void main(){vec3 n=normalize(vN);vec3 L=normalize(uL);vec3 V=normalize(uV-vP);
-    float h=H(n);float e=.004;vec3 nb=n;
-    if(uType!=0){vec3 t1=normalize(cross(n,abs(n.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));vec3 t2=cross(n,t1);float hx=H(normalize(n+t1*e)),hy=H(normalize(n+t2*e));float k=uType==2?.9:(uType==3?.6:1.6);nb=normalize(n-(t1*(hx-h)+t2*(hy-h))/e*k*.04);if(uType==2&&h<.05)nb=n;}
-    float spec;vec3 col=albedo(n,h,spec);
-    float d=max(dot(nb,L),0.);float term=smoothstep(-.12,.25,dot(n,L));
-    vec3 lit=col*(d*1.05*term+.07+max(dot(nb,V),0.)*.13);
-    if(uType==2){float cl=smoothstep(.05,.55,fbm(n*2.6+uSeed*3.+vec3(uT*.006,0.,0.),int(uDetail)));lit=mix(lit,vec3(1.)*(d*term*1.1+.03),cl*.85);spec*=1.-cl;}
-    vec3 Hh=normalize(L+V);lit+=vec3(1.,.98,.96)*pow(max(dot(n,Hh),0.),60.)*spec*term*.8;
-    float fr=pow(1.-max(dot(n,V),0.),3.);lit+=uAtm*fr*(.25+.9*smoothstep(-.3,.6,dot(n,L)));
-    gl_FragColor=vec4(lit,1.);}`;
+    if(uType==2){float land=smoothstep(.03,.08,h);vec3 sea=mix(c0,c1,smoothstep(-.5,.05,h));vec3 ld=mix(c2,c3,smoothstep(.1,.5,h));ld=mix(ld,vec3(1.),smoothstep(.75,.9,abs(n.y)));return mix(sea,ld,land);}
+    float cr=smoothstep(.42,.5,h);vec3 col=mix(c2,c3,smoothstep(.2,.45,h));col=mix(col,c0,cr*.7);col=mix(col,c1,smoothstep(.0,.25,sn(n*5.+uSeed))*.3);return col;}
+  void main(){float th=3.14159265*(1.-vUv.y),ph=6.2831853*vUv.x;vec3 n=vec3(-cos(ph)*sin(th),cos(th),sin(ph)*sin(th));
+    float h=H(n);
+    if(uMode==0){gl_FragColor=vec4(albedo(n,h),1.);return;}
+    if(uMode==1){float r=uType==2?mix(.28,.92,smoothstep(.03,.08,h)):uType==3?.45:uType==0?.75:.92;float hh=uType==2?max(h,.04):h;gl_FragColor=vec4(hh*.5+.5,r,0.,1.);return;}
+    float cl=smoothstep(.05,.55,fbm(n*2.6+uSeed*3.,8));gl_FragColor=vec4(1.,1.,1.,cl*.9);}`;
+  const bakeCam = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1), bakeScene = new T.Scene(), bakeQuad = new T.Mesh(new T.PlaneGeometry(2, 2)); bakeScene.add(bakeQuad);
+  function bake(p, mode, w){
+    const rt = new T.WebGLRenderTarget(w, w / 2, { minFilter: T.LinearMipmapLinearFilter, magFilter: T.LinearFilter, generateMipmaps: true, wrapS: T.RepeatWrapping, depthBuffer: false });
+    bakeQuad.material = new T.ShaderMaterial({ vertexShader: bakeVS, fragmentShader: bakeFS, uniforms: { uType: { value: p.type }, uMode: { value: mode }, c0: { value: col(p.c[0]) }, c1: { value: col(p.c[1]) }, c2: { value: col(p.c[2]) }, c3: { value: col(p.c[3]) }, uSeed: { value: p.seed }, uStorm: { value: p.storm || 0 } }, depthTest: false, transparent: mode === 2 });
+    const old = R.getRenderTarget(); R.setRenderTarget(rt); R.setClearColor(0x000000, 0); R.clear(); R.render(bakeScene, bakeCam); R.setRenderTarget(old); R.setClearColor(0x040208, 1);
+    bakeQuad.material.dispose(); rt.texture.anisotropy = R.capabilities.getMaxAnisotropy(); return rt;
+  }
   const atmFS = `uniform vec3 uAtm,uL,uV;varying vec3 vN;varying vec3 vP;void main(){vec3 n=normalize(vN);vec3 V=normalize(uV-vP);float f=pow(1.-abs(dot(n,V)),2.6);float l=smoothstep(-.4,.7,dot(n,normalize(uL)));gl_FragColor=vec4(uAtm*f*l*1.3,f*l);}`;
   const ringFS = `uniform vec3 uCol,uL;uniform float uIn,uOut,uSeed;varying vec3 vP;${NOISE}void main(){float r=length(vP.xy);float t=(r-uIn)/(uOut-uIn);if(t<0.||t>1.)discard;float b=.55+.45*sn(vec3(t*38.+uSeed,0.,0.))*.8+.25*sn(vec3(t*120.,uSeed,0.));float gap=smoothstep(.0,.02,abs(t-.62)-.02);float a=b*gap*smoothstep(0.,.06,t)*smoothstep(1.,.9,t)*.85;gl_FragColor=vec4(uCol*(.35+.65*b),a);}`;
   const ringVS = `varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
   const col = h => new T.Color(h).convertSRGBToLinear();
+  const sun = new T.PointLight(0xfff6f0, 1.7, 0, 0); sun.position.set(0, 0, 0); scene.add(sun); scene.add(new T.AmbientLight(0xe8e0f4, 0.16)); const fill = new T.DirectionalLight(0xd8d0ff, 0.12); scene.add(fill);
   const LDIR = new T.Vector3(0, 0, 0), tmp = new T.Vector3(), inv = new T.Matrix4();
   const planets = CX_PLANETS.map((p, idx) => {
     const grp = new T.Group(); grp.position.set(...p.pos); grp.rotation.z = (Math.random() - .5) * .5; scene.add(grp);
-    const U = { uType: { value: p.type }, c0: { value: col(p.c[0]) }, c1: { value: col(p.c[1]) }, c2: { value: col(p.c[2]) }, c3: { value: col(p.c[3]) }, uAtm: { value: col(p.atm) }, uL: { value: new T.Vector3() }, uV: { value: new T.Vector3() }, uSeed: { value: p.seed }, uT: { value: 0 }, uStorm: { value: p.storm || 0 }, uDetail: { value: 5 } };
-    const body = new T.Mesh(new T.SphereGeometry(p.r, 128, 96), new T.ShaderMaterial({ uniforms: U, vertexShader: planetVS, fragmentShader: planetFS }));
+    const U = { uAtm: { value: col(p.atm) }, uL: { value: new T.Vector3() } };
+    const W0 = innerWidth < 700 ? 1024 : 2048, rtA = bake(p, 0, W0), rtH = p.type === 0 ? null : bake(p, 1, W0);
+    const mat = new T.MeshStandardMaterial({ map: rtA.texture, roughness: p.type === 0 ? .75 : 1, metalness: 0 });
+    if (rtH) { mat.bumpMap = rtH.texture; mat.bumpScale = p.type === 2 ? .012 : p.type === 3 ? .01 : .028; mat.roughnessMap = rtH.texture; }
+    const body = new T.Mesh(new T.SphereGeometry(p.r, 128, 96), mat);
+    let clouds = null; if (p.type === 2) { const rtC = bake(p, 2, W0); clouds = new T.Mesh(new T.SphereGeometry(p.r * 1.012, 96, 72), new T.MeshStandardMaterial({ map: rtC.texture, transparent: true, depthWrite: false, roughness: 1 })); grp.add(clouds); }
     body.userData.i = idx; grp.add(body);
     const atmU = { uAtm: U.uAtm, uL: U.uL, uV: { value: new T.Vector3() } };
     const atm = new T.Mesh(new T.SphereGeometry(p.r * 1.045, 64, 48), new T.ShaderMaterial({ uniforms: atmU, vertexShader: planetVS, fragmentShader: atmFS, transparent: true, depthWrite: false, blending: T.AdditiveBlending, side: T.BackSide }));
@@ -127,7 +136,7 @@ function cosmosBuild(){
       ring = new T.Mesh(new T.RingGeometry(p.r * p.ring[0], p.r * p.ring[1], 256, 1), new T.ShaderMaterial({ uniforms: rU, vertexShader: ringVS, fragmentShader: ringFS, transparent: true, depthWrite: false, side: T.DoubleSide }));
       ring.rotation.x = -Math.PI / 2 + 0.35; grp.add(ring); }
     const lab = document.createElement("span"); lab.className = "cx-lab"; lab.textContent = nnLabel(p.k); labels.appendChild(lab);
-    return { p, grp, body, atm, U, atmU, ring, lab, spin: 0.04 + Math.random() * 0.06 };
+    return { p, grp, body, clouds, atm, U, atmU, ring, lab, spin: 0.04 + Math.random() * 0.06 };
   });
 
   // ---- câmera: livre (olhar em volta) ou focada num planeta ----
@@ -139,8 +148,9 @@ function cosmosBuild(){
   let curLook = new T.Vector3();
   function tween(toPos, toLook, dur, done){ st.tw = { a: cam.position.clone(), b: toPos, la: curLook.clone(), lb: toLook, t: 0, dur, done }; }
   function focus(i){
-    const pl = planets[i]; st.focus = i; st.dist = pl.p.r * 3.6;
-    tmp.copy(pl.grp.position).negate().normalize(); st.oy = Math.atan2(tmp.x, tmp.z) + 0.75; st.op = 0.18;
+    const pl = planets[i]; st.focus = i; st.dist = pl.p.r * 3.4 * Math.max(1, 0.8 / cam.aspect);
+    if (!pl.hd && innerWidth < 700) { pl.hd = true; const m = pl.body.material, oa = m.map, oh = m.bumpMap; m.map = bake(pl.p, 0, 2048).texture; if (pl.p.type !== 0) { const h = bake(pl.p, 1, 2048).texture; m.bumpMap = h; m.roughnessMap = h; } m.needsUpdate = true; oa && oa.dispose(); oh && oh.dispose(); }
+    tmp.copy(pl.grp.position).negate().normalize(); st.oy = Math.atan2(tmp.x, tmp.z) + 1.05; st.op = 0.18;
     const f = focusPose(i); st.mode = "tween"; tween(f.pos, f.look, 1.6, () => { st.mode = "focus"; });
     info.hidden = false; info.querySelector("h2").textContent = nnLabel(pl.p.k);
     info.querySelector(".cx-sub").textContent = (AREAS[pl.p.k] && AREAS[pl.p.k].sub) || (pl.p.k === "moto" ? "Sua Lead 110" : pl.p.k === "financeiro" ? "Dinheiro, metas e parcelas" : "");
@@ -160,7 +170,7 @@ function cosmosBuild(){
     setTimeout(() => el.querySelector(".cx-x").focus(), 50);
   };
   function exit(){ el.classList.remove("in"); CX.open = false; document.documentElement.classList.remove("cx-lock"); setTimeout(() => { el.hidden = true; }, 450); try { $("core").focus(); } catch {} }
-  CX.exit = exit;
+  CX.exit = exit; CX.dbg = { scene, planets, R };
   el.querySelector(".cx-x").addEventListener("click", exit);
   el.querySelector(".cx-back").addEventListener("click", unfocus);
   el.querySelector(".cx-open").addEventListener("click", () => { const k = planets[st.focus].p.k; exit(); location.hash = "#" + k; });
@@ -174,10 +184,10 @@ function cosmosBuild(){
   cv.addEventListener("pointermove", e => {
     if (!ptrs.has(e.pointerId)) return; const pv = ptrs.get(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); st.idle = 0;
     if (ptrs.size === 1) { const dx = e.clientX - pv[0], dy = e.clientY - pv[1];
-      if (st.mode === "focus") { st.oy -= dx * 0.006; st.op = Math.max(-1.2, Math.min(1.2, st.op + dy * 0.005)); }
+      if (st.mode === "focus") { st.oy -= dx * 0.008; st.op = Math.max(-1.2, Math.min(1.2, st.op + dy * 0.005)); }
       else if (st.mode === "free") { st.yaw += dx * 0.0035; st.pitch = Math.max(-1.2, Math.min(1.2, st.pitch + dy * 0.003)); } }
     else if (ptrs.size === 2 && pinch0) { const [a, b] = [...ptrs.values()]; const k = pinch0 / Math.hypot(a[0] - b[0], a[1] - b[1]);
-      if (st.mode === "focus") { const r = planets[st.focus].p.r; st.dist = Math.max(r * 1.35, Math.min(r * 9, val0 * k)); if (val0 * k > r * 9.5) { pinch0 = 0; unfocus(); } }
+      if (st.mode === "focus") { const r = planets[st.focus].p.r; st.dist = Math.max(r * 1.35, Math.min(r * 14, val0 * k)); if (val0 * k > r * 14.5) { pinch0 = 0; unfocus(); } }
       else if (st.mode === "free") { st.fov = Math.max(18, Math.min(75, val0 * k)); if (val0 * k > 82) { pinch0 = 0; exit(); } } }
   });
   const up = e => {
@@ -191,35 +201,34 @@ function cosmosBuild(){
     downAt = null;
   };
   cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", e => { ptrs.delete(e.pointerId); downAt = null; });
-  cv.addEventListener("wheel", e => { e.preventDefault(); st.idle = 0; if (st.mode === "focus") { const r = planets[st.focus].p.r; st.dist = Math.max(r * 1.35, Math.min(r * 9, st.dist * (1 + e.deltaY * .001))); } else if (st.mode === "free") st.fov = Math.max(18, Math.min(75, st.fov * (1 + e.deltaY * .001))); }, { passive: false });
+  cv.addEventListener("wheel", e => { e.preventDefault(); st.idle = 0; if (st.mode === "focus") { const r = planets[st.focus].p.r; st.dist = Math.max(r * 1.35, Math.min(r * 14, st.dist * (1 + e.deltaY * .001))); } else if (st.mode === "free") st.fov = Math.max(18, Math.min(75, st.fov * (1 + e.deltaY * .001))); }, { passive: false });
 
   function resize(){ const w = innerWidth, h = innerHeight; R.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
   addEventListener("resize", () => { if (CX.open) resize(); });
 
-  let last = performance.now();
+  let last = performance.now(), fa = 0.016, fc = 0;
   function loop(now){
     if (!CX.open && !el.classList.contains("in")) { if (el.hidden) { CX.run = false; return; } }
     requestAnimationFrame(loop);
     const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000; UT.value = t; st.idle += dt;
     if (st.mode === "tween" && st.tw) { const w = st.tw; w.t += dt / w.dur; const k = ease(Math.min(1, w.t)); cam.position.lerpVectors(w.a, w.b, k); curLook.lerpVectors(w.la, w.lb, k); if (w.t >= 1) { st.tw = null; w.done && w.done(); } }
     else if (st.mode === "free") { if (!reduce && st.idle > 4) st.yaw += dt * 0.02; cam.position.copy(HOME); curLook.copy(HOME).add(dirOf(st.yaw, st.pitch)); }
-    else if (st.mode === "focus") { if (!reduce && st.idle > 4) st.oy += dt * 0.05; const f = focusPose(st.focus); cam.position.lerp(f.pos, Math.min(1, dt * 8)); curLook.copy(f.look); }
+    else if (st.mode === "focus") { if (!reduce && st.idle > 4) st.oy += dt * 0.05; const f = focusPose(st.focus); cam.position.copy(f.pos); curLook.copy(f.look); }
+    fill.position.copy(cam.position);
     cam.fov += ((st.mode === "free" ? st.fov : 50) - cam.fov) * Math.min(1, dt * 6); cam.updateProjectionMatrix(); cam.lookAt(curLook);
     const W = innerWidth, Hh = innerHeight;
     planets.forEach((pl, i) => {
-      if (!reduce) pl.body.rotation.y += dt * pl.spin;
-      pl.body.updateMatrixWorld(); inv.copy(pl.body.matrixWorld).invert();
+      if (!reduce) { pl.body.rotation.y += dt * pl.spin; if (pl.clouds) pl.clouds.rotation.y += dt * pl.spin * 1.25; }
+      pl.atm.updateMatrixWorld(); inv.copy(pl.atm.matrixWorld).invert();
       tmp.copy(LDIR).applyMatrix4(inv); pl.U.uL.value.copy(tmp).normalize();
-      tmp.copy(cam.position).applyMatrix4(inv); pl.U.uV.value.copy(tmp); pl.U.uT.value = t;
-      pl.atm.updateMatrixWorld(); inv.copy(pl.atm.matrixWorld).invert(); tmp.copy(cam.position).applyMatrix4(inv); pl.atmU.uV.value.copy(tmp);
-      const dist = cam.position.distanceTo(pl.grp.position), px = pl.p.r / dist * Hh / (2 * Math.tan(cam.fov * Math.PI / 360));
-      pl.U.uDetail.value = px > 260 ? 8 : px > 90 ? 7 : px > 30 ? 6 : 4;
-      if (pl.ring) { pl.ring.updateMatrixWorld(); }
+      tmp.copy(cam.position).applyMatrix4(inv); pl.atmU.uV.value.copy(tmp);
       tmp.copy(pl.grp.position); tmp.y += pl.p.r * 1.25; tmp.project(cam);
       const vis = tmp.z < 1 && st.mode !== "focus" && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
       pl.lab.style.opacity = vis ? "1" : "0"; if (vis) pl.lab.style.transform = `translate(${((tmp.x * .5 + .5) * W).toFixed(1)}px,${((-tmp.y * .5 + .5) * Hh).toFixed(1)}px)`;
     });
     R.render(scene, cam);
+    // resolução adaptativa: se o aparelho não aguentar, desenha com menos pixels
+    fa = fa * 0.95 + dt * 0.05; if (++fc % 30 === 0) { const pr = R.getPixelRatio(); if (fa > 0.026 && pr > 1) { R.setPixelRatio(Math.max(1, pr - 0.25)); resize(); UPX.value = R.getPixelRatio(); } }
   }
 }
 
