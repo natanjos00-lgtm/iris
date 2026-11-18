@@ -119,7 +119,7 @@ function renderMoto(){
           <div class="mt-specs">${MOTO_SPECS.map(s => `<div class="acard mt-spec"><span>${s[0]}</span><b>${s[1]}</b>${s[2] ? `<small>${s[2]}</small>` : ""}</div>`).join("")}</div>
         </div>
       </div>
-      <section class="mt-det" aria-label="Detalhes da moto">${MOTO_DET.map(d => `<figure class="acard"><img src="assets/moto/d-${d[0]}.webp?v=1" alt="${d[1]}" loading="lazy"><figcaption><b>${d[1]}</b><span>${d[2]}</span></figcaption></figure>`).join("")}</section>
+      <section class="mt-det" aria-label="Detalhes da moto">${MOTO_DET.map(d => `<figure class="acard"><img src="assets/moto/d-${d[0]}.png?v=2" alt="${d[1]}" loading="lazy"><figcaption><b>${d[1]}</b><span>${d[2]}</span></figcaption></figure>`).join("")}</section>
       <section class="card mt-mine" aria-labelledby="h-mt-fuel">
         <h2 class="t" id="h-mt-fuel">Gasolina</h2>
         <div id="mtFuel"></div>
@@ -204,12 +204,12 @@ function motoXrayOff(){
 
 /* ---------- 360° com fotos (referência da sua moto) ---------- */
 const P3 = { A: 300, v: 0, auto: true, idle: 0, zoom: 1, pan: 0, goA: null, frames: [], cur: -1, prev: -1, fade: 1, run: false, ready: false };
-const P3_ANG = [0, 30, 60, 90, 135, 180, 225, 270, 300, 330];
+const P3_ANG = [0, 45, 90, 135, 180, 225, 270, 315];
 function moto360Start(){
   const cv = $("mt360"), st = $("mtStage"); if (!cv) return;
   if (!P3.ready) {
     P3.ready = true;
-    P3.frames = P3_ANG.map(a => { const im = new Image(); im.decoding = "async"; im.src = `assets/moto/a${String(a).padStart(3, "0")}.webp?v=1`; im.onload = () => { const l = $("mtLoad"); if (l && !st.classList.contains("x")) l.hidden = true; }; return im; });
+    P3.frames = P3_ANG.map(a => { const im = new Image(); im.decoding = "async"; im.src = `assets/moto/b${String(a).padStart(3, "0")}.png?v=1`; im.onload = () => { const l = $("mtLoad"); if (l && !st.classList.contains("x")) l.hidden = true; }; return im; });
     const ptrs = new Map(); let pinch0 = 0, z0 = 1, lastTap = 0;
     cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); P3.idle = 0; P3.goA = null; if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); z0 = P3.zoom; } const n = performance.now(); if (n - lastTap < 300 && ptrs.size === 1) { P3.zoom = 1; P3.pan = 0; } lastTap = n; });
     cv.addEventListener("pointermove", e => {
@@ -236,7 +236,7 @@ function moto360Loop(now){
   // quadro mais próximo do ângulo, com transição curta
   let best = 0, bd = 999; P3_ANG.forEach((a, i) => { const d = Math.abs(((P3.A - a + 540) % 360) - 180); if (d < bd) { bd = d; best = i; } });
   if (best !== P3.cur) { P3.prev = P3.cur; P3.cur = best; P3.fade = 0; }
-  P3.fade = Math.min(1, P3.fade + dt / 0.14);
+  P3.fade = Math.min(1, P3.fade + dt / 0.18);
   const dpr = Math.min(2, devicePixelRatio || 1), W = st.clientWidth, H = st.clientHeight;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
   const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
@@ -250,7 +250,7 @@ function moto360Loop(now){
   x.strokeStyle = hud; x.globalAlpha = 0.8; x.lineWidth = 1.5 / 0.2 * 0.2; x.beginPath(); x.arc(0, 0, pr * 0.92, 0, 7); x.stroke();
   x.globalAlpha = 0.35; x.beginPath(); x.arc(0, 0, pr * 0.7, 0, 7); x.stroke(); x.restore(); x.globalAlpha = 1;
   // sombra de contato
-  const bikeH = Math.min(H * 0.6, W * 0.9 / 1.51), frame = P3.frames[P3.cur], fw = frame && frame.naturalWidth ? frame.naturalWidth / frame.naturalHeight * bikeH : bikeH;
+  const bikeH = Math.min(H * 0.6, W * 0.9 / 1.48), frame = P3.frames[P3.cur], fw = frame && frame.naturalWidth ? frame.naturalWidth / frame.naturalHeight * bikeH : bikeH;
   x.save(); x.scale(1, 0.12); const sg = x.createRadialGradient(0, 0, 0, 0, 0, fw * 0.55); sg.addColorStop(0, "rgba(0,0,0,.55)"); sg.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = sg; x.beginPath(); x.arc(0, 0, fw * 0.55, 0, 7); x.fill(); x.restore();
   const draw = (i, a) => { const im = P3.frames[i]; if (!im || !im.complete || !im.naturalWidth || a <= 0) return; const w = im.naturalWidth / im.naturalHeight * bikeH; x.globalAlpha = a; x.drawImage(im, -w / 2, -bikeH * 0.985, w, bikeH); };
   if (P3.prev >= 0 && P3.fade < 1) draw(P3.prev, 1 - P3.fade);
