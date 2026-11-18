@@ -24,7 +24,7 @@ const MOTO_PLAN = [
   ["Pneus (frios)", "dianteiro 25 psi · traseiro 29 psi", "33 psi atrás com garupa"]
 ];
 const TANK = 6.5;
-const MOTO_DET = [["painel", "Painel", "velocímetro, combustível e temperatura"], ["abastecimento", "Abastecimento", "portinhola na base do banco"], ["portaluvas", "Porta-luvas", "na frente, atrás do escudo"], ["bau", "Baú", "sob o banco · até 10 kg"], ["motor", "Motor e transmissão", "lado esquerdo"], ["lado", "Lado direito", "carenagem lisa"]];
+const MOTO_DET = [["painel", "Painel", "velocímetro, combustível e temperatura"], ["abastecimento", "Abastecimento", "portinhola na base do banco"], ["portaluvas", "Porta-luvas", "na frente, atrás do escudo"], ["bau", "Baú", "sob o banco · cabem 2 capacetes fechados"], ["motor", "Motor e transmissão", "lado esquerdo"], ["lado", "Lado direito", "carenagem lisa"]];
 let moto = { km: 0, oilKm: 0, oilEvery: 4000, licenca: "", fuel: [] };
 try { moto = Object.assign(moto, JSON.parse(localStorage.getItem("iris.moto") || "{}")); } catch {}
 if (!Array.isArray(moto.fuel)) moto.fuel = [];
@@ -397,11 +397,10 @@ function motoBuild(){
   const fuel = ia(new T.BoxGeometry(tk.x1 - tk.x0 - 0.01, 1, tk.z * 2 - 0.01), fuelM, (tk.x0 + tk.x1) / 2, tk.y0, 0); fuel.castShadow = false;
   ia(new T.CylinderGeometry(0.018, 0.018, 0.2, 14), darkM, 0.33, 0.37, 0, 0, 0, -0.5);
   M3.setFuel = lv => { const f = lv == null ? 0.5 : Math.max(0.02, lv / TANK), h = (tk.y1 - tk.y0 - 0.01) * f; fuel.scale.y = h; fuel.position.y = tk.y0 + 0.005 + h / 2; };
-  // baú sob o assento, com capacete para dar a escala
+  // baú sob o assento: cabem dois capacetes fechados (confirmado pela dona da moto)
   const trunk = ia(new T.BoxGeometry(0.5, 0.26, 0.27), new T.MeshPhysicalMaterial({ color: lin(0xffffff), transparent: true, opacity: 0.08, depthWrite: false }), -0.47, 0.57, 0); trunk.castShadow = false;
   trunk.add(new T.LineSegments(new T.EdgesGeometry(trunk.geometry), new T.LineBasicMaterial({ color: lin(0xffe2b0), transparent: true, opacity: 0.9 })));
-  const helmet = ia(new T.SphereGeometry(0.115, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.62), new T.MeshPhysicalMaterial({ color: lin(0xf2efe9), roughness: 0.2, clearcoat: 1 }), -0.5, 0.47, 0);
-  ia(new T.BoxGeometry(0.01, 0.06, 0.16), new T.MeshStandardMaterial({ color: 0x222, roughness: 0.2 }), -0.395, 0.52, 0);
+  [[-0.6, 0xf2efe9], [-0.36, 0xc9ccd1]].forEach(([hx, hc]) => { ia(new T.SphereGeometry(0.11, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.62), new T.MeshPhysicalMaterial({ color: lin(hc), roughness: 0.2, clearcoat: 1 }), hx, 0.47, 0); ia(new T.BoxGeometry(0.01, 0.055, 0.15), new T.MeshStandardMaterial({ color: 0x222, roughness: 0.2 }), hx + 0.1, 0.52, 0); });
   // bateria sob o escudo, radiador, reservatório do líquido, filtro de ar, amortecedor
   const bat = ia(new T.BoxGeometry(0.11, 0.08, 0.07), new T.MeshStandardMaterial({ color: lin(0x1c1d20), roughness: 0.6 }), 0.5, 0.52, 0);
   ia(new T.CylinderGeometry(0.008, 0.008, 0.015, 10), new T.MeshStandardMaterial({ color: lin(0xc8202a) }), 0.47, 0.565, 0.02); ia(new T.CylinderGeometry(0.008, 0.008, 0.015, 10), darkM, 0.53, 0.565, 0.02);
@@ -437,14 +436,14 @@ function motoBuild(){
   // marcadores: por fora e por dentro
   const HOT = [
     { k: "out", p: [0.64, 0.24, -0.08], n: [0.1, 0, -1], t: "Freio a disco", s: "dianteiro, com CBS" },
-    { k: "out", p: [-0.42, 0.75, 0], n: [0, 1, 0], t: "Baú", s: "sob o assento · até 10 kg" },
+    { k: "out", p: [-0.42, 0.75, 0], n: [0, 1, 0], t: "Baú", s: "2 capacetes fechados · até 10 kg" },
     { k: "out", p: [0.41, 1.03, 0], n: [1, 0.2, 0], t: "Farol", s: "no guidão" },
     { k: "out", p: [0.2, 0.33, 0.14], n: [0, 0.4, 1], t: "Tanque", s: "6,5 L sob o assoalho" },
     { k: "in", p: along(0.24).toArray(), n: null, t: "Cabeçote e vela", s: "vela: trocar a cada 8.000 km" },
     { k: "in", p: along(0.12).toArray(), n: null, t: "Pistão", s: "50 × 55 mm · compressão 11:1" },
     { k: "in", p: [C.x, C.y - 0.06, 0.12], n: null, t: "Transmissão CVT", s: "correia: trocar a cada 20.000 km" },
     { k: "in", p: [0.15, 0.27, 0.13], n: null, t: "Tanque", s: "", fuel: true },
-    { k: "in", p: [-0.47, 0.7, 0.13], n: null, t: "Baú", s: "cabe um capacete · até 10 kg" },
+    { k: "in", p: [-0.47, 0.7, 0.13], n: null, t: "Baú", s: "cabem 2 capacetes fechados · até 10 kg" },
     { k: "in", p: [0.5, 0.57, 0.04], n: null, t: "Bateria", s: "selada, atrás do escudo" },
     { k: "in", p: [-0.1, 0.36, -0.14], n: null, t: "Radiador", s: "arrefecimento líquido · 0,41 L" },
     { k: "in", p: [-0.56, 0.47, 0.14], n: null, t: "Filtro de ar", s: "trocar a cada 16.000 km" },
