@@ -22,3 +22,34 @@
     box.style.setProperty("--pulse", g.toFixed(3));
   })(last);
 })();
+
+/* ÍRIS 360°: sequência gerada a partir do vídeo dela girando. De frente por padrão;
+   arrastar o dedo gira a ÍRIS; de tempos em tempos ela dá uma volta completa, como um holograma. */
+(function () {
+  const img = document.querySelector(".corebox .iris-av"); if (!img) return;
+  const box = img.parentElement, N = 61, LOOP = 60, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const frames = Array.from({ length: N }, (_, i) => { const im = new Image(); im.decoding = "async"; im.src = `assets/iris360/${String(i).padStart(2, "0")}.webp?v=1`; return im; });
+  const cv = document.createElement("canvas"); cv.className = "iris-av iris-seq"; cv.setAttribute("aria-hidden", "true");
+  let ready = false; frames[0].onload = () => { img.after(cv); img.style.visibility = "hidden"; ready = true; };
+  let f = 0, target = 0, dragging = false, lastX = 0, idle = 0, nextTurn = 9, turning = false, last = performance.now();
+  box.addEventListener("pointerdown", e => { dragging = true; lastX = e.clientX; turning = false; idle = 0; });
+  addEventListener("pointermove", e => { if (!dragging) return; const dx = e.clientX - lastX; lastX = e.clientX; f -= dx * 0.14; target = f; idle = 0; }, { passive: true });
+  addEventListener("pointerup", () => { if (!dragging) return; dragging = false; target = Math.round(f / LOOP) * LOOP; });
+  (function loop(now){
+    requestAnimationFrame(loop);
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (!ready || document.hidden || (typeof current !== "undefined" && current !== "inicio")) return;
+    let mode = "idle"; try { mode = coreMode; } catch {}
+    if (!dragging) {
+      idle += dt;
+      if (mode !== "idle") { turning = false; target = Math.round(f / LOOP) * LOOP; }
+      else if (!reduce && !turning && idle > nextTurn) { turning = true; target = Math.round(f / LOOP) * LOOP + LOOP; }
+      if (turning) { f += dt * 12; if (f >= target) { f = target; turning = false; idle = 0; nextTurn = 18 + Math.random() * 14; } }
+      else f += (target - f) * Math.min(1, dt * 5);
+    }
+    const i = ((Math.round(f) % LOOP) + LOOP) % LOOP, im = frames[i].complete && frames[i].naturalWidth ? frames[i] : frames[0];
+    const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+    if (!W) return; if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    const x = cv.getContext("2d"); x.clearRect(0, 0, W, H); x.drawImage(im, 0, 0, W, H);
+  })(last);
+})();

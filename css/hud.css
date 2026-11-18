@@ -245,3 +245,4 @@ html.booting body{overflow:hidden}
 .iris-3d{position:absolute;left:-6%;right:-6%;width:112%;top:-2%;height:96%;z-index:2;pointer-events:none;display:block}
 .av-3d .iris-av{visibility:hidden}
 .corebox.diving .iris-3d{opacity:0;transition:opacity .4s}
+.iris-seq{aspect-ratio:420/432;width:78%;bottom:9%}
